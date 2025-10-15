@@ -94,6 +94,14 @@ exports.loginUser = async (req, res) => {
         success: false,
         message: "Wrong password",
       });
+    // If user is blocked, prevent login and return clear message
+    if (user.status === 'blocked') {
+      return res.status(403).send({
+        success: false,
+        isBlocked: true,
+        message: "Your account has been blocked by the admin",
+      });
+    }
     const access_token = jwt.sign({ _id: user._id }, process.env.JWT_Secret, {
       expiresIn: "30m",
     });

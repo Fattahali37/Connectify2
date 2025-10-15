@@ -5,9 +5,31 @@ const axiosInstance = axios.create({});
 
 axiosInstance.interceptors.request.use(
   async (config) => {
-    config.headers = {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    };
+    // Preserve any Authorization header already set elsewhere
+    const existingAuthHeader = config.headers?.Authorization || config.headers?.authorization;
+
+    if (existingAuthHeader) {
+      return config;
+    }
+
+    // Prefer admin token if available
+    const adminAuthRaw = localStorage.getItem('adminAuth');
+    const adminToken = (() => {
+      try {
+        return adminAuthRaw ? JSON.parse(adminAuthRaw)?.token : null;
+      } catch (_) {
+        return null;
+      }
+    })();
+
+    const userAccessToken = localStorage.getItem("access_token");
+
+    const tokenToUse = adminToken || userAccessToken;
+
+    if (!config.headers) config.headers = {};
+    if (tokenToUse) {
+      config.headers["Authorization"] = `Bearer ${tokenToUse}`;
+    }
     return config;
   },
   (error) => {
