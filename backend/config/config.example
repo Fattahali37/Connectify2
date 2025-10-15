@@ -8,3 +8,7 @@ password=1skjsnksdsd
 clientid={google auth cclientid}
 clientsecret={google auth client secret}
 redirect_url=http://localhost:8000/auth/google/oauth
+
+# Admin Dashboard Configuration
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123

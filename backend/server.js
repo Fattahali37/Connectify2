@@ -20,6 +20,7 @@ const postRoute = require("./routes/post");
 const userRoute = require("./routes/user");
 const chatRoute = require("./routes/chat");
 const storyRoute = require("./routes/story");
+const adminRoute = require("./routes/admin");
 const User = require("./models/User");
 
 app.use("/auth", authRoute);
@@ -27,6 +28,7 @@ app.use("/post", postRoute);
 app.use("/user", userRoute);
 app.use("/chat", chatRoute);
 app.use("/story", storyRoute);
+app.use("/api/admin", adminRoute);
 
 app.get("/test", (req, res) => {
   res.send("Hello from other side");

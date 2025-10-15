@@ -1,14 +1,17 @@
 import React, { useContext, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import logo from '../../assets/logo.png'
 import { Disabled } from '../disabled/Disabled'
 import axios from 'axios'
 import { AuthContext } from '../../context/Auth'
+import { AdminAuthContext } from '../../context/AdminAuth'
 import { url } from '../../baseUrl'
 import googleicon from './google.png'
 
 export const LoginCard = () => {
     const context = useContext(AuthContext)
+    const adminContext = useContext(AdminAuthContext)
+    const navigate = useNavigate()
     const [username, setUsername] = useState('')
     const [password, setPasword] = useState('')
 
@@ -18,6 +21,17 @@ export const LoginCard = () => {
                 text: username,
                 password
             })
+            
+            // Check if admin login
+            if (response.data.isAdmin) {
+                const result = await adminContext.loginAdmin({ text: username, password })
+                if (result.success) {
+                    navigate('/admin/dashboard')
+                    return
+                }
+            }
+            
+            // Regular user login
             localStorage.setItem('user', JSON.stringify(response.data.user))
             localStorage.setItem("access_token", response.data.access_token)
             localStorage.setItem("refresh_token", response.data.refresh_token)
@@ -69,6 +83,7 @@ export const LoginCard = () => {
             </div>
             <div className="signup-action-box border" style={{ textAlign: 'center' }}>
                 <p style={{ color: 'gray', fontSize: '14px' }}>Don't have an account?<Link to="/signup" style={{ color: '#2196f3', fontWeight: 'bold', marginLeft: '6px', textDecoration: 'none', fontSize: '13.25px' }}>Sign up</Link></p>
+                <Link to="/admin/login" style={{ color: '#666', fontSize: '12px', textDecoration: 'none', marginTop: '10px', display: 'block' }}>Admin Login</Link>
             </div>
         </div>
     )

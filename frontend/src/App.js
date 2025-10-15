@@ -5,15 +5,19 @@ import Explore from "./pages/Explore";
 import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
 import { AuthContext } from "./context/Auth";
+import { AdminAuthProvider } from "./context/AdminAuth";
 import { useEffect, useState } from "react";
 import { Private } from "./routers/Private";
 import Redirect from "./routers/Redirect";
+import AdminProtected from "./routers/AdminProtected";
 import { Forgot } from "./pages/Forgot";
 import { Profile } from "./pages/Profile";
 import { Settings } from "./pages/Settings";
 import toast, { Toaster } from "react-hot-toast";
 import { Chat } from "./pages/Chat";
 import Story from "./pages/Story";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLogin from "./components/admin/AdminLogin";
 import { api } from "./Interceptor/apiCall";
 import { url } from "./baseUrl";
 import io from "socket.io-client";
@@ -95,13 +99,14 @@ function App() {
   };
 
   return (
-    <AuthContext.Provider
-      value={{ auth, setAuth, throwErr, throwSuccess, handleActive, findStory }}
-    >
-      <Toaster />
-      {auth && <Navbar active={active} />}
-      <div className="width60">
-        <Routes>
+    <AdminAuthProvider>
+      <AuthContext.Provider
+        value={{ auth, setAuth, throwErr, throwSuccess, handleActive, findStory }}
+      >
+        <Toaster />
+        {auth && <Navbar active={active} />}
+        <div className="width60">
+          <Routes>
           <Route
             path="/login"
             element={
@@ -179,9 +184,21 @@ function App() {
               </Private>
             }
           />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminProtected>
+                <AdminDashboard />
+              </AdminProtected>
+            }
+          />
         </Routes>
       </div>
-    </AuthContext.Provider>
+      </AuthContext.Provider>
+    </AdminAuthProvider>
   );
 }
 

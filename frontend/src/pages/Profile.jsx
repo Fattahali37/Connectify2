@@ -105,6 +105,23 @@ export const Profile = ({ findStory, post = true }) => {
 
   return (
     <div className='home' style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* Blocked User Notification */}
+      {user?.status === 'blocked' && (
+        <div style={{
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          padding: '16px',
+          margin: '20px auto',
+          width: '84%',
+          borderRadius: '8px',
+          border: '1px solid #ffcdd2',
+          textAlign: 'center',
+          fontWeight: 'bold'
+        }}>
+          ⚠️ Your account has been blocked by the admin
+        </div>
+      )}
+      
       <div className="user-info" style={{ display: 'flex', flexDirection: 'row', width: '84%', margin: 'auto', marginTop: '20px' }}>
         <div className="image-user">
           <Story profile={true} avatar={user?.avatar} uid={user?._id} />
