@@ -60,7 +60,8 @@ export const Settings = () => {
                 localStorage.setItem('user', JSON.stringify(context.auth))
             }
         }).catch(err => {
-            context.throwErr(err.response.data.message)
+            const errorMessage = err.response?.data?.message || err.message || 'Update failed';
+            context.throwErr(errorMessage);
         })
         console.log(data);
     }
@@ -106,13 +107,16 @@ export const Settings = () => {
                 setResetNewPassword('')
                 setResetPassword('')
             }
-        }).catch(err => context.throwErr(err.response.data.message))
+        }).catch(err => {
+            const errorMessage = err.response?.data?.message || err.message || 'Password update failed';
+            context.throwErr(errorMessage);
+        })
     }
 
 
     return (
         <>
-            <div className='' style={{ width: '100%', backgroundColor: 'white', marginTop: '22px', border: '1px solid #dbdbdb', display: 'flex', flexDirection: 'row', minHeight: '90vh', marginBottom: '3vh' }}>
+            <div className='settings-container' style={{ width: '100%', backgroundColor: 'var(--bg-primary)', marginTop: '22px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'row', minHeight: '90vh', marginBottom: '3vh' }}>
                 <div className="left-sett" style={{ width: '230px', height: '100%', marginLeft: '0px', marginTop: '17px' }}>
                     <Link to="/accounts/edit" style={params.params === "edit" ? activeStyle : inactiveStyle}>Edit Profile</Link>
                     <Link to="/accounts/reset" style={params.params !== "edit" ? activeStyle : inactiveStyle}>Change Password</Link>
@@ -270,8 +274,8 @@ export const Settings = () => {
     )
 }
 const activeStyle = {
-    margin: '20px 0px', fontSize: '14.7px', color: 'black', fontWeight: 'bold', borderLeft: '2px solid black', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center'
+    margin: '20px 0px', fontSize: '14.7px', color: 'var(--text-primary)', fontWeight: 'bold', borderLeft: '2px solid var(--text-primary)', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center'
 }
 const inactiveStyle = {
-    margin: '20px 0px', fontSize: '14.7px', color: 'black', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center'
+    margin: '20px 0px', fontSize: '14.7px', color: 'var(--text-secondary)', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center'
 }

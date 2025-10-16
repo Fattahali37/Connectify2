@@ -1,0 +1,255 @@
+/* Global Black Theme Overrides */
+
+/* Login/Signup Boxes */
+.login-box,
+.signup-box,
+.forgot-box,
+.signup-action-box {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+}
+
+/* Input Fields */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-tertiary) !important;
+}
+
+/* Buttons */
+button {
+    color: var(--text-primary);
+}
+
+/* Links */
+a {
+    color: var(--text-primary);
+}
+
+/* Cards and Containers */
+.card,
+.post,
+.stories,
+.container {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Right Sidebar */
+.right-home {
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+/* Dialog/Modal Overrides */
+.MuiDialog-paper {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.MuiDialogTitle-root {
+    color: var(--text-primary) !important;
+}
+
+.MuiDialogContent-root {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Text Fields (Material UI) */
+.MuiTextField-root {
+    background-color: var(--bg-secondary) !important;
+}
+
+.MuiInputBase-input {
+    color: var(--text-primary) !important;
+}
+
+.MuiInputLabel-root {
+    color: var(--text-secondary) !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+    border-color: var(--border) !important;
+}
+
+/* Scrollbars (for webkit browsers) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Menu Items */
+.MuiList-root {
+    background-color: var(--bg-tertiary) !important;
+}
+
+.MuiMenuItem-root {
+    color: var(--text-primary) !important;
+}
+
+.MuiMenuItem-root:hover {
+    background-color: var(--bg-secondary) !important;
+}
+
+/* Dividers */
+.MuiDivider-root,
+hr {
+    background-color: var(--border) !important;
+    border-color: var(--border) !important;
+}
+
+/* Explore Grid */
+.grid {
+    background-color: var(--bg-primary) !important;
+}
+
+/* Profile Page */
+.profile-header,
+.profile-stats,
+.profile-bio {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Chat Interface */
+.chatpage,
+.left_chat_bar,
+.right_chatbar {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+/* Settings Page */
+.settings-container {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Story Viewer */
+.story-viewer {
+    background-color: var(--bg-primary) !important;
+}
+
+/* Notification Box */
+.notification-item {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.notification-item:hover {
+    background-color: var(--bg-secondary) !important;
+}
+
+/* User Cards */
+.user-card {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Comments */
+.comment {
+    color: var(--text-primary) !important;
+}
+
+.comment-input {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+/* Spinner/Loader */
+.spinner-container {
+    background-color: transparent !important;
+}
+
+/* SVG Icons Color */
+svg {
+    color: var(--text-primary);
+}
+
+/* Toaster Notifications */
+.Toastify__toast {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.Toastify__toast--success {
+    background-color: #1a5d1a !important;
+}
+
+.Toastify__toast--error {
+    background-color: #5d1a1a !important;
+}
+
+/* Admin Dashboard */
+.admin-dashboard {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Forms */
+form {
+    background-color: transparent !important;
+}
+
+label {
+    color: var(--text-secondary) !important;
+}
+
+/* Badges */
+.MuiBadge-badge {
+    background-color: #ff4444 !important;
+    color: white !important;
+}
+
+/* Avatar Borders */
+img[alt="Profile"],
+img[alt="Avatar"] {
+    border-color: var(--border) !important;
+}
+
+/* Selection */
+::selection {
+    background-color: #2196f3;
+    color: white;
+}
+
+/* Focus States */
+*:focus {
+    outline-color: #2196f3 !important;
+}
+
+/* Disabled States */
+*:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading States */
+.loading {
+    color: var(--text-secondary) !important;
+}

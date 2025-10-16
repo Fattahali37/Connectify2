@@ -40,6 +40,12 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Check if error.response exists (network errors won't have a response)
+    if (!error.response) {
+      console.error('Network Error: Backend server may be down', error.message);
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
 
     if (error.response.status === 401) {

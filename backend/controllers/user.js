@@ -315,3 +315,46 @@ exports.handleNewPassword = async (req, res) => {
 }
 
 // read unread notifications to read
+
+// get unread notification count
+exports.getUnreadNotificationCount = async (req, res) => {
+  try {
+    const user = req.user._id;
+    const userData = await User.findOne({ _id: user });
+    
+    if (!userData) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Count notifications where seen is false
+    const unreadCount = userData.notifications.filter(notification => !notification.seen).length;
+    
+    res.json({ success: true, count: unreadCount });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// mark notifications as read
+exports.markNotificationsAsRead = async (req, res) => {
+  try {
+    const user = req.user._id;
+    
+    // Update all notifications to seen: true
+    await User.updateOne(
+      { _id: user },
+      { $set: { "notifications.$[].seen": true } }
+    );
+    
+    res.json({ success: true, message: 'All notifications marked as read' });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+

@@ -39,7 +39,8 @@ export function Password() {
                 navigate('/login')
             }
         }).catch(err => {
-            context.throwErr(err.response.data.message)
+            const errorMessage = err.response?.data?.message || err.message || 'Password update failed';
+            context.throwErr(errorMessage);
         })
     }
     return (

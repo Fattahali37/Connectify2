@@ -1,5 +1,5 @@
-import { Navbar } from "./components/navbar/Navbar";
-import { Routes, Route } from "react-router-dom";
+import { Sidebar } from "./components/navbar/Sidebar";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import { Login } from "./pages/Login";
@@ -23,16 +23,24 @@ import { url } from "./baseUrl";
 import io from "socket.io-client";
 import { Password } from "./pages/Password";
 import AuthRedirect from "./pages/AuthRedirect";
+import "./theme.css";
 
-export const socket = io(url);
+export const socket = io(url, {
+  transports: ['websocket', 'polling'],
+  reconnectionDelay: 1000,
+  reconnection: true,
+  reconnectionAttempts: 10,
+  autoConnect: true,
+});
 
 function App() {
-  socket.on("connection", function (data) {
-    console.log(data);
-  });
+  const location = useLocation();
   const [auth, setAuth] = useState(JSON.parse(localStorage.getItem("user")));
   const [active, setActive] = useState("home");
   const [stories, setStories] = useState([]);
+  
+  // Check if current route is admin route
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   const throwErr = (err) => {
     toast.error(err, {
@@ -56,16 +64,38 @@ function App() {
     api
       .get(`${url}/story/home`)
       .then((res) => {
-        setStories(res.data);
+        // Ensure the response is an array
+        setStories(Array.isArray(res.data) ? res.data : []);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        setStories([]);
+      });
   }, [auth]);
 
   useEffect(() => {
-    socket.on("connect");
-    if (auth) socket.emit("online", { uid: auth._id });
+    if (!auth) return;
+    
+    const handleConnect = () => {
+      console.log("Socket connected");
+      socket.emit("online", { uid: auth._id });
+    };
+
+    const handleConnectError = (error) => {
+      console.log("Socket connection error:", error);
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("connect_error", handleConnectError);
+    
+    // If already connected, emit online status
+    if (socket.connected) {
+      socket.emit("online", { uid: auth._id });
+    }
+
     return () => {
-      socket.off("connect");
+      socket.off("connect", handleConnect);
+      socket.off("connect_error", handleConnectError);
     };
   }, [auth]);
 
@@ -104,9 +134,10 @@ function App() {
         value={{ auth, setAuth, throwErr, throwSuccess, handleActive, findStory }}
       >
         <Toaster />
-        {auth && <Navbar active={active} />}
-        <div className="width60">
-          <Routes>
+        {auth && !isAdminRoute && <Sidebar active={active} />}
+        <div className={auth && !isAdminRoute ? "main-content" : ""}>
+          <div className={!isAdminRoute ? "width60" : ""}>
+            <Routes>
           <Route
             path="/login"
             element={
@@ -196,7 +227,8 @@ function App() {
             }
           />
         </Routes>
-      </div>
+          </div>
+        </div>
       </AuthContext.Provider>
     </AdminAuthProvider>
   );

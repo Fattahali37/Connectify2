@@ -142,7 +142,10 @@ export const Post = ({ postId, userId, filterPosts, setOpenDilaog }) => {
         api.get(`${url}/user/handlefollow/${user._id}`).then((res) => {
             if (res.data)
                 setIFollow(follow => !follow)
-        }).catch(err => context.throwErr(err.message))
+        }).catch(err => {
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to unfollow';
+            context.throwErr(errorMessage);
+        })
     }
 
     function getEmoji(emoji) {

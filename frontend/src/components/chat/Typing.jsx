@@ -16,7 +16,7 @@ export default function Typing({ user: userID }) {
             <Link to={`/${user?.username}`}>
                 <img style={{ width: '30px', borderRadius: '50%', marginBottom: '-7px', marginLeft: '18px' }} src={user?.avatar || defaultImg} alt="" />
             </Link>
-            <div className="other_text" style={{ width: 'fit-content', marginLeft: '12px', backgroundColor: '#dbdbdb', color: 'black', padding: '10px 16px', borderRadius: '22px', maxWidth: '60%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="other_text" style={{ width: 'fit-content', marginLeft: '12px', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)', padding: '10px 16px', borderRadius: '22px', maxWidth: '60%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <img style={{ width: '25px' }} src={type} alt="" />
             </div>
         </div>

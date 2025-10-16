@@ -24,9 +24,14 @@ export default function Right() {
     useEffect(() => {
         api.get(`${url}/user/suggestions?limit=15`).then(res => {
             // console.log(res.data);
-            setSuggestedUsers(res.data.slice(0, 5))
-            setCompleteSuggestions(res.data)
-        }).catch(err => console.log(err))
+            const data = Array.isArray(res.data) ? res.data : []
+            setSuggestedUsers(data.slice(0, 5))
+            setCompleteSuggestions(data)
+        }).catch(err => {
+            console.log(err)
+            setSuggestedUsers([])
+            setCompleteSuggestions([])
+        })
     }, [])
 
     const handleClickOpen = () => {
@@ -112,7 +117,7 @@ export default function Right() {
                         {
                             <DialogContent style={{ marginTop: '-9px', minHeight: '5px' }} dividers>
                                 {
-                                    completeSuggestions.map(user =>
+                                    Array.isArray(completeSuggestions) && completeSuggestions.map(user =>
                                         <User key={user._id} user={user} />
                                     )
                                 }
@@ -122,7 +127,7 @@ export default function Right() {
                 </div>
                 <div className="allusers" style={{ display: 'flex', alignItems: 'center', marginTop: '22px', flexDirection: 'column' }}>
                     {
-                        suggestedUsers.map(user => {
+                        Array.isArray(suggestedUsers) && suggestedUsers.map(user => {
                             return <UserCard key={user._id} userId={user._id} avatar={user.avatar} username={user.username} name={user.name} />
                         })
                     }

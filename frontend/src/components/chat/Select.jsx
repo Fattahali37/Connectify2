@@ -12,8 +12,11 @@ export default function Select({ handleClose, addRoom }) {
     const navigate = useNavigate()
 
     useEffect(() => {
-        api.get(`${url}/user/allusers`).then(res => setUsers(res.data))
-            .catch(err => console.log(err))
+        api.get(`${url}/user/allusers`).then(res => setUsers(Array.isArray(res.data) ? res.data : []))
+            .catch(err => {
+                console.log(err)
+                setUsers([])
+            })
     }, [])
 
     function handleSelect(user) {
@@ -44,7 +47,7 @@ export default function Select({ handleClose, addRoom }) {
                 <div className="select_chip_input" style={{ padding: '12px 7px' }}>
                     <div className="chips">
                         {
-                            selected.map(selects =>
+                            Array.isArray(selected) && selected.map(selects =>
                                 <Chip color="primary" key={selects._id} sx={{ margin: '2px 5px' }} label={selects.username} onDelete={() => removeUser(selects._id)} />
                             )
                         }
@@ -56,7 +59,7 @@ export default function Select({ handleClose, addRoom }) {
                 <h5 style={{ marginLeft: '17px', marginTop: '14px', marginBottom: '15px' }}>Suggested</h5>
                 <div className="user_list_suggest">
                     {
-                        users.map(user =>
+                        Array.isArray(users) && users.map(user =>
                             <SelectUser selects={selectedIds} key={user._id} handleSelect={handleSelect} removeUser={removeUser} user={user} />
                         )
                     }

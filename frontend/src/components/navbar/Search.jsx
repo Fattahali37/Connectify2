@@ -41,13 +41,13 @@ export default function Search() {
           type="text" className="noborder" placeholder="Search" />
         {show && <CloseIcon onClick={() => setShow(false)} sx={{ fontSize: '17px', marginRight: '8px', color: 'gray', cursor: 'pointer' }} />}
       </div>
-      {show && <div className="containerSuggest" style={{ position: 'absolute', top: '58px', backgroundColor: 'white', width: '390px', border: '1px solid #e7e7e7', borderRadius: '8px', minHeight: '75px', maxHeight: '300px', overflowY: 'auto', padding: '15px 15px' }}>
+      {show && <div className="containerSuggest" style={{ position: 'absolute', top: '58px', backgroundColor: '#1a1a1a', width: '390px', border: '1px solid #262626', borderRadius: '8px', minHeight: '75px', maxHeight: '300px', overflowY: 'auto', padding: '15px 15px' }}>
         {loading && <Spinner />}
-        {userResults.length === 0 && !loading ? <p style={{ fontSize: '13px', textAlign: 'center', marginTop: '22px' }}>Nothing to see !</p>
+        {userResults.length === 0 && !loading ? <p style={{ fontSize: '13px', textAlign: 'center', marginTop: '22px', color: '#a8a8a8' }}>Nothing to see !</p>
           :
           <>
             {
-              userResults.map(item =>
+              Array.isArray(userResults) && userResults.map(item =>
                 <User setShow={setShow} key={item._id} user={item} />
               )
             }

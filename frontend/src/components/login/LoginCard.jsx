@@ -38,8 +38,9 @@ export const LoginCard = () => {
             context.setAuth(response.data.user)
             window.location.reload()
         } catch (err) {
-            context.throwErr(err.response.data.message)
-            console.log(err.response.data.message);
+            const errorMessage = err.response?.data?.message || err.message || 'Login failed';
+            context.throwErr(errorMessage);
+            console.log(errorMessage);
         }
     }
 
@@ -75,8 +76,8 @@ export const LoginCard = () => {
                     <span style={{ margin: '0 8px', color: 'gray', fontSize: '11.5px', fontWeight: 'bold' }}>OR</span>
                     <div style={{ backgroundColor: '#cac7c7', height: '1px', width: '120px' }}></div>
                 </div>
-                <Link to="/forgot" style={{ marginTop: '25px', color: 'gray', fontSize: '13.15px', textDecoration: 'none' }}>Forgotten your password ?</Link>
-                <button onClick={() => handleGoogleAuth()} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: '9px 10px', marginTop: '18px', borderRadius: '5px', backgroundColor: '#ffff', color: 'gray', border: '1px solid #e9e9e9' }}>
+                <Link to="/forgot" style={{ marginTop: '25px', color: 'var(--text-secondary)', fontSize: '13.15px', textDecoration: 'none' }}>Forgotten your password ?</Link>
+                <button onClick={() => handleGoogleAuth()} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: '9px 10px', marginTop: '18px', borderRadius: '5px', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
                     <img src={googleicon} style={{ width: '20px', }} alt="" />
                     <p style={{ marginLeft: '8px', fontSize: '14px' }}> Continue with Google</p>
                 </button>

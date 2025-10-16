@@ -7,6 +7,7 @@
     border-radius: 7px;
     padding-bottom: 15px;
     margin-bottom: 15px;
-    background-color: white;
+    background-color: var(--bg-primary);
     overflow: hidden;
+    color: var(--text-primary);
 }

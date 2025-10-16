@@ -19,6 +19,7 @@ export default function RoomName({ roomId }) {
     const [roomName, setRoomName] = useState('')
     const [lastmessage, setlastmessage] = useState('')
     const [online, setOnline] = useState(false)
+    const [hasUnread, setHasUnread] = useState(false)
     useEffect(() => {
         api.get(`${url}/chat/${roomId}`).then(res => {
             const nameArr = res.data.people.filter(id => id !== context.auth._id)
@@ -41,13 +42,45 @@ export default function RoomName({ roomId }) {
             querySnapshot.forEach((doc) => {
                 messages.push(doc.data());
             });
-            setlastmessage(messages[0].message)
+            // Check if messages array has items and the first message has a message property
+            if (messages.length > 0 && messages[0]?.message) {
+                setlastmessage(messages[0].message);
+                
+                // Check if this message is from someone else (unread)
+                if (messages[0].uid !== context.auth._id) {
+                    // Get last seen timestamp from localStorage
+                    const lastSeenKey = `lastSeen_${roomId}_${context.auth._id}`;
+                    const lastSeenTime = localStorage.getItem(lastSeenKey);
+                    const messageTime = messages[0].timestamp?.toDate?.() || new Date();
+                    
+                    // If no last seen time or message is newer, mark as unread
+                    if (!lastSeenTime || new Date(messageTime) > new Date(lastSeenTime)) {
+                        setHasUnread(true);
+                    } else {
+                        setHasUnread(false);
+                    }
+                } else {
+                    setHasUnread(false);
+                }
+            } else {
+                setlastmessage('');
+                setHasUnread(false);
+            }
         });
         return () => unsubscribe()
-    }, [q])
+    }, [q, roomId, context.auth._id])
 
     return (
-        <Link to={`/chats/${roomId}`} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', margin: "18px 0", paddingLeft: '22px', cursor: 'pointer' }} >
+        <Link 
+            to={`/chats/${roomId}`} 
+            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', margin: "18px 0", paddingLeft: '22px', cursor: 'pointer', position: 'relative' }}
+            onClick={() => {
+                // Mark this room as seen when clicked
+                const lastSeenKey = `lastSeen_${roomId}_${context.auth._id}`;
+                localStorage.setItem(lastSeenKey, new Date().toISOString());
+                setHasUnread(false);
+            }}
+        >
             <img style={{ borderRadius: '50%', width: '52px', height: '52px', backgroundColor: '#eaeaea', position: 'relative', objectFit: 'cover' }} src={roomImage || defaultImg} alt="" />
             {
                 online &&
@@ -56,10 +89,22 @@ export default function RoomName({ roomId }) {
                         : '99'
                 }}></div>
             }
-            <div className="nameandmsg" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '12px', }}>
-                <p style={{ fontSize: '13.75px' }}>{roomName ? roomName : "...."}</p>
-                <p style={{ fontSize: '12px', color: 'gray' }}>{lastmessage === "like_true" ? <FavoriteIcon sx={{ fontSize: '18px', marginTop: '4px', color: '#e33636' }} /> : lastmessage.includes("http") ? "image" : lastmessage.length > 27 ? lastmessage.slice(0, 27) + "  ..." : lastmessage}</p>
+            <div className="nameandmsg" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '12px', flex: 1 }}>
+                <p style={{ fontSize: '13.75px', fontWeight: hasUnread ? 'bold' : 'normal' }}>{roomName ? roomName : "...."}</p>
+                <p style={{ fontSize: '12px', color: hasUnread ? '#000' : 'gray', fontWeight: hasUnread ? '600' : 'normal' }}>
+                    {lastmessage === "like_true" ? <FavoriteIcon sx={{ fontSize: '18px', marginTop: '4px', color: '#e33636' }} /> : lastmessage.includes("http") ? "image" : lastmessage.length > 27 ? lastmessage.slice(0, 27) + "  ..." : lastmessage}
+                </p>
             </div>
+            {hasUnread && (
+                <div style={{
+                    backgroundColor: '#ff0000',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    marginRight: '20px',
+                    flexShrink: 0
+                }}></div>
+            )}
         </Link>
     )
 }

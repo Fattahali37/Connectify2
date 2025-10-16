@@ -16,7 +16,8 @@ export const ForgotCard = () => {
                 context.throwSuccess(res.data.message)
             }
         }).catch(err => {
-            context.throwErr(err.response.data.message)
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to send reset link';
+            context.throwErr(errorMessage);
         })
     }
     return (

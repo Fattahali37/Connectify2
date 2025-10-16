@@ -15,9 +15,12 @@ export default function Home({ stories }) {
   const context = useContext(AuthContext)
   useEffect(() => {
     api.get(`${url}/post/get/home`).then((res) => {
-      setPosts(res.data)
+      // Ensure the response is an array
+      setPosts(Array.isArray(res.data) ? res.data : [])
     }).catch(err => {
       console.log(err);
+      // Set to empty array on error to prevent map error
+      setPosts([])
     }).finally(() => {
       setLoading(false)
     })
@@ -58,7 +61,7 @@ export default function Home({ stories }) {
             posts?.length === 0 && !loading && <p style={{ textAlign: 'center', marginTop: '32px', width: '100%', fontWeight: 'bold', fontSize: '16px' }}>No posts to see</p>
           }
           {
-            posts.map(item =>
+            Array.isArray(posts) && posts.map(item =>
               <Card filterUserPosts={filterUserPosts} filterPosts={filterPosts} key={item._id} id={item._id} img={item.files[0].link} likes={item.likes} saved={item.saved} userId={item.owner} avatar="https://1.gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=200&r=pg&d=mp" username="karen__." caption={item.caption} comments={item.comments} time={item.createdAt} />
             )
 

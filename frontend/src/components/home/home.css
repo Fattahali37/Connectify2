@@ -4,6 +4,7 @@
     flex-direction: row;
     justify-content: space-evenly;
     padding: 18px 0;
+    background-color: var(--bg-primary);
 }
 
 .left-home {
@@ -20,7 +21,7 @@
 
 .stories {
     width: 100%;
-    background-color: white;
+    background-color: var(--bg-primary);
     margin-bottom: 15px;
     height: 109px;
     border-radius: 7px;

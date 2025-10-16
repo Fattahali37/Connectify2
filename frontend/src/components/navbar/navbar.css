@@ -4,8 +4,8 @@
     border-bottom: 1.75px solid var(--border);
     position: sticky;
     top: 0;
-    background-color: white;
-    z-index: 999;;
+    background-color: var(--bg-primary);
+    z-index: 999;
 }
 
 .icons {
