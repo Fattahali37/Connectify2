@@ -3,6 +3,8 @@ const Post = require("../models/Post");
 const Room = require("../models/Room");
 const Story = require("../models/Story");
 const DeletedUser = require("../models/DeletedUser");
+const ProfileVerification = require("../models/ProfileVerification");
+const axios = require("axios");
 
 // Get all users (admin only)
 exports.getAllUsers = async (req, res) => {
@@ -339,6 +341,142 @@ exports.getUserActivityStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching user activity stats",
+      error: error.message
+    });
+  }
+};
+
+// Helper function to calculate number ratio in a string
+const calculateNumberRatio = (str) => {
+  if (!str || str.length === 0) return 0;
+  const numbers = str.match(/\d/g);
+  return numbers ? numbers.length / str.length : 0;
+};
+
+// Helper function to count words
+const countWords = (str) => {
+  if (!str || str.trim().length === 0) return 0;
+  return str.trim().split(/\s+/).length;
+};
+
+// Verify profile using ML model
+exports.verifyProfile = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Fetch user data with populated fields
+    const user = await User.findById(userId)
+      .populate('posts')
+      .populate('followers')
+      .populate('followings');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Calculate the 11 features required by the ML model
+    const features = {
+      "profile pic": user.avatar ? 1 : 0,
+      "nums/length username": calculateNumberRatio(user.username || ""),
+      "fullname words": countWords(user.name || ""),
+      "nums/length fullname": calculateNumberRatio(user.name || ""),
+      "name==username": (user.name && user.username && user.name.toLowerCase() === user.username.toLowerCase()) ? 1 : 0,
+      "description length": (user.bio || "").length,
+      "external URL": user.website ? 1 : 0,
+      "private": user.private ? 1 : 0,
+      "#posts": user.posts.length,
+      "#followers": user.followers.length,
+      "#following": user.followings.length
+    };
+
+    // Call Python Flask API
+    const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
+    let predictionResponse;
+    
+    try {
+      predictionResponse = await axios.post(`${FLASK_API_URL}/predict`, features, {
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true' // Required for ngrok tunnels
+        },
+        timeout: 10000 // 10 seconds timeout
+      });
+    } catch (apiError) {
+      console.error("Flask API Error:", apiError.message);
+      console.error("Flask API Response:", apiError.response?.data);
+      return res.status(503).json({
+        success: false,
+        message: "Failed to connect to ML verification service. Please ensure the Flask API is running at " + FLASK_API_URL,
+        error: apiError.message,
+        details: apiError.response?.data
+      });
+    }
+
+    const prediction = predictionResponse.data.prediction;
+    const confidence = predictionResponse.data.confidence;
+
+    // Determine verification status
+    const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
+
+    // Update or create ProfileVerification document
+    const verificationData = {
+      userId: userId,
+      features: features,
+      verificationStatus: verificationStatus,
+      isFake: prediction.is_fake,
+      confidence: {
+        realProfileProb: confidence.real_profile_prob,
+        fakeProfileProb: confidence.fake_profile_prob
+      },
+      lastVerified: new Date(),
+      $push: {
+        verificationHistory: {
+          verifiedAt: new Date(),
+          status: verificationStatus,
+          confidence: {
+            realProfileProb: confidence.real_profile_prob,
+            fakeProfileProb: confidence.fake_profile_prob
+          }
+        }
+      }
+    };
+
+    const profileVerification = await ProfileVerification.findOneAndUpdate(
+      { userId: userId },
+      verificationData,
+      { new: true, upsert: true }
+    );
+
+    // Return updated user data with verification status
+    res.json({
+      success: true,
+      message: `Profile verified as ${verificationStatus}`,
+      verification: {
+        status: verificationStatus,
+        isFake: prediction.is_fake,
+        confidence: {
+          realProfileProb: confidence.real_profile_prob,
+          fakeProfileProb: confidence.fake_profile_prob
+        },
+        features: features,
+        lastVerified: profileVerification.lastVerified
+      },
+      user: {
+        _id: user._id,
+        username: user.username,
+        name: user.name,
+        verificationStatus: verificationStatus
+      }
+    });
+
+  } catch (error) {
+    console.error("Profile verification error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error verifying profile",
       error: error.message
     });
   }

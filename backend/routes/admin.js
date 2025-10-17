@@ -7,7 +7,8 @@ const {
   blockUser,
   unblockUser,
   getUserGrowthStats,
-  getUserActivityStats
+  getUserActivityStats,
+  verifyProfile
 } = require("../controllers/admin");
 const { requireAdmin } = require("../middlewares/adminAuth");
 
@@ -20,6 +21,9 @@ router.get("/blocked-users", getBlockedUsers);
 router.delete("/users/:id", deleteUser);
 router.put("/users/:id/block", blockUser);
 router.put("/users/:id/unblock", unblockUser);
+
+// Profile verification route (ML integration)
+router.post("/users/:userId/verify-profile", verifyProfile);
 
 // Analytics routes
 router.get("/stats/user-growth", getUserGrowthStats);
