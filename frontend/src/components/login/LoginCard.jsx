@@ -1,7 +1,5 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-// using public logo
-import { Disabled } from "../disabled/Disabled";
 import axios from "axios";
 import { AuthContext } from "../../context/Auth";
 import { AdminAuthContext } from "../../context/AdminAuth";
@@ -67,73 +65,110 @@ export const LoginCard = () => {
   }
 
   return (
-    <div className="right-login px-4 md:px-0">
-      <div className="login-box border border-dark-border pb-4">
-        <img
-          className="w-3/5 my-8 mb-6"
-          src="/logoround.png"
-          alt="Connectify Logo"
-        />
-        <input
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-3/4 h-9 text-sm px-2 mt-2 rounded-md bg-dark-secondary border border-dark-border text-dark-text-primary placeholder-dark-text-tertiary focus:border-brand-blue focus:outline-none transition-colors"
-          type="text"
-          placeholder="Username or email address"
-        />
-        <input
-          value={password}
-          onChange={(e) => setPasword(e.target.value)}
-          className="w-3/4 h-9 text-sm px-2 mt-4 rounded-md bg-dark-secondary border border-dark-border text-dark-text-primary placeholder-dark-text-tertiary focus:border-brand-blue focus:outline-none transition-colors"
-          type="password"
-          placeholder="Password"
-        />
-        {username !== "" && password !== "" ? (
-          <button
-            onClick={() => login()}
-            className="w-3/4 py-2 px-2 mt-5 rounded-md text-white bg-brand-blue hover:bg-brand-blue-hover text-sm font-bold transition-colors"
-          >
-            Login
-          </button>
-        ) : (
-          <Disabled text={"Log in"}></Disabled>
-        )}
-        <div className="flex flex-row items-center mt-9">
-          <div className="h-px w-28 bg-dark-border"></div>
-          <span className="mx-2 text-dark-text-tertiary text-xs font-bold">
-            OR
-          </span>
-          <div className="h-px w-28 bg-dark-border"></div>
+    <div className="w-full max-w-md px-4 md:px-0">
+      {/* Modern Glass Card */}
+      <div className="relative bg-slate-900/40 backdrop-blur-2xl border border-slate-700/50 rounded-3xl p-10 shadow-2xl shadow-blue-500/10">
+        {/* Gradient Orb Background */}
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"></div>
+
+        {/* Logo Branding */}
+        <div className="relative text-center mb-10">
+          <div className="flex justify-center mb-4">
+            <img
+              src="/logoround.png"
+              alt="Connectify Logo"
+              className="w-32 h-32 object-contain"
+            />
+          </div>
+          <p className="text-slate-400 text-sm font-medium">
+            Welcome back! Please login to continue
+          </p>
         </div>
-        <Link
-          to="/forgot"
-          className="mt-6 text-dark-text-secondary text-sm hover:text-dark-text-primary transition-colors"
-        >
-          Forgotten your password?
-        </Link>
-        <button
-          onClick={() => handleGoogleAuth()}
-          className="flex flex-row items-center justify-center py-2 px-3 mt-5 rounded-md bg-dark-secondary text-dark-text-primary border border-dark-border hover:bg-dark-tertiary transition-colors"
-        >
-          <img src={googleicon} className="w-5" alt="Google" />
-          <p className="ml-2 text-sm">Continue with Google</p>
-        </button>
+
+        {/* Input Fields */}
+        <div className="space-y-5 relative">
+          <div className="group">
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-5 py-4 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 group-hover:border-slate-600"
+              type="text"
+              placeholder="Username or email"
+            />
+          </div>
+
+          <div className="group">
+            <input
+              value={password}
+              onChange={(e) => setPasword(e.target.value)}
+              className="w-full px-5 py-4 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 group-hover:border-slate-600"
+              type="password"
+              placeholder="Password"
+            />
+          </div>
+
+          {/* Login Button */}
+          {username !== "" && password !== "" ? (
+            <button
+              onClick={() => login()}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 transform hover:-translate-y-0.5"
+            >
+              Sign In
+            </button>
+          ) : (
+            <button
+              disabled
+              className="w-full py-4 bg-slate-800/50 text-slate-600 font-bold rounded-xl cursor-not-allowed"
+            >
+              Sign In
+            </button>
+          )}
+
+          {/* Forgot Password */}
+          <div className="text-center">
+            <Link
+              to="/forgot"
+              className="text-sm text-slate-400 hover:text-blue-400 transition-colors duration-200"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center my-8">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+            <span className="px-4 text-xs text-slate-500 font-medium">OR</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+          </div>
+
+          {/* Google Login */}
+          <button
+            onClick={() => handleGoogleAuth()}
+            className="w-full flex items-center justify-center gap-3 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 text-white rounded-xl transition-all duration-300"
+          >
+            <img src={googleicon} className="w-5 h-5" alt="Google" />
+            <span className="font-medium">Continue with Google</span>
+          </button>
+        </div>
       </div>
-      <div className="signup-action-box border border-dark-border text-center flex flex-col">
-        <p className="text-dark-text-secondary text-sm">
+
+      {/* Sign Up Prompt */}
+      <div className="mt-6 text-center bg-slate-900/40 backdrop-blur-2xl border border-slate-700/50 rounded-2xl p-5">
+        <p className="text-slate-400 text-sm">
           Don't have an account?
           <Link
             to="/signup"
-            className="text-brand-blue font-bold ml-2 hover:text-brand-blue-hover transition-colors"
+            className="ml-2 text-blue-400 hover:text-blue-300 font-bold transition-colors duration-200"
           >
             Sign up
           </Link>
         </p>
         <Link
           to="/admin/login"
-          className="text-dark-text-tertiary text-xs mt-2 hover:text-dark-text-secondary transition-colors"
+          className="block mt-3 text-xs text-slate-500 hover:text-slate-400 transition-colors duration-200"
         >
-          Admin Login
+          Admin Portal →
         </Link>
       </div>
     </div>

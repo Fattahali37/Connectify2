@@ -48,19 +48,20 @@
 
 @layer components {
   .width60 {
-    @apply w-full mx-auto px-4;
-    max-width: 52%;
+    @apply w-full mx-auto px-6;
+    max-width: 100%;
   }
 
   @media screen and (max-width: 1500px) {
     .width60 {
-      max-width: 85%;
+      max-width: 100%;
     }
   }
 
   @media screen and (max-width: 850px) {
     .width60 {
-      max-width: 95%;
+      max-width: 100%;
+      @apply px-4;
     }
   }
 
@@ -69,17 +70,20 @@
     @apply transition-all duration-300 ease-in-out;
     margin-left: 280px;
     min-height: 100vh;
+    width: calc(100% - 280px);
   }
 
   @media screen and (max-width: 1200px) {
     .main-content {
       margin-left: 80px;
+      width: calc(100% - 80px);
     }
   }
 
   @media screen and (max-width: 768px) {
     .main-content {
       @apply ml-0 mb-16;
+      width: 100%;
     }
   }
 

@@ -1,25 +1,102 @@
 .home {
-    @apply w-full flex flex-row justify-evenly py-5 bg-dark-primary;
+    @apply w-full flex flex-row py-6 px-8;
+    min-height: 100vh;
+    background: linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%);
+    position: relative;
+    gap: 40px;
+}
+
+.home::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .left-home {
-    @apply w-full md:w-3/5 lg:w-[55%] flex flex-col rounded;
+    @apply w-full flex flex-col rounded;
+    max-width: 680px;
+    flex: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .right-home {
-    @apply w-[28%] hidden lg:block;
+    @apply w-[380px] hidden lg:block;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .stories {
-    @apply w-full bg-dark-primary mb-4 h-28 rounded-lg border-2 border-dark-border flex flex-row items-center overflow-x-auto;
+    @apply w-full mb-6 h-32 rounded-2xl flex flex-row items-center overflow-x-auto;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    gap: 12px;
+}
+
+.stories::-webkit-scrollbar {
+    height: 6px;
+}
+
+.stories::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.stories::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 3px;
+}
+
+.stories::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.3);
+}
+
+.posts {
+    @apply space-y-5;
+}
+
+@media screen and (max-width: 1400px) {
+    .home {
+        @apply px-6;
+    }
+    
+    .left-home {
+        max-width: 600px;
+    }
+    
+    .right-home {
+        @apply w-[340px];
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .right-home {
+        @apply hidden;
+    }
+    
+    .left-home {
+        max-width: 100%;
+    }
 }
 
 @media screen and (max-width: 850px) {
     .home {
-        @apply flex-col;
+        @apply flex-col px-4;
     }
     
     .left-home {
         @apply w-full;
+        max-width: 100%;
     }
 }
