@@ -1,12 +1,20 @@
-import React from 'react'
-import { ForgotCard } from '../components/login/ForgotCard'
+import React from "react";
+import { ForgotCard } from "../components/login/ForgotCard";
 
 export function Forgot() {
-    return (
-        <div className='home'>
-            <ForgotCard />
-            <span style={{position:'absolute',bottom:'15px',fontSize:'14px',color:'gray'}}>© 2024 Connectify</span>
-
-        </div>
-    )
+  return (
+    <div className="home">
+      <ForgotCard />
+      <span
+        style={{
+          position: "absolute",
+          bottom: "15px",
+          fontSize: "14px",
+          color: "gray",
+        }}
+      >
+        © 2024 Connectify
+      </span>
+    </div>
+  );
 }

@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo.png";
+// using public logo
 import { url } from "../../baseUrl";
 import { AuthContext } from "../../context/Auth";
 import { Disabled } from "../disabled/Disabled";
@@ -35,7 +35,11 @@ export const SignupCard = () => {
   return (
     <div className="right-login px-4 md:px-0">
       <div className="signup-box border border-dark-border">
-        <img className="w-3/5 my-8 mb-6" src={logo} alt="Logo" />
+        <img
+          className="w-3/5 my-8 mb-6"
+          src="/logoround.png"
+          alt="Connectify Logo"
+        />
         <p className="mt-0 text-dark-text-secondary text-base mb-6 w-4/5 text-center font-semibold">
           Sign up to see photos and videos from your friends
         </p>

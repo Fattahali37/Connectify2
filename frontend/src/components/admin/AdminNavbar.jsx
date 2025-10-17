@@ -3,7 +3,6 @@ import { AdminAuthContext } from "../../context/AdminAuth";
 import { useNavigate } from "react-router-dom";
 import {
   Logout as LogoutIcon,
-  Dashboard as DashboardIcon,
   Language,
   Notifications,
   AccountCircle,
@@ -24,8 +23,12 @@ export default function AdminNavbar() {
         <div className="flex items-center justify-between">
           {/* Left - Logo & Title */}
           <div className="flex items-center space-x-4">
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
-              <DashboardIcon className="text-white" sx={{ fontSize: 28 }} />
+            <div className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-1.5 rounded-xl shadow-lg shadow-blue-500/20">
+              <img
+                src="/logoround.png"
+                alt="Connectify Logo"
+                className="w-10 h-10 rounded-lg object-contain"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight">

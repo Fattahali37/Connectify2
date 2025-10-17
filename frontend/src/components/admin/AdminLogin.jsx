@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AdminAuthContext } from "../../context/AdminAuth";
 import { useNavigate } from "react-router-dom";
-import { Lock, Person, Dashboard } from "@mui/icons-material";
+import { Lock, Person } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 
 export default function AdminLogin() {
@@ -45,8 +45,12 @@ export default function AdminLogin() {
       <div className="relative w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl shadow-blue-500/30 mb-6">
-            <Dashboard sx={{ fontSize: 40, color: "white" }} />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl shadow-blue-500/30 mb-6 p-2">
+            <img
+              src="/logoround.png"
+              alt="Connectify Logo"
+              className="w-full h-full rounded-xl object-contain"
+            />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">Admin Portal</h1>
           <p className="text-slate-400">Sign in to access the dashboard</p>

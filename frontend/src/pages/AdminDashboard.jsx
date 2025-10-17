@@ -85,7 +85,9 @@ export default function AdminDashboard() {
       setBlockedUsers(response.data.users);
     } catch (error) {
       console.error("Error fetching blocked users:", error);
-      throwErr(error.response?.data?.message || "Failed to fetch blocked users");
+      throwErr(
+        error.response?.data?.message || "Failed to fetch blocked users"
+      );
     }
   }, [throwErr]);
 
@@ -125,7 +127,9 @@ export default function AdminDashboard() {
     try {
       await api.delete(`${url}/api/admin/users/${deleteDialog.user._id}`);
       setUsers(users.filter((user) => user._id !== deleteDialog.user._id));
-      setBlockedUsers(blockedUsers.filter((user) => user._id !== deleteDialog.user._id));
+      setBlockedUsers(
+        blockedUsers.filter((user) => user._id !== deleteDialog.user._id)
+      );
       setDeleteDialog({ open: false, user: null });
       throwSuccess("User deleted successfully");
     } catch (error) {
@@ -136,7 +140,11 @@ export default function AdminDashboard() {
   const handleBlockUser = async (userId) => {
     try {
       await api.put(`${url}/api/admin/users/${userId}/block`);
-      setUsers(users.map((user) => (user._id === userId ? { ...user, status: "blocked" } : user)));
+      setUsers(
+        users.map((user) =>
+          user._id === userId ? { ...user, status: "blocked" } : user
+        )
+      );
       await Promise.all([fetchBlockedUsers(), fetchStats()]);
       throwSuccess("User blocked successfully");
     } catch (error) {
@@ -147,7 +155,11 @@ export default function AdminDashboard() {
   const handleUnblockUser = async (userId) => {
     try {
       await api.put(`${url}/api/admin/users/${userId}/unblock`);
-      setUsers(users.map((user) => (user._id === userId ? { ...user, status: "active" } : user)));
+      setUsers(
+        users.map((user) =>
+          user._id === userId ? { ...user, status: "active" } : user
+        )
+      );
       setBlockedUsers(blockedUsers.filter((user) => user._id !== userId));
       await fetchStats();
       throwSuccess("User unblocked successfully");
@@ -159,7 +171,9 @@ export default function AdminDashboard() {
   const handleVerifyProfile = async (userId) => {
     try {
       setVerifyingUsers((prev) => ({ ...prev, [userId]: true }));
-      const response = await api.post(`${url}/api/admin/users/${userId}/verify-profile`);
+      const response = await api.post(
+        `${url}/api/admin/users/${userId}/verify-profile`
+      );
 
       if (response.data.success) {
         const verificationStatus = response.data.verification.status;
@@ -168,17 +182,26 @@ export default function AdminDashboard() {
         setUsers((prevUsers) =>
           prevUsers.map((user) =>
             user._id === userId
-              ? { ...user, verificationStatus, verificationConfidence: confidence }
+              ? {
+                  ...user,
+                  verificationStatus,
+                  verificationConfidence: confidence,
+                }
               : user
           )
         );
 
-        const statusText = verificationStatus === "fake" ? "Flagged as Fake" : "Verified Real";
+        const statusText =
+          verificationStatus === "fake" ? "Flagged as Fake" : "Verified Real";
         const confidencePercent = (
-          (verificationStatus === "fake" ? confidence.fakeProfileProb : confidence.realProfileProb) * 100
+          (verificationStatus === "fake"
+            ? confidence.fakeProfileProb
+            : confidence.realProfileProb) * 100
         ).toFixed(1);
 
-        throwSuccess(`Profile ${statusText} (${confidencePercent}% confidence)`);
+        throwSuccess(
+          `Profile ${statusText} (${confidencePercent}% confidence)`
+        );
       }
     } catch (error) {
       throwErr(error.response?.data?.message || "Failed to verify profile");
@@ -189,14 +212,26 @@ export default function AdminDashboard() {
 
   // Stats Cards
   const StatCard = ({ title, value, change, icon: Icon, gradient, trend }) => (
-    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1`}>
+    <div
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1`}
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl">
           <Icon className="text-white" sx={{ fontSize: 32 }} />
         </div>
         {change && (
-          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full ${trend === 'up' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
-            {trend === 'up' ? <ArrowUpward sx={{ fontSize: 16 }} /> : <ArrowDownward sx={{ fontSize: 16 }} />}
+          <div
+            className={`flex items-center space-x-1 px-3 py-1 rounded-full ${
+              trend === "up"
+                ? "bg-green-500/20 text-green-300"
+                : "bg-red-500/20 text-red-300"
+            }`}
+          >
+            {trend === "up" ? (
+              <ArrowUpward sx={{ fontSize: 16 }} />
+            ) : (
+              <ArrowDownward sx={{ fontSize: 16 }} />
+            )}
             <span className="text-sm font-bold">{change}</span>
           </div>
         )}
@@ -221,7 +256,7 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <CircularProgress size={60} sx={{ color: '#3b82f6' }} />
+          <CircularProgress size={60} sx={{ color: "#3b82f6" }} />
           <p className="text-white mt-4 text-lg">Loading Dashboard...</p>
         </div>
       </div>
@@ -229,19 +264,24 @@ export default function AdminDashboard() {
   }
 
   const activeUsers = users.filter((u) => u.status === "active").length;
-  const totalPosts = users.reduce((sum, user) => sum + (user.postsCount || 0), 0);
+  const totalPosts = users.reduce(
+    (sum, user) => sum + (user.postsCount || 0),
+    0
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <AdminNavbar />
-      
+
       <div className="pt-20 px-6 pb-8">
         {/* Header with Tabs */}
         <div className="max-w-7xl mx-auto mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">Dashboard</h1>
-              <p className="text-slate-400">Welcome back, here's what's happening</p>
+              <p className="text-slate-400">
+                Welcome back, here's what's happening
+              </p>
             </div>
             <button
               onClick={fetchData}
@@ -321,9 +361,23 @@ export default function AdminDashboard() {
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={stats.userGrowth}>
                       <defs>
-                        <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8} />
-                          <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
+                        <linearGradient
+                          id="colorGrowth"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor={CHART_COLORS.primary}
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor={CHART_COLORS.primary}
+                            stopOpacity={0}
+                          />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -353,8 +407,16 @@ export default function AdminDashboard() {
                     <PieChart>
                       <Pie
                         data={[
-                          { name: "Active", value: activeUsers, fill: CHART_COLORS.success },
-                          { name: "Blocked", value: blockedUsers.length, fill: CHART_COLORS.danger },
+                          {
+                            name: "Active",
+                            value: activeUsers,
+                            fill: CHART_COLORS.success,
+                          },
+                          {
+                            name: "Blocked",
+                            value: blockedUsers.length,
+                            fill: CHART_COLORS.danger,
+                          },
                         ]}
                         cx="50%"
                         cy="50%"
@@ -362,7 +424,9 @@ export default function AdminDashboard() {
                         outerRadius={100}
                         paddingAngle={5}
                         dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) =>
+                          `${name} ${(percent * 100).toFixed(0)}%`
+                        }
                       />
                       <RechartsTooltip
                         contentStyle={{
@@ -386,8 +450,19 @@ export default function AdminDashboard() {
                 <table className="w-full">
                   <thead className="bg-slate-900/50">
                     <tr>
-                      {["User", "Email", "Posts", "Followers", "Status", "Verification", "Actions"].map((header) => (
-                        <th key={header} className="px-6 py-4 text-left text-sm font-semibold text-slate-300">
+                      {[
+                        "User",
+                        "Email",
+                        "Posts",
+                        "Followers",
+                        "Status",
+                        "Verification",
+                        "Actions",
+                      ].map((header) => (
+                        <th
+                          key={header}
+                          className="px-6 py-4 text-left text-sm font-semibold text-slate-300"
+                        >
                           {header}
                         </th>
                       ))}
@@ -395,25 +470,45 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-slate-700/50">
                     {users.map((user) => (
-                      <tr key={user._id} className="hover:bg-slate-700/30 transition-colors">
+                      <tr
+                        key={user._id}
+                        className="hover:bg-slate-700/30 transition-colors"
+                      >
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
-                            <Avatar src={user.avatar} alt={user.username} sx={{ width: 40, height: 40 }} />
+                            <Avatar
+                              src={user.avatar}
+                              alt={user.username}
+                              sx={{ width: 40, height: 40 }}
+                            />
                             <div>
-                              <p className="font-medium text-white">{user.username}</p>
-                              <p className="text-sm text-slate-400">{user.name}</p>
+                              <p className="font-medium text-white">
+                                {user.username}
+                              </p>
+                              <p className="text-sm text-slate-400">
+                                {user.name}
+                              </p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-slate-300">{user.email}</td>
-                        <td className="px-6 py-4 text-slate-300">{user.postsCount || 0}</td>
-                        <td className="px-6 py-4 text-slate-300">{user.followersCount || 0}</td>
+                        <td className="px-6 py-4 text-slate-300">
+                          {user.email}
+                        </td>
+                        <td className="px-6 py-4 text-slate-300">
+                          {user.postsCount || 0}
+                        </td>
+                        <td className="px-6 py-4 text-slate-300">
+                          {user.followersCount || 0}
+                        </td>
                         <td className="px-6 py-4">
                           <Chip
                             label={user.status}
                             size="small"
                             sx={{
-                              backgroundColor: user.status === "active" ? "#10b981" : "#ef4444",
+                              backgroundColor:
+                                user.status === "active"
+                                  ? "#10b981"
+                                  : "#ef4444",
                               color: "white",
                               fontWeight: "bold",
                             }}
@@ -422,11 +517,24 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">
                           {user.verificationStatus ? (
                             <Chip
-                              label={user.verificationStatus === "real" ? "Verified" : "Flagged"}
+                              label={
+                                user.verificationStatus === "real"
+                                  ? "Verified"
+                                  : "Flagged"
+                              }
                               size="small"
-                              icon={user.verificationStatus === "real" ? <VerifiedUserIcon /> : <WarningIcon />}
+                              icon={
+                                user.verificationStatus === "real" ? (
+                                  <VerifiedUserIcon />
+                                ) : (
+                                  <WarningIcon />
+                                )
+                              }
                               sx={{
-                                backgroundColor: user.verificationStatus === "real" ? "#10b981" : "#ef4444",
+                                backgroundColor:
+                                  user.verificationStatus === "real"
+                                    ? "#10b981"
+                                    : "#ef4444",
                                 color: "white",
                               }}
                             />
@@ -436,7 +544,9 @@ export default function AdminDashboard() {
                               disabled={verifyingUsers[user._id]}
                               className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
                             >
-                              {verifyingUsers[user._id] ? "Verifying..." : "Verify"}
+                              {verifyingUsers[user._id]
+                                ? "Verifying..."
+                                : "Verify"}
                             </button>
                           )}
                         </td>
@@ -457,7 +567,9 @@ export default function AdminDashboard() {
                               {user.status === "active" ? "Block" : "Unblock"}
                             </button>
                             <button
-                              onClick={() => setDeleteDialog({ open: true, user })}
+                              onClick={() =>
+                                setDeleteDialog({ open: true, user })
+                              }
                               className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                             >
                               Delete
@@ -479,7 +591,9 @@ export default function AdminDashboard() {
                 Blocked Users ({blockedUsers.length})
               </h2>
               {blockedUsers.length === 0 ? (
-                <p className="text-slate-400 text-center py-12">No blocked users found</p>
+                <p className="text-slate-400 text-center py-12">
+                  No blocked users found
+                </p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {blockedUsers.map((user) => (
@@ -488,9 +602,15 @@ export default function AdminDashboard() {
                       className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 hover:border-slate-600 transition-colors"
                     >
                       <div className="flex items-center space-x-3 mb-4">
-                        <Avatar src={user.avatar} alt={user.username} sx={{ width: 50, height: 50 }} />
+                        <Avatar
+                          src={user.avatar}
+                          alt={user.username}
+                          sx={{ width: 50, height: 50 }}
+                        />
                         <div className="flex-1">
-                          <p className="font-medium text-white">{user.username}</p>
+                          <p className="font-medium text-white">
+                            {user.username}
+                          </p>
                           <p className="text-sm text-slate-400">{user.email}</p>
                         </div>
                       </div>
@@ -533,16 +653,18 @@ export default function AdminDashboard() {
                           color: "#fff",
                         }}
                       />
-                      <Bar dataKey="count" fill={CHART_COLORS.purple} radius={[8, 8, 0, 0]} />
+                      <Bar
+                        dataKey="count"
+                        fill={CHART_COLORS.purple}
+                        radius={[8, 8, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartCard>
 
                 <ChartCard title="User Engagement">
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart
-                      data={stats.userGrowth}
-                    >
+                    <LineChart data={stats.userGrowth}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                       <XAxis dataKey="label" stroke="#94a3b8" />
                       <YAxis stroke="#94a3b8" />
@@ -587,8 +709,9 @@ export default function AdminDashboard() {
         </DialogTitle>
         <DialogContent>
           <p className="text-slate-300">
-            Are you sure you want to delete <strong>{deleteDialog.user?.username}</strong>?
-            This action cannot be undone.
+            Are you sure you want to delete{" "}
+            <strong>{deleteDialog.user?.username}</strong>? This action cannot
+            be undone.
           </p>
         </DialogContent>
         <DialogActions style={{ padding: "16px 24px" }}>

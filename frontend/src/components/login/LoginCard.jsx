@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png";
+// using public logo
 import { Disabled } from "../disabled/Disabled";
 import axios from "axios";
 import { AuthContext } from "../../context/Auth";
@@ -69,7 +69,11 @@ export const LoginCard = () => {
   return (
     <div className="right-login px-4 md:px-0">
       <div className="login-box border border-dark-border pb-4">
-        <img className="w-3/5 my-8 mb-6" src={logo} alt="Logo" />
+        <img
+          className="w-3/5 my-8 mb-6"
+          src="/logoround.png"
+          alt="Connectify Logo"
+        />
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
