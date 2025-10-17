@@ -41,18 +41,17 @@ export const NavbarModern = ({ active }) => {
   const [notificationAnchor, setNotificationAnchor] = useState(null);
 
   const logout = async () => {
-    api
-      .post(`${url}/auth/logout`, {
+    try {
+      await api.post(`${url}/auth/logout`, {
         token: localStorage.getItem("refresh_token"),
-      })
-      .then((resp) => {
-        if (resp.data) {
-          localStorage.clear();
-          window.location.reload();
-          context.setAuth(null);
-        }
-      })
-      .catch((err) => console.log(err));
+      });
+    } catch (err) {
+      console.log(err);
+    } finally {
+      localStorage.clear();
+      context.setAuth(null);
+      window.location.reload();
+    }
   };
 
   const upload = async (e) => {

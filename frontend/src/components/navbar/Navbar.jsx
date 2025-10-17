@@ -70,18 +70,18 @@ export const Navbar = ({ active }) => {
   };
 
   const logout = async () => {
-    api
-      .post(`${url}/auth/logout`, {
+    try {
+      await api.post(`${url}/auth/logout`, {
         token: localStorage.getItem("refresh_token"),
-      })
-      .then((resp) => {
-        if (resp.data) {
-          localStorage.clear();
-          window.location.reload();
-          context.setAuth(null);
-        }
-      })
-      .catch((err) => {});
+      });
+    } catch (err) {
+      // Best-effort: proceed with client-side cleanup even if server call fails
+      console.log(err);
+    } finally {
+      localStorage.clear();
+      context.setAuth(null);
+      window.location.reload();
+    }
   };
   context.logout = logout;
 
