@@ -1,17 +1,23 @@
-import React from 'react'
-import phone from '../assets/gifphone.gif'
-import {LoginCard} from '../components/login/LoginCard'
+import React from "react";
+import phone from "../assets/gifphone.gif";
+import { LoginCard } from "../components/login/LoginCard";
 
 export function Login() {
-    return (
-        <div className='home lg-sg'>
-            <div className="login-left">
-                <div className="phone">
-                    <img className='' style={{ width: '453px' }} src={phone} alt="" />
-                </div>
-            </div>
-            <LoginCard/>
-            <span style={{position:'absolute',bottom:'15px',fontSize:'14px',color:'gray'}}>© 2022 Instagram</span>
+  return (
+    <div className="min-h-screen bg-dark-primary flex flex-col lg:flex-row justify-around items-center px-4 py-8 lg:py-0 relative">
+      <div className="login-left hidden lg:block">
+        <div className="phone relative">
+          <img
+            className="w-full max-w-[453px]"
+            src={phone}
+            alt="Phone mockup"
+          />
         </div>
-    )
+      </div>
+      <LoginCard />
+      <span className="absolute bottom-4 text-sm text-dark-text-tertiary">
+        © 2024 Connectify
+      </span>
+    </div>
+  );
 }

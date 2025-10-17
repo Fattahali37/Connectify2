@@ -1,44 +1,18 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import {
-  Box,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tab,
-  Tabs,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Tooltip,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
-import {
-  Delete as DeleteIcon,
-  Block as BlockIcon,
-  CheckCircle as UnblockIcon,
-  CheckCircle,
   Person as PersonIcon,
   People as PeopleIcon,
   TrendingUp as TrendingUpIcon,
   Assessment as AssessmentIcon,
-  Refresh as RefreshIcon,
+  Block as BlockIcon,
+  CheckCircle as UnblockIcon,
+  Delete as DeleteIcon,
   VerifiedUser as VerifiedUserIcon,
   Warning as WarningIcon,
-  HelpOutline as HelpOutlineIcon,
+  HelpOutlineIcon,
+  Refresh as RefreshIcon,
+  ArrowUpward,
+  ArrowDownward,
 } from "@mui/icons-material";
 import {
   LineChart,
@@ -53,35 +27,42 @@ import {
   PieChart,
   Pie,
   Cell,
+  Area,
+  AreaChart,
 } from "recharts";
 import { api } from "../Interceptor/apiCall";
 import { url } from "../baseUrl";
 import { AuthContext } from "../context/Auth";
 import AdminNavbar from "../components/admin/AdminNavbar";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  CircularProgress,
+  Avatar,
+  Chip,
+  Tooltip,
+} from "@mui/material";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
-function TabPanel({ children, value, index, ...other }) {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b"];
+const CHART_COLORS = {
+  primary: "#3b82f6",
+  success: "#10b981",
+  warning: "#f59e0b",
+  danger: "#ef4444",
+  purple: "#8b5cf6",
+  pink: "#ec4899",
+};
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tabValue, setTabValue] = useState(0);
+  const [activeTab, setActiveTab] = useState("overview");
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
-  const [verifyingUsers, setVerifyingUsers] = useState({}); // Track verification loading state per user
+  const [verifyingUsers, setVerifyingUsers] = useState({});
   const [stats, setStats] = useState({
     userGrowth: [],
     activityStats: null,
@@ -94,11 +75,7 @@ export default function AdminDashboard() {
       setUsers(response.data.users);
     } catch (error) {
       console.error("Error fetching users:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to fetch users. Please ensure the backend server is running.";
-      throwErr(errorMessage);
+      throwErr(error.response?.data?.message || "Failed to fetch users");
     }
   }, [throwErr]);
 
@@ -108,11 +85,7 @@ export default function AdminDashboard() {
       setBlockedUsers(response.data.users);
     } catch (error) {
       console.error("Error fetching blocked users:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to fetch blocked users";
-      throwErr(errorMessage);
+      throwErr(error.response?.data?.message || "Failed to fetch blocked users");
     }
   }, [throwErr]);
 
@@ -129,11 +102,7 @@ export default function AdminDashboard() {
       });
     } catch (error) {
       console.error("Error fetching statistics:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to fetch statistics";
-      throwErr(errorMessage);
+      throwErr(error.response?.data?.message || "Failed to fetch statistics");
     }
   }, [throwErr]);
 
@@ -156,9 +125,7 @@ export default function AdminDashboard() {
     try {
       await api.delete(`${url}/api/admin/users/${deleteDialog.user._id}`);
       setUsers(users.filter((user) => user._id !== deleteDialog.user._id));
-      setBlockedUsers(
-        blockedUsers.filter((user) => user._id !== deleteDialog.user._id)
-      );
+      setBlockedUsers(blockedUsers.filter((user) => user._id !== deleteDialog.user._id));
       setDeleteDialog({ open: false, user: null });
       throwSuccess("User deleted successfully");
     } catch (error) {
@@ -169,12 +136,7 @@ export default function AdminDashboard() {
   const handleBlockUser = async (userId) => {
     try {
       await api.put(`${url}/api/admin/users/${userId}/block`);
-      setUsers(
-        users.map((user) =>
-          user._id === userId ? { ...user, status: "blocked" } : user
-        )
-      );
-      // Refresh all data to update charts
+      setUsers(users.map((user) => (user._id === userId ? { ...user, status: "blocked" } : user)));
       await Promise.all([fetchBlockedUsers(), fetchStats()]);
       throwSuccess("User blocked successfully");
     } catch (error) {
@@ -185,13 +147,8 @@ export default function AdminDashboard() {
   const handleUnblockUser = async (userId) => {
     try {
       await api.put(`${url}/api/admin/users/${userId}/unblock`);
-      setUsers(
-        users.map((user) =>
-          user._id === userId ? { ...user, status: "active" } : user
-        )
-      );
+      setUsers(users.map((user) => (user._id === userId ? { ...user, status: "active" } : user)));
       setBlockedUsers(blockedUsers.filter((user) => user._id !== userId));
-      // Refresh stats to update charts
       await fetchStats();
       throwSuccess("User unblocked successfully");
     } catch (error) {
@@ -201,943 +158,458 @@ export default function AdminDashboard() {
 
   const handleVerifyProfile = async (userId) => {
     try {
-      // Set loading state for this specific user
       setVerifyingUsers((prev) => ({ ...prev, [userId]: true }));
-
       const response = await api.post(`${url}/api/admin/users/${userId}/verify-profile`);
-      
+
       if (response.data.success) {
         const verificationStatus = response.data.verification.status;
         const confidence = response.data.verification.confidence;
-        
-        // Update the user in the users array
+
         setUsers((prevUsers) =>
           prevUsers.map((user) =>
             user._id === userId
-              ? { 
-                  ...user, 
-                  verificationStatus,
-                  verificationConfidence: confidence
-                }
+              ? { ...user, verificationStatus, verificationConfidence: confidence }
               : user
           )
         );
 
-        // Also update blocked users if applicable
-        setBlockedUsers((prevBlockedUsers) =>
-          prevBlockedUsers.map((user) =>
-            user._id === userId
-              ? { 
-                  ...user, 
-                  verificationStatus,
-                  verificationConfidence: confidence
-                }
-              : user
-          )
-        );
-
-        const statusText = verificationStatus === 'fake' ? 'Flagged as Fake' : 'Verified Real';
+        const statusText = verificationStatus === "fake" ? "Flagged as Fake" : "Verified Real";
         const confidencePercent = (
-          verificationStatus === 'fake' 
-            ? confidence.fakeProfileProb * 100 
-            : confidence.realProfileProb * 100
+          (verificationStatus === "fake" ? confidence.fakeProfileProb : confidence.realProfileProb) * 100
         ).toFixed(1);
-        
-        throwSuccess(
-          `Profile ${statusText} (${confidencePercent}% confidence)`
-        );
+
+        throwSuccess(`Profile ${statusText} (${confidencePercent}% confidence)`);
       }
     } catch (error) {
-      console.error("Error verifying profile:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to verify profile";
-      throwErr(errorMessage);
+      throwErr(error.response?.data?.message || "Failed to verify profile");
     } finally {
-      // Clear loading state
       setVerifyingUsers((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
-  const getVerificationBadge = (user) => {
-    if (!user.verificationStatus) {
-      return (
-        <Chip
-          icon={<HelpOutlineIcon />}
-          label="Unverified"
-          size="small"
-          sx={{
-            backgroundColor: "#9e9e9e",
-            color: "white",
-            fontWeight: "bold",
-            fontSize: "11px"
-          }}
-        />
-      );
-    }
-
-    if (user.verificationStatus === "real") {
-      return (
-        <Chip
-          icon={<VerifiedUserIcon />}
-          label="Verified Real"
-          size="small"
-          color="success"
-          sx={{
-            fontWeight: "bold",
-            fontSize: "11px"
-          }}
-        />
-      );
-    }
-
-    if (user.verificationStatus === "fake") {
-      return (
-        <Chip
-          icon={<WarningIcon />}
-          label="Flagged Fake"
-          size="small"
-          color="error"
-          sx={{
-            fontWeight: "bold",
-            fontSize: "11px"
-          }}
-        />
-      );
-    }
-
-    return null;
-  };
-
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString();
-  };
-
-  const getStatusColor = (status) => {
-    return status === "active" ? "success" : "error";
-  };
-
-  const renderUserTable = (userList) => (
-    <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
-      <Table>
-        <TableHead>
-          <TableRow sx={{ backgroundColor: "#1976d2" }}>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              User
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Email
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Join Date
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Posts
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Followers
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Following
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Status
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Verification
-            </TableCell>
-            <TableCell
-              sx={{ color: "white", fontWeight: "bold", fontSize: "14px" }}
-            >
-              Actions
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {userList.map((user) => (
-            <TableRow
-              key={user._id}
-              sx={{
-                "&:hover": {
-                  backgroundColor: "#f5f5f5",
-                  "& .action-buttons": {
-                    opacity: 1,
-                  },
-                },
-                "&:nth-of-type(odd)": {
-                  backgroundColor: "#fafafa",
-                },
-              }}
-            >
-              <TableCell>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Avatar
-                    src={user.avatar}
-                    alt={user.username}
-                    sx={{ width: 40, height: 40 }}
-                  />
-                  <Box>
-                    <Typography variant="body2" fontWeight="bold">
-                      {user.username}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {user.name}
-                    </Typography>
-                  </Box>
-                </Box>
-              </TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{formatDate(user.createdAt)}</TableCell>
-              <TableCell>
-                <strong>{user.postsCount}</strong>
-              </TableCell>
-              <TableCell>
-                <strong>{user.followersCount}</strong>
-              </TableCell>
-              <TableCell>
-                <strong>{user.followingCount}</strong>
-              </TableCell>
-              <TableCell>
-                <Chip
-                  label={user.status.toUpperCase()}
-                  color={getStatusColor(user.status)}
-                  size="small"
-                  sx={{ fontWeight: "bold" }}
-                />
-              </TableCell>
-              <TableCell>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  {getVerificationBadge(user)}
-                  <Tooltip title="Verify profile using ML model" arrow>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="info"
-                      onClick={() => handleVerifyProfile(user._id)}
-                      disabled={verifyingUsers[user._id]}
-                      startIcon={
-                        verifyingUsers[user._id] ? (
-                          <CircularProgress size={16} />
-                        ) : (
-                          <VerifiedUserIcon />
-                        )
-                      }
-                      sx={{
-                        minWidth: "120px",
-                        px: 1,
-                        fontSize: "11px",
-                        fontWeight: "bold",
-                        borderWidth: 1.5,
-                        "&:hover": {
-                          borderWidth: 1.5,
-                        },
-                      }}
-                    >
-                      {verifyingUsers[user._id] ? "Verifying..." : "Verify"}
-                    </Button>
-                  </Tooltip>
-                  {user.verificationConfidence && (
-                    <Typography variant="caption" color="text.secondary">
-                      Confidence:{" "}
-                      {(
-                        (user.verificationStatus === "fake"
-                          ? user.verificationConfidence.fakeProfileProb
-                          : user.verificationConfidence.realProfileProb) * 100
-                      ).toFixed(1)}
-                      %
-                    </Typography>
-                  )}
-                </Box>
-              </TableCell>
-              <TableCell>
-                <Box
-                  className="action-buttons"
-                  sx={{
-                    display: "flex",
-                    gap: 1,
-                    opacity: 0.7,
-                    transition: "opacity 0.2s",
-                  }}
-                >
-                  {user.status === "active" ? (
-                    <Tooltip title="Block User" arrow>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="warning"
-                        onClick={() => handleBlockUser(user._id)}
-                        startIcon={<BlockIcon />}
-                        sx={{
-                          minWidth: "auto",
-                          px: 1.5,
-                          fontWeight: "bold",
-                          borderWidth: 2,
-                          "&:hover": {
-                            borderWidth: 2,
-                            backgroundColor: "rgba(237, 108, 2, 0.08)",
-                          },
-                        }}
-                      >
-                        Block
-                      </Button>
-                    </Tooltip>
-                  ) : (
-                    <Tooltip title="Unblock User" arrow>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="success"
-                        onClick={() => handleUnblockUser(user._id)}
-                        startIcon={<UnblockIcon />}
-                        sx={{
-                          minWidth: "auto",
-                          px: 1.5,
-                          fontWeight: "bold",
-                          borderWidth: 2,
-                          "&:hover": {
-                            borderWidth: 2,
-                            backgroundColor: "rgba(46, 125, 50, 0.08)",
-                          },
-                        }}
-                      >
-                        Unblock
-                      </Button>
-                    </Tooltip>
-                  )}
-                  <Tooltip title="Delete User" arrow>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="error"
-                      onClick={() => setDeleteDialog({ open: true, user })}
-                      startIcon={<DeleteIcon />}
-                      sx={{
-                        minWidth: "auto",
-                        px: 1.5,
-                        fontWeight: "bold",
-                        borderWidth: 2,
-                        "&:hover": {
-                          borderWidth: 2,
-                          backgroundColor: "rgba(211, 47, 47, 0.08)",
-                        },
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </Tooltip>
-                </Box>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+  // Stats Cards
+  const StatCard = ({ title, value, change, icon: Icon, gradient, trend }) => (
+    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl">
+          <Icon className="text-white" sx={{ fontSize: 32 }} />
+        </div>
+        {change && (
+          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full ${trend === 'up' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+            {trend === 'up' ? <ArrowUpward sx={{ fontSize: 16 }} /> : <ArrowDownward sx={{ fontSize: 16 }} />}
+            <span className="text-sm font-bold">{change}</span>
+          </div>
+        )}
+      </div>
+      <h3 className="text-white/70 text-sm font-medium mb-2">{title}</h3>
+      <p className="text-white text-3xl font-bold">{value}</p>
+    </div>
   );
 
-  const renderCharts = () => {
-    if (!stats.activityStats) return null;
-
-    const statusData = stats.activityStats.statusDistribution.map((item) => ({
-      name: item._id === "active" ? "Active Users" : "Blocked Users",
-      value: item.count,
-      fill: item._id === "active" ? "#4caf50" : "#f44336", // Green for active, Red for blocked
-    }));
-
-    const activityData = [
-      {
-        name: "Low Activity (0-4 posts)",
-        value: stats.activityStats.activityLevels[0]?.count || 0,
-      },
-      {
-        name: "Medium Activity (5-19 posts)",
-        value: stats.activityStats.activityLevels[1]?.count || 0,
-      },
-      {
-        name: "High Activity (20+ posts)",
-        value: stats.activityStats.activityLevels[2]?.count || 0,
-      },
-    ];
-
-    return (
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6">User Growth Over Time</Typography>
-                <Tooltip title="Refresh data">
-                  <IconButton size="small" onClick={fetchStats}>
-                    <RefreshIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={stats.userGrowth}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" />
-                  <YAxis />
-                  <RechartsTooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6">Active vs Blocked Users</Typography>
-                <Tooltip title="Refresh data">
-                  <IconButton size="small" onClick={fetchStats}>
-                    <RefreshIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={statusData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis allowDecimals={false} />
-                  <RechartsTooltip
-                    formatter={(value, name) => [value, "Count"]}
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                  <Bar dataKey="value">
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 3,
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={{
-                      width: 16,
-                      height: 16,
-                      backgroundColor: "#4caf50",
-                      borderRadius: 1,
-                    }}
-                  />
-                  <Typography variant="caption">Active</Typography>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={{
-                      width: 16,
-                      height: 16,
-                      backgroundColor: "#f44336",
-                      borderRadius: 1,
-                    }}
-                  />
-                  <Typography variant="caption">Blocked</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                User Status Distribution
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    label={({ name, value, percent }) =>
-                      `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
-                    }
-                    outerRadius={80}
-                    dataKey="value"
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    formatter={(value, name) => [value, "Users"]}
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                User Activity Distribution
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={activityData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {activityData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Dashboard Overview
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box textAlign="center">
-                    <PersonIcon color="primary" sx={{ fontSize: 40 }} />
-                    <Typography variant="h4">{users.length}</Typography>
-                    <Typography variant="body2">Total Users</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="center">
-                    <PeopleIcon color="error" sx={{ fontSize: 40 }} />
-                    <Typography variant="h4">{blockedUsers.length}</Typography>
-                    <Typography variant="body2">Blocked Users</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="center">
-                    <TrendingUpIcon color="success" sx={{ fontSize: 40 }} />
-                    <Typography variant="h4">
-                      {users.filter((u) => u.status === "active").length}
-                    </Typography>
-                    <Typography variant="body2">Active Users</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="center">
-                    <AssessmentIcon color="info" sx={{ fontSize: 40 }} />
-                    <Typography variant="h4">
-                      {users.reduce((sum, user) => sum + user.postsCount, 0)}
-                    </Typography>
-                    <Typography variant="body2">Total Posts</Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
+  // Chart Card Wrapper
+  const ChartCard = ({ title, children, action }) => (
+    <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-bold text-white">{title}</h3>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="60vh"
-      >
-        <CircularProgress />
-      </Box>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <CircularProgress size={60} sx={{ color: '#3b82f6' }} />
+          <p className="text-white mt-4 text-lg">Loading Dashboard...</p>
+        </div>
+      </div>
     );
   }
 
+  const activeUsers = users.filter((u) => u.status === "active").length;
+  const totalPosts = users.reduce((sum, user) => sum + (user.postsCount || 0), 0);
+
   return (
-    <Box sx={{ backgroundColor: "#f5f5f5", minHeight: "100vh", width: "100%" }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <AdminNavbar />
-      <Box sx={{ p: 3, maxWidth: "100%", width: "100%", margin: 0 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-            backgroundColor: "white",
-            p: 2,
-            borderRadius: 2,
-            boxShadow: 1,
-          }}
-        >
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{ fontWeight: "bold", color: "#1976d2" }}
-          >
-            Admin Dashboard
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<RefreshIcon />}
-            onClick={fetchData}
-            sx={{
-              backgroundColor: "#1976d2",
-              "&:hover": {
-                backgroundColor: "#1565c0",
-              },
-            }}
-          >
-            Refresh
-          </Button>
-        </Box>
-
-        <Box
-          sx={{
-            borderBottom: 2,
-            borderColor: "#1976d2",
-            mb: 2,
-            backgroundColor: "white",
-            borderRadius: "8px 8px 0 0",
-            boxShadow: 1,
-          }}
-        >
-          <Tabs
-            value={tabValue}
-            onChange={(e, newValue) => setTabValue(newValue)}
-            sx={{
-              "& .MuiTab-root": {
-                fontSize: "16px",
-                fontWeight: 600,
-                textTransform: "none",
-                minHeight: 60,
-                "&:hover": {
-                  backgroundColor: "rgba(25, 118, 210, 0.08)",
-                },
-              },
-              "& .Mui-selected": {
-                color: "#1976d2",
-              },
-            }}
-          >
-            <Tab label="All Users" />
-            <Tab label="Blocked Users" />
-            <Tab label="Analytics" />
-          </Tabs>
-        </Box>
-
-        <TabPanel value={tabValue} index={0}>
-          <Box
-            sx={{
-              backgroundColor: "white",
-              p: 3,
-              borderRadius: 2,
-              boxShadow: 2,
-            }}
-          >
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{ fontWeight: "bold", color: "#1976d2", mb: 3 }}
+      
+      <div className="pt-20 px-6 pb-8">
+        {/* Header with Tabs */}
+        <div className="max-w-7xl mx-auto mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">Dashboard</h1>
+              <p className="text-slate-400">Welcome back, here's what's happening</p>
+            </div>
+            <button
+              onClick={fetchData}
+              className="mt-4 md:mt-0 flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200"
             >
-              All Users ({users.length})
-            </Typography>
-            {renderUserTable(users)}
-          </Box>
-        </TabPanel>
+              <RefreshIcon />
+              <span className="font-medium">Refresh</span>
+            </button>
+          </div>
 
-        <TabPanel value={tabValue} index={1}>
-          <Box
-            sx={{
-              backgroundColor: "white",
-              p: 3,
-              borderRadius: 2,
-              boxShadow: 2,
-            }}
-          >
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{ fontWeight: "bold", color: "#d32f2f", mb: 3 }}
-            >
-              Blocked Users ({blockedUsers.length})
-            </Typography>
-            {blockedUsers.length === 0 ? (
-              <Alert severity="info" sx={{ fontSize: "16px" }}>
-                No blocked users found.
-              </Alert>
-            ) : (
-              renderUserTable(blockedUsers)
-            )}
-          </Box>
-        </TabPanel>
+          {/* Tabs */}
+          <div className="flex space-x-2 bg-slate-800/50 backdrop-blur-xl p-2 rounded-xl border border-slate-700/50">
+            {[
+              { id: "overview", label: "Overview" },
+              { id: "users", label: "All Users" },
+              { id: "blocked", label: "Blocked Users" },
+              { id: "analytics", label: "Analytics" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                    : "text-slate-400 hover:text-white hover:bg-slate-700/50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <TabPanel value={tabValue} index={2}>
-          <Box
-            sx={{
-              backgroundColor: "white",
-              p: 3,
-              borderRadius: 2,
-              boxShadow: 2,
-            }}
-          >
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{ fontWeight: "bold", color: "#1976d2", mb: 3 }}
-            >
-              Analytics & Statistics
-            </Typography>
+        <div className="max-w-7xl mx-auto">
+          {/* Overview Tab */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard
+                  title="Total Users"
+                  value={users.length.toLocaleString()}
+                  change="12.5%"
+                  trend="up"
+                  icon={PersonIcon}
+                  gradient="from-blue-600 to-blue-700"
+                />
+                <StatCard
+                  title="Active Users"
+                  value={activeUsers.toLocaleString()}
+                  change="8.2%"
+                  trend="up"
+                  icon={TrendingUpIcon}
+                  gradient="from-green-600 to-green-700"
+                />
+                <StatCard
+                  title="Blocked Users"
+                  value={blockedUsers.length.toLocaleString()}
+                  change="3.1%"
+                  trend="down"
+                  icon={BlockIcon}
+                  gradient="from-red-600 to-red-700"
+                />
+                <StatCard
+                  title="Total Posts"
+                  value={totalPosts.toLocaleString()}
+                  change="23.7%"
+                  trend="up"
+                  icon={AssessmentIcon}
+                  gradient="from-purple-600 to-purple-700"
+                />
+              </div>
 
-            {/* Summary Stats Cards */}
-            <Grid container spacing={3} sx={{ mb: 3 }}>
-              <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ backgroundColor: "#e3f2fd" }}>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="h4" color="primary">
-                          {users.length}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Total Users
-                        </Typography>
-                      </Box>
-                      <PersonIcon
-                        sx={{
-                          fontSize: 48,
-                          color: "primary.main",
-                          opacity: 0.5,
+              {/* Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartCard title="User Growth">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={stats.userGrowth}>
+                      <defs>
+                        <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8} />
+                          <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis dataKey="label" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: "#1e293b",
+                          border: "1px solid #334155",
+                          borderRadius: "0.5rem",
+                          color: "#fff",
                         }}
                       />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ backgroundColor: "#e8f5e9" }}>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="h4" sx={{ color: "#4caf50" }}>
-                          {users.filter((u) => u.status === "active").length}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Active Users
-                        </Typography>
-                      </Box>
-                      <CheckCircle
-                        sx={{ fontSize: 48, color: "#4caf50", opacity: 0.5 }}
+                      <Area
+                        type="monotone"
+                        dataKey="count"
+                        stroke={CHART_COLORS.primary}
+                        fillOpacity={1}
+                        fill="url(#colorGrowth)"
                       />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </ChartCard>
 
-              <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ backgroundColor: "#ffebee" }}>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="h4" sx={{ color: "#f44336" }}>
-                          {blockedUsers.length}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Blocked Users
-                        </Typography>
-                      </Box>
-                      <BlockIcon
-                        sx={{ fontSize: 48, color: "#f44336", opacity: 0.5 }}
+                <ChartCard title="User Status Distribution">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: "Active", value: activeUsers, fill: CHART_COLORS.success },
+                          { name: "Blocked", value: blockedUsers.length, fill: CHART_COLORS.danger },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: "#1e293b",
+                          border: "1px solid #334155",
+                          borderRadius: "0.5rem",
+                          color: "#fff",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+            </div>
+          )}
 
-              <Grid item xs={12} sm={6} md={3}>
-                <Card sx={{ backgroundColor: "#fff3e0" }}>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="h4" color="warning.main">
-                          {users.reduce(
-                            (sum, user) => sum + (user.postsCount || 0),
-                            0
+          {/* Users Tab */}
+          {activeTab === "users" && (
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-900/50">
+                    <tr>
+                      {["User", "Email", "Posts", "Followers", "Status", "Verification", "Actions"].map((header) => (
+                        <th key={header} className="px-6 py-4 text-left text-sm font-semibold text-slate-300">
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700/50">
+                    {users.map((user) => (
+                      <tr key={user._id} className="hover:bg-slate-700/30 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-3">
+                            <Avatar src={user.avatar} alt={user.username} sx={{ width: 40, height: 40 }} />
+                            <div>
+                              <p className="font-medium text-white">{user.username}</p>
+                              <p className="text-sm text-slate-400">{user.name}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-slate-300">{user.email}</td>
+                        <td className="px-6 py-4 text-slate-300">{user.postsCount || 0}</td>
+                        <td className="px-6 py-4 text-slate-300">{user.followersCount || 0}</td>
+                        <td className="px-6 py-4">
+                          <Chip
+                            label={user.status}
+                            size="small"
+                            sx={{
+                              backgroundColor: user.status === "active" ? "#10b981" : "#ef4444",
+                              color: "white",
+                              fontWeight: "bold",
+                            }}
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          {user.verificationStatus ? (
+                            <Chip
+                              label={user.verificationStatus === "real" ? "Verified" : "Flagged"}
+                              size="small"
+                              icon={user.verificationStatus === "real" ? <VerifiedUserIcon /> : <WarningIcon />}
+                              sx={{
+                                backgroundColor: user.verificationStatus === "real" ? "#10b981" : "#ef4444",
+                                color: "white",
+                              }}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => handleVerifyProfile(user._id)}
+                              disabled={verifyingUsers[user._id]}
+                              className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              {verifyingUsers[user._id] ? "Verifying..." : "Verify"}
+                            </button>
                           )}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Total Posts
-                        </Typography>
-                      </Box>
-                      <AssessmentIcon
-                        sx={{
-                          fontSize: 48,
-                          color: "warning.main",
-                          opacity: 0.5,
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() =>
+                                user.status === "active"
+                                  ? handleBlockUser(user._id)
+                                  : handleUnblockUser(user._id)
+                              }
+                              className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                                user.status === "active"
+                                  ? "bg-yellow-600 hover:bg-yellow-700"
+                                  : "bg-green-600 hover:bg-green-700"
+                              } text-white`}
+                            >
+                              {user.status === "active" ? "Block" : "Unblock"}
+                            </button>
+                            <button
+                              onClick={() => setDeleteDialog({ open: true, user })}
+                              className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Blocked Users Tab */}
+          {activeTab === "blocked" && (
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
+              <h2 className="text-2xl font-bold text-white mb-6">
+                Blocked Users ({blockedUsers.length})
+              </h2>
+              {blockedUsers.length === 0 ? (
+                <p className="text-slate-400 text-center py-12">No blocked users found</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {blockedUsers.map((user) => (
+                    <div
+                      key={user._id}
+                      className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 hover:border-slate-600 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3 mb-4">
+                        <Avatar src={user.avatar} alt={user.username} sx={{ width: 50, height: 50 }} />
+                        <div className="flex-1">
+                          <p className="font-medium text-white">{user.username}</p>
+                          <p className="text-sm text-slate-400">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleUnblockUser(user._id)}
+                          className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
+                        >
+                          Unblock
+                        </button>
+                        <button
+                          onClick={() => setDeleteDialog({ open: true, user })}
+                          className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Analytics Tab */}
+          {activeTab === "analytics" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartCard title="Monthly Activity">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.userGrowth}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis dataKey="label" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: "#1e293b",
+                          border: "1px solid #334155",
+                          borderRadius: "0.5rem",
+                          color: "#fff",
                         }}
                       />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+                      <Bar dataKey="count" fill={CHART_COLORS.purple} radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
 
-            {renderCharts()}
-          </Box>
-        </TabPanel>
+                <ChartCard title="User Engagement">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={stats.userGrowth}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis dataKey="label" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: "#1e293b",
+                          border: "1px solid #334155",
+                          borderRadius: "0.5rem",
+                          color: "#fff",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="count"
+                        stroke={CHART_COLORS.pink}
+                        strokeWidth={3}
+                        dot={{ fill: CHART_COLORS.pink, r: 5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
-        <Dialog
-          open={deleteDialog.open}
-          onClose={() => setDeleteDialog({ open: false, user: null })}
-          PaperProps={{
-            sx: {
-              borderRadius: 2,
-              padding: 1,
-            },
-          }}
-        >
-          <DialogTitle
-            sx={{
-              fontWeight: "bold",
-              fontSize: "20px",
-              color: "#d32f2f",
-              borderBottom: "2px solid #f5f5f5",
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, user: null })}
+        PaperProps={{
+          style: {
+            backgroundColor: "#1e293b",
+            borderRadius: "1rem",
+            border: "1px solid #334155",
+          },
+        }}
+      >
+        <DialogTitle style={{ color: "#fff", fontWeight: "bold" }}>
+          Delete User
+        </DialogTitle>
+        <DialogContent>
+          <p className="text-slate-300">
+            Are you sure you want to delete <strong>{deleteDialog.user?.username}</strong>?
+            This action cannot be undone.
+          </p>
+        </DialogContent>
+        <DialogActions style={{ padding: "16px 24px" }}>
+          <Button
+            onClick={() => setDeleteDialog({ open: false, user: null })}
+            style={{ color: "#94a3b8" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteUser}
+            variant="contained"
+            style={{
+              backgroundColor: "#ef4444",
+              color: "#fff",
             }}
           >
-            ⚠️ Delete User
-          </DialogTitle>
-          <DialogContent sx={{ mt: 2 }}>
-            <Typography sx={{ fontSize: "16px", lineHeight: 1.6 }}>
-              Are you sure you want to permanently delete user{" "}
-              <strong>"{deleteDialog.user?.username}"</strong>?
-              <br />
-              <br />
-              This action cannot be undone and will remove all associated data
-              including:
-            </Typography>
-            <ul style={{ marginTop: "10px", color: "#666" }}>
-              <li>Posts and stories</li>
-              <li>Comments and likes</li>
-              <li>Follower relationships</li>
-              <li>All user data</li>
-            </ul>
-          </DialogContent>
-          <DialogActions sx={{ p: 2, gap: 1 }}>
-            <Button
-              onClick={() => setDeleteDialog({ open: false, user: null })}
-              variant="outlined"
-              sx={{
-                minWidth: 100,
-                fontWeight: "bold",
-                borderWidth: 2,
-                "&:hover": { borderWidth: 2 },
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDeleteUser}
-              color="error"
-              variant="contained"
-              sx={{
-                minWidth: 100,
-                fontWeight: "bold",
-                "&:hover": {
-                  backgroundColor: "#c62828",
-                },
-              }}
-            >
-              Delete Permanently
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Box>
-    </Box>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 }

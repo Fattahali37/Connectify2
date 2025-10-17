@@ -1,33 +1,25 @@
 .home {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    padding: 18px 0;
-    background-color: var(--bg-primary);
+    @apply w-full flex flex-row justify-evenly py-5 bg-dark-primary;
 }
 
 .left-home {
-    width: 55%;
-    display: flex;
-    flex-direction: column;
-    border-radius: 3px;
+    @apply w-full md:w-3/5 lg:w-[55%] flex flex-col rounded;
 }
 
 .right-home {
-    width: 28%;
-    height: 50px;
+    @apply w-[28%] hidden lg:block;
 }
 
 .stories {
-    width: 100%;
-    background-color: var(--bg-primary);
-    margin-bottom: 15px;
-    height: 109px;
-    border-radius: 7px;
-    border: 1.7px solid var(--border);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    overflow: scroll;
+    @apply w-full bg-dark-primary mb-4 h-28 rounded-lg border-2 border-dark-border flex flex-row items-center overflow-x-auto;
+}
+
+@media screen and (max-width: 850px) {
+    .home {
+        @apply flex-col;
+    }
+    
+    .left-home {
+        @apply w-full;
+    }
 }

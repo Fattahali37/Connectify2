@@ -1,128 +1,144 @@
-import React, { useState, useContext } from 'react';
-import {
-  Box,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-  CircularProgress,
-  Container
-} from '@mui/material';
-import { AdminAuthContext } from '../../context/AdminAuth';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from "react";
+import { AdminAuthContext } from "../../context/AdminAuth";
+import { useNavigate } from "react-router-dom";
+import { Lock, Person, Dashboard } from "@mui/icons-material";
+import { CircularProgress } from "@mui/material";
 
 export default function AdminLogin() {
-  const [credentials, setCredentials] = useState({ text: '', password: '' });
+  const [credentials, setCredentials] = useState({ text: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { loginAdmin } = useContext(AdminAuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     const result = await loginAdmin(credentials);
-    
+
     if (result.success) {
-      navigate('/admin/dashboard');
+      navigate("/admin/dashboard");
     } else {
       setError(result.message);
     }
-    
+
     setLoading(false);
   };
 
   const handleChange = (e) => {
     setCredentials({
       ...credentials,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            width: '100%',
-            maxWidth: 400
-          }}
-        >
-          <Box textAlign="center" mb={3}>
-            <Typography variant="h4" component="h1" gutterBottom>
-              Admin Login
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Enter your admin credentials to access the dashboard
-            </Typography>
-          </Box>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute w-96 h-96 bg-blue-600/10 rounded-full blur-3xl -top-48 -left-48 animate-pulse"></div>
+        <div className="absolute w-96 h-96 bg-purple-600/10 rounded-full blur-3xl -bottom-48 -right-48 animate-pulse delay-1000"></div>
+      </div>
 
+      <div className="relative w-full max-w-md">
+        {/* Logo/Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl shadow-blue-500/30 mb-6">
+            <Dashboard sx={{ fontSize: 40, color: "white" }} />
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">Admin Portal</h1>
+          <p className="text-slate-400">Sign in to access the dashboard</p>
+        </div>
+
+        {/* Login Card */}
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl">
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
           )}
 
-          <Box component="form" onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Username"
-              name="text"
-              value={credentials.text}
-              onChange={handleChange}
-              margin="normal"
-              required
-              autoFocus
-            />
-            
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={credentials.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Username Field */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Username
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Person sx={{ fontSize: 20, color: "#94a3b8" }} />
+                </div>
+                <input
+                  type="text"
+                  name="text"
+                  value={credentials.text}
+                  onChange={handleChange}
+                  required
+                  autoFocus
+                  className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Enter admin username"
+                />
+              </div>
+            </div>
 
-            <Button
+            {/* Password Field */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock sx={{ fontSize: 20, color: "#94a3b8" }} />
+                </div>
+                <input
+                  type="password"
+                  name="password"
+                  value={credentials.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Enter admin password"
+                />
+              </div>
+            </div>
+
+            {/* Login Button */}
+            <button
               type="submit"
-              fullWidth
-              variant="contained"
               disabled={loading}
-              sx={{ mt: 3, mb: 2 }}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {loading ? <CircularProgress size={24} /> : 'Login as Admin'}
-            </Button>
-          </Box>
+              {loading ? (
+                <CircularProgress size={24} sx={{ color: "white" }} />
+              ) : (
+                "Login to Dashboard"
+              )}
+            </button>
+          </form>
 
-          <Box textAlign="center" mt={2}>
-            <Typography variant="body2" color="text.secondary">
-              Not an admin?{' '}
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => navigate('/login')}
+          {/* Footer Links */}
+          <div className="mt-6 pt-6 border-t border-slate-700/50 text-center">
+            <p className="text-sm text-slate-400">
+              Not an admin?{" "}
+              <button
+                onClick={() => navigate("/login")}
+                className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
               >
                 Go to User Login
-              </Button>
-            </Typography>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+              </button>
+            </p>
+          </div>
+        </div>
+
+        {/* Security Notice */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-slate-500">
+            🔒 Secure admin access • Protected by encryption
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
