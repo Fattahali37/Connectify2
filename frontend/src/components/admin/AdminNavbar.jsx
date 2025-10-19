@@ -23,13 +23,28 @@ export default function AdminNavbar() {
         <div className="flex items-center justify-between">
           {/* Left - Logo & Title */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-1.5 rounded-xl shadow-lg shadow-blue-500/20">
-              <img
-                src="/logoround.png"
-                alt="Connectify Logo"
-                className="w-10 h-10 rounded-lg object-contain"
-              />
-            </div>
+            <img
+              src="/logoround.png"
+              alt="Connectify Logo"
+              style={{
+                height: "48px",
+                width: "auto",
+                filter: "drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3))",
+                transition: "transform 0.3s ease, filter 0.3s ease",
+                cursor: "pointer",
+              }}
+              onClick={() => navigate("/admin/dashboard")}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.08)";
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 6px 16px rgba(59, 130, 246, 0.5))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3))";
+              }}
+            />
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight">
                 Connectify Admin

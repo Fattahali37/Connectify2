@@ -45,11 +45,26 @@ export default function AdminLogin() {
       <div className="relative w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl shadow-blue-500/30 mb-6 p-2">
+          <div className="flex justify-center mb-6">
             <img
               src="/logoround.png"
               alt="Connectify Logo"
-              className="w-full h-full rounded-xl object-contain"
+              style={{
+                height: "80px",
+                width: "auto",
+                filter: "drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3))",
+                transition: "transform 0.3s ease, filter 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.08)";
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 6px 16px rgba(59, 130, 246, 0.5))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3))";
+              }}
             />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">Admin Portal</h1>
