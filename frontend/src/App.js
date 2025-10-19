@@ -26,7 +26,7 @@ import AuthRedirect from "./pages/AuthRedirect";
 import "./theme.css";
 
 export const socket = io(url, {
-  transports: ['websocket', 'polling'],
+  transports: ["websocket", "polling"],
   reconnectionDelay: 1000,
   reconnection: true,
   reconnectionAttempts: 10,
@@ -38,9 +38,9 @@ function App() {
   const [auth, setAuth] = useState(JSON.parse(localStorage.getItem("user")));
   const [active, setActive] = useState("home");
   const [stories, setStories] = useState([]);
-  
+
   // Check if current route is admin route
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   const throwErr = (err) => {
     toast.error(err, {
@@ -75,7 +75,7 @@ function App() {
 
   useEffect(() => {
     if (!auth) return;
-    
+
     const handleConnect = () => {
       console.log("Socket connected");
       socket.emit("online", { uid: auth._id });
@@ -87,7 +87,7 @@ function App() {
 
     socket.on("connect", handleConnect);
     socket.on("connect_error", handleConnectError);
-    
+
     // If already connected, emit online status
     if (socket.connected) {
       socket.emit("online", { uid: auth._id });
@@ -131,7 +131,14 @@ function App() {
   return (
     <AdminAuthProvider>
       <AuthContext.Provider
-        value={{ auth, setAuth, throwErr, throwSuccess, handleActive, findStory }}
+        value={{
+          auth,
+          setAuth,
+          throwErr,
+          throwSuccess,
+          handleActive,
+          findStory,
+        }}
       >
         <Toaster />
         {auth && !isAdminRoute && <Sidebar active={active} />}
@@ -213,7 +220,7 @@ function App() {
               </Private>
             }
           />
-          
+
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route

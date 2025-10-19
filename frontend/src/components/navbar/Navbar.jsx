@@ -258,7 +258,8 @@ export const Navbar = ({ active }) => {
                         style={{
                           border: "none",
                           outline: "none",
-                          background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
+                          background:
+                            "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                           padding: "3.5px 9px",
                           borderRadius: "8px",
                           color: "white",
@@ -306,7 +307,8 @@ export const Navbar = ({ active }) => {
                       style={{
                         border: "none",
                         outline: "none",
-                        background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
+                        background:
+                          "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                         padding: "3.5px 9px",
                         borderRadius: "8px",
                         color: "white",

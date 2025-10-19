@@ -433,18 +433,18 @@ export const Sidebar = ({ active }) => {
 
       {/* Search Panel Backdrop - covers content area only */}
       {showSearch && (
-        <div 
+        <div
           onClick={() => setShowSearch(false)}
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
-            left: '280px',
+            left: "280px",
             right: 0,
             bottom: 0,
-            background: 'rgba(0, 0, 0, 0.5)',
-            backdropFilter: 'blur(4px)',
+            background: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(4px)",
             zIndex: 1100,
-            animation: 'fadeIn 0.3s ease'
+            animation: "fadeIn 0.3s ease",
           }}
         />
       )}
@@ -481,7 +481,8 @@ export const Sidebar = ({ active }) => {
             minHeight: "30px",
             maxHeight: "400px",
             mt: 1.5,
-            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
             backdropFilter: "blur(16px)",
             border: "1px solid rgba(148, 163, 184, 0.2)",
             color: "rgba(226, 232, 240, 0.95)",
@@ -523,7 +524,8 @@ export const Sidebar = ({ active }) => {
             filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
             width: "250px",
             mt: 1.5,
-            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
             backdropFilter: "blur(16px)",
             border: "1px solid rgba(148, 163, 184, 0.2)",
             color: "rgba(226, 232, 240, 0.95)",
@@ -614,7 +616,8 @@ export const Sidebar = ({ active }) => {
         PaperProps={{
           sx: {
             borderRadius: "16px",
-            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
             backdropFilter: "blur(16px)",
             border: "1px solid rgba(148, 163, 184, 0.2)",
             color: "rgba(226, 232, 240, 0.95)",
@@ -639,7 +642,12 @@ export const Sidebar = ({ active }) => {
         >
           {"Create new post"}
         </DialogTitle>
-        <Divider style={{ marginTop: "-10px", backgroundColor: "rgba(148, 163, 184, 0.2)" }} />
+        <Divider
+          style={{
+            marginTop: "-10px",
+            backgroundColor: "rgba(148, 163, 184, 0.2)",
+          }}
+        />
         <DialogContent>
           <div
             className="post"
@@ -715,7 +723,8 @@ export const Sidebar = ({ active }) => {
                     style={{
                       border: "none",
                       outline: "none",
-                      background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
+                      background:
+                        "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                       padding: "8px 16px",
                       borderRadius: "8px",
                       color: "white",
@@ -772,7 +781,8 @@ export const Sidebar = ({ active }) => {
                     padding: "8px 16px",
                     borderRadius: "8px",
                     color: "white",
-                    background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
+                    background:
+                      "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                     fontSize: "15px",
                     cursor: "pointer",
                     fontWeight: "bold",
