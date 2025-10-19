@@ -229,7 +229,10 @@ export const Sidebar = ({ active }) => {
       if (res.data) {
         context.throwSuccess("Posted");
         handleCloseDialog();
-        context.newpost(res.data);
+        // Only call newpost if the function exists (when on Home page)
+        if (typeof context.newpost === "function") {
+          context.newpost(res.data);
+        }
       }
     });
   };

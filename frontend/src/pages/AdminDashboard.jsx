@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import {
   Person as PersonIcon,
-  People as PeopleIcon,
   TrendingUp as TrendingUpIcon,
   Assessment as AssessmentIcon,
   Block as BlockIcon,
-  CheckCircle as UnblockIcon,
-  Delete as DeleteIcon,
   VerifiedUser as VerifiedUserIcon,
   Warning as WarningIcon,
-  HelpOutlineIcon,
   Refresh as RefreshIcon,
   ArrowUpward,
   ArrowDownward,
@@ -26,7 +22,6 @@ import {
   Bar,
   PieChart,
   Pie,
-  Cell,
   Area,
   AreaChart,
 } from "recharts";
@@ -43,10 +38,9 @@ import {
   CircularProgress,
   Avatar,
   Chip,
-  Tooltip,
 } from "@mui/material";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b"];
+// Color tokens (kept as hex for charts but UI uses CSS variables)
 const CHART_COLORS = {
   primary: "#3b82f6",
   success: "#10b981",
@@ -254,10 +248,27 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div
+        className="min-h-screen"
+        style={{
+          background:
+            "linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div className="text-center">
-          <CircularProgress size={60} sx={{ color: "#3b82f6" }} />
-          <p className="text-white mt-4 text-lg">Loading Dashboard...</p>
+          <CircularProgress size={60} sx={{ color: "var(--text-primary)" }} />
+          <p
+            style={{
+              color: "var(--text-primary)",
+              marginTop: 16,
+              fontSize: 18,
+            }}
+          >
+            Loading Dashboard...
+          </p>
         </div>
       </div>
     );
@@ -285,10 +296,21 @@ export default function AdminDashboard() {
             </div>
             <button
               onClick={fetchData}
-              className="mt-4 md:mt-0 flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200"
+              style={{
+                marginTop: 16,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "12px 20px",
+                background: "var(--gradient-primary)",
+                color: "white",
+                borderRadius: 12,
+                boxShadow: "0 12px 40px rgba(59,130,246,0.12)",
+                transition: "all 0.2s",
+              }}
             >
               <RefreshIcon />
-              <span className="font-medium">Refresh</span>
+              <span style={{ fontWeight: 600 }}>Refresh</span>
             </button>
           </div>
 
@@ -303,11 +325,19 @@ export default function AdminDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                    : "text-slate-400 hover:text-white hover:bg-slate-700/50"
-                }`}
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  transition: "all 0.15s",
+                  background:
+                    activeTab === tab.id
+                      ? "var(--gradient-primary)"
+                      : "transparent",
+                  color:
+                    activeTab === tab.id ? "white" : "var(--text-secondary)",
+                }}
               >
                 {tab.label}
               </button>
@@ -385,10 +415,10 @@ export default function AdminDashboard() {
                       <YAxis stroke="#94a3b8" />
                       <RechartsTooltip
                         contentStyle={{
-                          backgroundColor: "#1e293b",
-                          border: "1px solid #334155",
+                          backgroundColor: "var(--bg-primary)",
+                          border: "1px solid var(--border)",
                           borderRadius: "0.5rem",
-                          color: "#fff",
+                          color: "var(--text-primary)",
                         }}
                       />
                       <Area
@@ -507,8 +537,8 @@ export default function AdminDashboard() {
                             sx={{
                               backgroundColor:
                                 user.status === "active"
-                                  ? "#10b981"
-                                  : "#ef4444",
+                                  ? CHART_COLORS.success
+                                  : CHART_COLORS.danger,
                               color: "white",
                               fontWeight: "bold",
                             }}
@@ -533,8 +563,8 @@ export default function AdminDashboard() {
                               sx={{
                                 backgroundColor:
                                   user.verificationStatus === "real"
-                                    ? "#10b981"
-                                    : "#ef4444",
+                                    ? CHART_COLORS.success
+                                    : CHART_COLORS.danger,
                                 color: "white",
                               }}
                             />
@@ -542,7 +572,14 @@ export default function AdminDashboard() {
                             <button
                               onClick={() => handleVerifyProfile(user._id)}
                               disabled={verifyingUsers[user._id]}
-                              className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                              style={{
+                                padding: "6px 10px",
+                                fontSize: 12,
+                                borderRadius: 8,
+                                background: "var(--gradient-primary)",
+                                color: "white",
+                                border: "none",
+                              }}
                             >
                               {verifyingUsers[user._id]
                                 ? "Verifying..."
@@ -558,11 +595,17 @@ export default function AdminDashboard() {
                                   ? handleBlockUser(user._id)
                                   : handleUnblockUser(user._id)
                               }
-                              className={`px-3 py-1 text-xs rounded-lg transition-colors ${
-                                user.status === "active"
-                                  ? "bg-yellow-600 hover:bg-yellow-700"
-                                  : "bg-green-600 hover:bg-green-700"
-                              } text-white`}
+                              style={{
+                                padding: "6px 10px",
+                                fontSize: 12,
+                                borderRadius: 8,
+                                background:
+                                  user.status === "active"
+                                    ? "linear-gradient(135deg, rgb(234,179,8) 0%, rgb(202,138,4) 100%)"
+                                    : "linear-gradient(135deg, rgb(16,185,129) 0%, rgb(5,150,105) 100%)",
+                                color: "white",
+                                border: "none",
+                              }}
                             >
                               {user.status === "active" ? "Block" : "Unblock"}
                             </button>
@@ -570,7 +613,14 @@ export default function AdminDashboard() {
                               onClick={() =>
                                 setDeleteDialog({ open: true, user })
                               }
-                              className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                              style={{
+                                padding: "6px 10px",
+                                fontSize: 12,
+                                borderRadius: 8,
+                                background: "var(--gradient-danger)",
+                                color: "white",
+                                border: "none",
+                              }}
                             >
                               Delete
                             </button>
@@ -698,9 +748,9 @@ export default function AdminDashboard() {
         onClose={() => setDeleteDialog({ open: false, user: null })}
         PaperProps={{
           style: {
-            backgroundColor: "#1e293b",
+            backgroundColor: "var(--bg-primary)",
             borderRadius: "1rem",
-            border: "1px solid #334155",
+            border: "1px solid var(--border)",
           },
         }}
       >
@@ -708,16 +758,18 @@ export default function AdminDashboard() {
           Delete User
         </DialogTitle>
         <DialogContent>
-          <p className="text-slate-300">
+          <p style={{ color: "var(--text-secondary)" }}>
             Are you sure you want to delete{" "}
-            <strong>{deleteDialog.user?.username}</strong>? This action cannot
-            be undone.
+            <strong style={{ color: "var(--text-primary)" }}>
+              {deleteDialog.user?.username}
+            </strong>
+            ? This action cannot be undone.
           </p>
         </DialogContent>
         <DialogActions style={{ padding: "16px 24px" }}>
           <Button
             onClick={() => setDeleteDialog({ open: false, user: null })}
-            style={{ color: "#94a3b8" }}
+            style={{ color: "var(--text-secondary)" }}
           >
             Cancel
           </Button>
@@ -725,8 +777,8 @@ export default function AdminDashboard() {
             onClick={handleDeleteUser}
             variant="contained"
             style={{
-              backgroundColor: "#ef4444",
-              color: "#fff",
+              background: "var(--gradient-danger)",
+              color: "white",
             }}
           >
             Delete
