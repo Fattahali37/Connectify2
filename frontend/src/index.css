@@ -6,13 +6,22 @@
 
 @layer base {
   :root {
-    --border: #262626;
-    --bg-primary: #000000;
-    --bg-secondary: #0a0a0a;
-    --bg-tertiary: #1a1a1a;
-    --text-primary: #ffffff;
-    --text-secondary: #a8a8a8;
-    --text-tertiary: #737373;
+    --border: rgba(148, 163, 184, 0.2);
+    --bg-primary: rgba(15, 23, 42, 0.95);
+    --bg-secondary: rgba(30, 41, 59, 0.95);
+    --bg-tertiary: rgba(51, 65, 85, 0.95);
+    --text-primary: rgba(226, 232, 240, 0.95);
+    --text-secondary: rgba(148, 163, 184, 0.9);
+    --text-tertiary: rgba(100, 116, 139, 0.9);
+    
+    /* Gradient theme colors */
+    --gradient-primary: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%);
+    --gradient-primary-hover: linear-gradient(135deg, rgb(37, 99, 235) 0%, rgb(109, 40, 217) 100%);
+    --gradient-slate: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    --gradient-slate-light: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    --gradient-success: linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(21, 128, 61) 100%);
+    --gradient-danger: linear-gradient(135deg, rgb(239, 68, 68) 0%, rgb(220, 38, 38) 100%);
+    --gradient-warning: linear-gradient(135deg, rgb(234, 179, 8) 0%, rgb(202, 138, 4) 100%);
   }
 
   * {
@@ -24,7 +33,9 @@
   }
 
   body {
-    @apply relative h-screen w-screen bg-dark-primary text-dark-text-primary overflow-x-hidden;
+    @apply relative h-screen w-screen text-dark-text-primary overflow-x-hidden;
+    background: linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%);
+    background-attachment: fixed;
   }
 
   a {
@@ -104,7 +115,10 @@
   .login-box,
   .signup-box,
   .forgot-box {
-    @apply bg-dark-tertiary border border-dark-border flex flex-col items-center pt-6 rounded-lg;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    @apply flex flex-col items-center pt-6 rounded-lg;
   }
 
   .login-box {
@@ -120,11 +134,15 @@
   }
 
   .separate {
-    @apply absolute bottom-0 border-t border-dark-border;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    @apply absolute bottom-0;
   }
 
   .signup-action-box {
-    @apply bg-dark-tertiary border border-dark-border min-h-[70px] w-full max-w-[350px] mt-3 flex items-center justify-center rounded-lg;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    @apply min-h-[70px] w-full max-w-[350px] mt-3 flex items-center justify-center rounded-lg;
   }
 
   .phone {
@@ -156,6 +174,21 @@
     }
   }
 
+  @media screen and (max-width: 1200px) {
+    /* Collapsed sidebar - adjust margins */
+    .home {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
+    
+    .explore-page,
+    .chatpage,
+    .settings-container {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
+  }
+
   @media screen and (max-width: 850px) {
     .right-home {
       @apply hidden;
@@ -179,6 +212,36 @@
 
     .navbar {
       @apply w-full flex justify-center;
+    }
+    
+    /* Sidebar switches to collapsed */
+    .home {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
+    
+    .explore-page,
+    .chatpage,
+    .settings-container {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    /* Mobile bottom nav - remove left margin */
+    .home {
+      margin-left: 0 !important;
+      width: 100% !important;
+      margin-bottom: 72px;
+    }
+    
+    .explore-page,
+    .chatpage,
+    .settings-container {
+      margin-left: 0 !important;
+      width: 100% !important;
+      margin-bottom: 72px;
     }
   }
 }

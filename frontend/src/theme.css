@@ -12,8 +12,13 @@
 }
 
 .MuiDialogContent-root {
-  background-color: var(--bg-tertiary) !important;
+  background-color: transparent !important;
   color: var(--text-primary) !important;
+}
+
+/* Ensure DialogContent doesn't override Paper gradient */
+.MuiDialog-paper .MuiDialogContent-root {
+  background: transparent !important;
 }
 
 /* Material-UI Input Fields */
@@ -35,7 +40,8 @@
 
 /* Material-UI Menu Items */
 .MuiList-root {
-  background-color: var(--bg-tertiary) !important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%) !important;
+  backdrop-filter: blur(16px) !important;
 }
 
 .MuiMenuItem-root {
@@ -43,7 +49,30 @@
 }
 
 .MuiMenuItem-root:hover {
-  background-color: var(--bg-secondary) !important;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%) !important;
+}
+
+/* Material-UI Menu Paper */
+.MuiPaper-root.MuiMenu-paper,
+.MuiPaper-root.MuiPopover-paper {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure text is visible in menus */
+.MuiMenuItem-root *,
+.MuiList-root * {
+  color: rgba(226, 232, 240, 0.95) !important;
+}
+
+.MuiMenuItem-root svg {
+  color: rgba(148, 163, 184, 0.9) !important;
+}
+
+.MuiMenuItem-root:hover svg {
+  color: rgba(59, 130, 246, 1) !important;
 }
 
 /* Material-UI Dividers */
@@ -102,4 +131,68 @@ textarea {
 input::placeholder,
 textarea::placeholder {
   color: var(--text-tertiary) !important;
+}
+
+/* IMPORTANT: Prevent black backgrounds globally */
+/* Override any black, dark gray, or default white backgrounds */
+
+/* Prevent white/black backgrounds on dialogs and modals */
+.MuiDialog-paper,
+.MuiPaper-root {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%) !important;
+  background-color: transparent !important;
+}
+
+/* Force gradient backgrounds to be respected */
+[style*="background: linear-gradient"],
+[style*="background-image: linear-gradient"] {
+  background-color: transparent !important;
+}
+
+/* IMPORTANT: Preserve gradient backgrounds - do NOT override */
+/* Elements with gradient classes should maintain their gradients */
+.bg-gradient-primary,
+.bg-gradient-to-r,
+.bg-gradient-to-br,
+.bg-gradient-to-l,
+.bg-gradient-to-tr,
+.bg-gradient-to-tl,
+.bg-gradient-to-bl,
+[class*="bg-gradient"],
+[class*="from-"],
+[style*="linear-gradient"],
+[style*="background: linear-gradient"],
+[style*="background-image: linear-gradient"] {
+  /* Explicitly prevent background overrides on gradient elements */
+  background-color: transparent !important;
+}
+
+/* Utility classes for gradient theme */
+.gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.gradient-primary-hover:hover {
+  background: var(--gradient-primary-hover);
+}
+
+.gradient-slate {
+  background: var(--gradient-slate);
+}
+
+.gradient-success {
+  background: var(--gradient-success);
+}
+
+.gradient-danger {
+  background: var(--gradient-danger);
+}
+
+.gradient-warning {
+  background: var(--gradient-warning);
+}
+
+.glass-effect {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }

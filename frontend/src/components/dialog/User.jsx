@@ -31,9 +31,9 @@ export const User = ({ user, setShow = undefined, handleClose }) => {
             {
                 user?._id !== context.auth._id ?
                     iFollow ?
-                        <button onClick={() => handleFollow()} style={{ border: 'none', outline: 'none', padding: '1px 5px', borderRadius: '5px', color: '#4e4e4e', fontSize: '13px', width: '105px', fontWeight: 'bold', marginLeft: 'auto', height: '30px' }}>UnFollow</button>
+                        <button onClick={() => handleFollow()} style={{ border: '1px solid rgba(148, 163, 184, 0.3)', outline: 'none', padding: '1px 5px', borderRadius: '8px', color: 'var(--text-secondary)', background: 'rgba(30, 41, 59, 0.5)', fontSize: '13px', width: '105px', fontWeight: 'bold', marginLeft: 'auto', height: '30px', transition: 'all 0.2s' }}>UnFollow</button>
                         :
-                        <button onClick={() => handleFollow()} style={{ border: 'none', outline: 'none', background: 'blue', padding: '1px 5px', borderRadius: '5px', color: 'white', backgroundColor: '#2196f3', fontSize: '13px', width: '105px', fontWeight: 'bold', marginLeft: 'auto', height: '30px' }}>Follow</button> : <></>
+                        <button onClick={() => handleFollow()} style={{ border: 'none', outline: 'none', background: 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)', padding: '1px 5px', borderRadius: '8px', color: 'white', fontSize: '13px', width: '105px', fontWeight: 'bold', marginLeft: 'auto', height: '30px', boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)', transition: 'all 0.2s' }}>Follow</button> : <></>
             }
 
         </div>

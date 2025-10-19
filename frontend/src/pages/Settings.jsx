@@ -116,7 +116,7 @@ export const Settings = () => {
 
     return (
         <>
-            <div className='settings-container' style={{ width: '100%', backgroundColor: 'var(--bg-primary)', marginTop: '22px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'row', minHeight: '90vh', marginBottom: '3vh' }}>
+            <div className='settings-container' style={{ width: 'calc(100% - 280px)', marginLeft: '280px', padding: '0 40px', background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)', marginTop: '22px', border: '1px solid rgba(148, 163, 184, 0.1)', display: 'flex', flexDirection: 'row', minHeight: '90vh', marginBottom: '3vh', borderRadius: '16px', backdropFilter: 'blur(16px)' }}>
                 <div className="left-sett" style={{ width: '230px', height: '100%', marginLeft: '0px', marginTop: '17px' }}>
                     <Link to="/accounts/edit" style={params.params === "edit" ? activeStyle : inactiveStyle}>Edit Profile</Link>
                     <Link to="/accounts/reset" style={params.params !== "edit" ? activeStyle : inactiveStyle}>Change Password</Link>
@@ -191,10 +191,10 @@ export const Settings = () => {
                                     {
                                         !(username && name) ?
                                             <button disabled style={{
-                                                border: 'none', outline: 'none', background: 'blue', padding: '4px 9px', borderRadius: '5px', color: 'gray', backgroundColor: 'rgb(172 194 212)', marginTop: '18px', fontSize: '13px', width: '75px', cursor: 'not-allowed'
+                                                border: 'none', outline: 'none', background: 'linear-gradient(135deg, rgb(148, 163, 184) 0%, rgb(100, 116, 139) 100%)', padding: '4px 9px', borderRadius: '8px', color: 'gray', marginTop: '18px', fontSize: '13px', width: '75px', cursor: 'not-allowed'
                                             }}>Submit</button>
                                             :
-                                            <button onClick={() => edit()} style={{ border: 'none', outline: 'none', background: 'blue', padding: '4px 9px', borderRadius: '5px', color: 'white', backgroundColor: '#2196f3', marginTop: '18px', fontSize: '13px', width: '75px', fontWeight: 'bold' }}>Submit</button>
+                                            <button onClick={() => edit()} style={{ border: 'none', outline: 'none', background: 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)', padding: '4px 9px', borderRadius: '8px', color: 'white', marginTop: '18px', fontSize: '13px', width: '75px', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)', transition: 'all 0.2s' }}>Submit</button>
                                     }
 
                                 </div>
@@ -251,10 +251,10 @@ export const Settings = () => {
                                     {
                                         !(resetPasword && resetNewPasword && resetConfirmPasword) ?
                                             <button disabled style={{
-                                                border: 'none', outline: 'none', background: 'blue', padding: '4px 9px', borderRadius: '5px', color: 'gray', backgroundColor: 'rgb(172 194 212)', marginTop: '18px', fontSize: '13px', width: '155px', cursor: 'not-allowed', height: '33px'
+                                                border: 'none', outline: 'none', background: 'linear-gradient(135deg, rgb(148, 163, 184) 0%, rgb(100, 116, 139) 100%)', padding: '4px 9px', borderRadius: '8px', color: 'gray', marginTop: '18px', fontSize: '13px', width: '155px', cursor: 'not-allowed', height: '33px'
                                             }}>Change Password</button>
                                             :
-                                            <button onClick={() => handlePasswordChange()} style={{ border: 'none', outline: 'none', background: 'blue', padding: '4px 9px', borderRadius: '5px', color: 'white', backgroundColor: '#2196f3', marginTop: '18px', fontSize: '13px', width: '155px', fontWeight: 'bold', height: '33px' }}>Change Password</button>
+                                            <button onClick={() => handlePasswordChange()} style={{ border: 'none', outline: 'none', background: 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)', padding: '4px 9px', borderRadius: '8px', color: 'white', marginTop: '18px', fontSize: '13px', width: '155px', fontWeight: 'bold', height: '33px', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)', transition: 'all 0.2s' }}>Change Password</button>
                                     }
 
                                 </div>
@@ -274,8 +274,8 @@ export const Settings = () => {
     )
 }
 const activeStyle = {
-    margin: '20px 0px', fontSize: '14.7px', color: 'var(--text-primary)', fontWeight: 'bold', borderLeft: '2px solid var(--text-primary)', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center'
+    margin: '20px 0px', fontSize: '14.7px', color: 'var(--text-primary)', fontWeight: 'bold', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)', borderLeft: '2px solid rgb(59, 130, 246)', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center', borderRadius: '0 8px 8px 0'
 }
 const inactiveStyle = {
-    margin: '20px 0px', fontSize: '14.7px', color: 'var(--text-secondary)', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center'
+    margin: '20px 0px', fontSize: '14.7px', color: 'var(--text-secondary)', paddingLeft: '22px', height: '29px', display: 'flex', alignItems: 'center', transition: 'all 0.2s'
 }

@@ -45,7 +45,7 @@ export default function ViewBox({ stories }) {
     }, [navigate, stories])
 
     return (
-        <div style={{ backgroundColor: 'gray', width: '25vw', minWidth: '445px', height: '95vh', borderRadius: '9px', position: 'absolute', top: '2.75vh', boxShadow: '0 0 200px rgba(0,0,0,0.9) inset' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)', width: '25vw', minWidth: '445px', height: '95vh', borderRadius: '16px', position: 'absolute', top: '2.75vh', boxShadow: '0 0 200px rgba(0,0,0,0.9) inset, 0 8px 32px rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(16px)' }}>
             <Box sx={{ width: '100%', color: '#656565' }}>
                 <LinearProgress sx={{ position: 'absolute', top: '0.55vh', width: '98%', left: '5px', borderRadius: '7px' }} color="inherit" variant="determinate" value={bar} />
             </Box>
@@ -71,13 +71,13 @@ export default function ViewBox({ stories }) {
             <img src={stories?.current?.data} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '9px' }} alt="" />
             {
                 stories?.prev &&
-                <button onClick={() => navigate(`/story/${stories.prev.owner}?id=${stories.prev.id}`)} style={{ position: 'absolute', left: '-39px', top: '50%', zIndex: '99999', backgroundColor: '#5b5b5b', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%', padding: '5px' }}>
+                <button onClick={() => navigate(`/story/${stories.prev.owner}?id=${stories.prev.id}`)} style={{ position: 'absolute', left: '-39px', top: '50%', zIndex: '99999', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%', padding: '5px', border: '1px solid rgba(148, 163, 184, 0.2)', transition: 'all 0.2s' }}>
                     <ArrowBackIosNewIcon sx={{ color: 'white', fontSize: '16px' }} />
                 </button>
             }
             {
                 stories?.next &&
-                <button onClick={() => navigate(`/story/${stories.next.owner}?id=${stories.next.id}`)} style={{ position: 'absolute', right: '-39px', top: '50%', zIndex: '99999', backgroundColor: '#5b5b5b', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%', padding: '5px' }}>
+                <button onClick={() => navigate(`/story/${stories.next.owner}?id=${stories.next.id}`)} style={{ position: 'absolute', right: '-39px', top: '50%', zIndex: '99999', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%', padding: '5px', border: '1px solid rgba(148, 163, 184, 0.2)', transition: 'all 0.2s' }}>
                     <ArrowForwardIosIcon sx={{ color: 'white', fontSize: '16px' }} />
                 </button>
             }

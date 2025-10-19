@@ -167,8 +167,8 @@ export const Navbar = ({ active }) => {
               <svg
                 aria-label="New post"
                 className="_ab6-"
-                color="#262626"
-                fill="#262626"
+                color="rgba(226, 232, 240, 0.95)"
+                fill="rgba(226, 232, 240, 0.95)"
                 height="24"
                 role="img"
                 viewBox="0 0 24 24"
@@ -258,14 +258,15 @@ export const Navbar = ({ active }) => {
                         style={{
                           border: "none",
                           outline: "none",
-                          background: "blue",
+                          background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                           padding: "3.5px 9px",
-                          borderRadius: "5px",
+                          borderRadius: "8px",
                           color: "white",
-                          backgroundColor: "#2196f3",
                           marginTop: "12px",
                           fontSize: "15px",
                           cursor: "pointer",
+                          boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+                          transition: "all 0.2s",
                         }}
                       >
                         Upload
@@ -277,8 +278,8 @@ export const Navbar = ({ active }) => {
                     <svg
                       style={{ marginBottom: "10px" }}
                       aria-label="Icon to represent media such as images or videos"
-                      color="#262626"
-                      fill="#262626"
+                      color="rgba(148, 163, 184, 0.9)"
+                      fill="rgba(148, 163, 184, 0.9)"
                       height="77"
                       role="img"
                       viewBox="0 0 97.6 77.3"
@@ -305,14 +306,15 @@ export const Navbar = ({ active }) => {
                       style={{
                         border: "none",
                         outline: "none",
-                        background: "blue",
+                        background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                         padding: "3.5px 9px",
-                        borderRadius: "5px",
+                        borderRadius: "8px",
                         color: "white",
-                        backgroundColor: "#2196f3",
                         marginTop: "12px",
                         fontSize: "15px",
                         cursor: "pointer",
+                        boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+                        transition: "all 0.2s",
                       }}
                     >
                       Select from computer
@@ -392,8 +394,8 @@ export const Navbar = ({ active }) => {
               <svg
                 aria-label="Notifications"
                 className="_ab6-"
-                color="#262626"
-                fill="#262626"
+                color="rgba(226, 232, 240, 0.95)"
+                fill="rgba(226, 232, 240, 0.95)"
                 height="24"
                 role="img"
                 viewBox="0 0 48 48"

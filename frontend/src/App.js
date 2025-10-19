@@ -135,9 +135,7 @@ function App() {
       >
         <Toaster />
         {auth && !isAdminRoute && <Sidebar active={active} />}
-        <div className={auth && !isAdminRoute ? "main-content" : ""}>
-          <div className={!isAdminRoute ? "width60" : ""}>
-            <Routes>
+        <Routes>
           <Route
             path="/login"
             element={
@@ -227,8 +225,6 @@ function App() {
             }
           />
         </Routes>
-          </div>
-        </div>
       </AuthContext.Provider>
     </AdminAuthProvider>
   );

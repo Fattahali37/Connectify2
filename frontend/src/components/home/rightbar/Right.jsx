@@ -279,7 +279,7 @@ export default function Right() {
                 overflowY: "auto",
                 borderRadius: "20px",
                 background:
-                  "linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%)",
+                  "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
                 backdropFilter: "blur(24px)",
                 border: "1px solid rgba(148, 163, 184, 0.2)",
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",

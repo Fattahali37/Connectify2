@@ -152,14 +152,16 @@ export default function Card({ img, likes, caption, time, comments, userId, id, 
                         <button onClick={() => handleClickMenu()} className="no-style" style={{ marginLeft: '-32px' }}>{moreIcons}</button>
                         <Dialog
                             PaperProps={{
-                                style: {
+                                sx: {
                                     minHeight: '10%',
                                     maxHeight: '55%',
                                     minWidth: '350px',
                                     maxWidth: '350px',
                                     padding: 0,
                                     overflowY: 'auto',
-                                    borderRadius: '15px'
+                                    borderRadius: '15px',
+                                    background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+                                    backdropFilter: 'blur(10px)'
                                 }
                             }}
                             onClose={handleCloseMenu}
@@ -168,20 +170,20 @@ export default function Card({ img, likes, caption, time, comments, userId, id, 
                         >
                             <div>
                                 {
-                                    userId === context.auth._id ? <div onClick={() => deletepost()} className="option" style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', textAlign: 'center', color: '#e33636', fontWeight: 'bold', cursor: 'pointer' }}>
+                                    userId === context.auth._id ? <div onClick={() => deletepost()} className="option" style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.3)', width: '100%', padding: '12px 0', fontSize: '14.17px', textAlign: 'center', color: '#e33636', fontWeight: 'bold', cursor: 'pointer' }}>
                                         Delete
                                     </div> :
-                                        <div onClick={() => unFollow()} className="option" style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', color: '#e33636', marginTop: '0px', textAlign: 'center', fontWeight: 'bold', cursor: 'pointer' }}>
+                                        <div onClick={() => unFollow()} className="option" style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.3)', width: '100%', padding: '12px 0', fontSize: '14.17px', color: '#e33636', marginTop: '0px', textAlign: 'center', fontWeight: 'bold', cursor: 'pointer' }}>
                                             Unfollow
                                         </div>
                                 }
-                                {userId === context.auth._id && <div onClick={() => handleClickOpenCaption()} className="option" style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'black', textAlign: 'center', cursor: 'pointer' }}>
+                                {userId === context.auth._id && <div onClick={() => handleClickOpenCaption()} className="option" style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.3)', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'rgba(226, 232, 240, 0.95)', textAlign: 'center', cursor: 'pointer' }}>
                                     Edit
                                 </div>}
-                                <div className="option" onClick={(() => handleCopy())} style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'black', textAlign: 'center', cursor: 'pointer' }}>
+                                <div className="option" onClick={(() => handleCopy())} style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.3)', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'rgba(226, 232, 240, 0.95)', textAlign: 'center', cursor: 'pointer' }}>
                                     Copy link
                                 </div>
-                                <div onClick={() => handleCloseMenu()} className="option" style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'black', marginBottom: '0px', textAlign: 'center', cursor: 'pointer' }}>
+                                <div onClick={() => handleCloseMenu()} className="option" style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.3)', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'rgba(226, 232, 240, 0.95)', marginBottom: '0px', textAlign: 'center', cursor: 'pointer' }}>
                                     Cancel
                                 </div>
 
@@ -277,10 +279,12 @@ export default function Card({ img, likes, caption, time, comments, userId, id, 
                     maxWidth="lg"
                     open={openDailog}
                     PaperProps={{
-                        style: {
+                        sx: {
                             minHeight: '95%',
                             maxHeight: '95%',
-                            padding: 0
+                            padding: 0,
+                            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+                            backdropFilter: 'blur(10px)'
                         }
                     }}
                     onClose={handleCloseDialog}

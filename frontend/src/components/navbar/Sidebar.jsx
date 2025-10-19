@@ -431,6 +431,24 @@ export const Sidebar = ({ active }) => {
         </div>
       </div>
 
+      {/* Search Panel Backdrop - covers content area only */}
+      {showSearch && (
+        <div 
+          onClick={() => setShowSearch(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: '280px',
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 1100,
+            animation: 'fadeIn 0.3s ease'
+          }}
+        />
+      )}
+
       {/* Search Panel */}
       <div className={`search-panel ${showSearch ? "show" : ""}`}>
         <div className="search-panel-header">
@@ -463,8 +481,10 @@ export const Sidebar = ({ active }) => {
             minHeight: "30px",
             maxHeight: "400px",
             mt: 1.5,
-            backgroundColor: "#1a1a1a",
-            color: "#ffffff",
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+            color: "rgba(226, 232, 240, 0.95)",
             "& .MuiAvatar-root": {
               width: 32,
               height: 32,
@@ -503,8 +523,10 @@ export const Sidebar = ({ active }) => {
             filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
             width: "250px",
             mt: 1.5,
-            backgroundColor: "#1a1a1a",
-            color: "#ffffff",
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+            color: "rgba(226, 232, 240, 0.95)",
             "& .MuiAvatar-root": {
               width: 32,
               height: 32,
@@ -590,10 +612,19 @@ export const Sidebar = ({ active }) => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         PaperProps={{
-          style: {
-            borderRadius: "15px",
-            backgroundColor: "#1a1a1a",
-            color: "#ffffff",
+          sx: {
+            borderRadius: "16px",
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+            color: "rgba(226, 232, 240, 0.95)",
+            "& .MuiDialogContent-root": {
+              background: "transparent",
+              color: "rgba(226, 232, 240, 0.95)",
+            },
+            "& .MuiDialogTitle-root": {
+              color: "rgba(226, 232, 240, 0.95)",
+            },
           },
         }}
       >
@@ -602,13 +633,13 @@ export const Sidebar = ({ active }) => {
             fontFamily: "Poppins",
             textAlign: "center",
             fontSize: "15.5px",
-            color: "#ffffff",
+            color: "rgba(226, 232, 240, 0.95)",
           }}
           id="alert-dialog-title"
         >
           {"Create new post"}
         </DialogTitle>
-        <Divider style={{ marginTop: "-10px", backgroundColor: "#333" }} />
+        <Divider style={{ marginTop: "-10px", backgroundColor: "rgba(148, 163, 184, 0.2)" }} />
         <DialogContent>
           <div
             className="post"
@@ -684,15 +715,16 @@ export const Sidebar = ({ active }) => {
                     style={{
                       border: "none",
                       outline: "none",
-                      background: "blue",
+                      background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                       padding: "8px 16px",
                       borderRadius: "8px",
                       color: "white",
-                      backgroundColor: "#2196f3",
                       marginTop: "12px",
                       fontSize: "15px",
                       cursor: "pointer",
                       fontWeight: "bold",
+                      boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+                      transition: "all 0.2s",
                     }}
                   >
                     Upload
@@ -740,10 +772,12 @@ export const Sidebar = ({ active }) => {
                     padding: "8px 16px",
                     borderRadius: "8px",
                     color: "white",
-                    backgroundColor: "#2196f3",
+                    background: "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
                     fontSize: "15px",
                     cursor: "pointer",
                     fontWeight: "bold",
+                    boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+                    transition: "all 0.2s",
                   }}
                 >
                   Select from computer

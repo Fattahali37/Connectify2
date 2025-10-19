@@ -56,14 +56,14 @@ export const Chat = () => {
     <div
       className="chatpage"
       style={{
-        width: "100%",
+        width: "calc(100% - 280px)",
+        marginLeft: "280px",
         background:
           "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)",
         border: "none",
         display: "flex",
         flexDirection: "row",
         height: "100vh",
-        margin: "0",
         borderRadius: "0",
         position: "relative",
       }}
@@ -178,7 +178,7 @@ export const Chat = () => {
                 overflowY: "auto",
                 borderRadius: "20px",
                 background:
-                  "linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%)",
+                  "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
                 backdropFilter: "blur(24px)",
                 border: "1px solid rgba(148, 163, 184, 0.2)",
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",

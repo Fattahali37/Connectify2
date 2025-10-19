@@ -1,8 +1,8 @@
 export const searchIcon = (
   <svg
     aria-label="Search"
-    color="#8e8e8e"
-    fill="#8e8e8e"
+    color="rgba(148, 163, 184, 0.9)"
+    fill="rgba(148, 163, 184, 0.9)"
     height="16"
     role="img"
     viewBox="0 0 24 24"
@@ -34,8 +34,8 @@ export const savedHome = (
   <svg
     aria-label="Remove"
     className="_ab6-"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -46,15 +46,15 @@ export const savedHome = (
 );
 
 export const commentMore = (
-  <svg aria-label="Comment options" className="_ab6-" color="#8e8e8e" fill="#8e8e8e" height="24" role="img" viewBox="0 0 24 24" width="24"><circle cx="12" cy="12" r="1.5"></circle><circle cx="6" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle></svg>
+  <svg aria-label="Comment options" className="_ab6-" color="rgba(148, 163, 184, 0.9)" fill="rgba(148, 163, 184, 0.9)" height="24" role="img" viewBox="0 0 24 24" width="24"><circle cx="12" cy="12" r="1.5"></circle><circle cx="6" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle></svg>
 )
 
 export const saveHome = (
   <svg
     aria-label="Remove"
     className="_ab6-"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -82,8 +82,8 @@ export const afterLike = (
 export const homeOutline = (
   <svg
     aria-label="Home"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -101,8 +101,8 @@ export const homeOutline = (
 export const homeFill = (
   <svg
     aria-label="Home"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -115,8 +115,8 @@ export const homeFill = (
 export const messageOutline = (
   <svg
     aria-label="Messenger"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -138,8 +138,8 @@ export const messageOutline = (
 export const messageFill = (
   <svg
     aria-label="Messenger"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -152,8 +152,8 @@ export const messageFill = (
 export const exploreOutline = (
   <svg
     aria-label="Find People"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -201,8 +201,8 @@ export const likeFill = (
 export const likeOutline = (
   <svg
     aria-label="Activity Feed"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -215,8 +215,8 @@ export const likeOutline = (
 export const postUploadOutline = (
   <svg
     aria-label="New Post"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -258,8 +258,8 @@ export const postUploadOutline = (
 export const profileIcon = (
   <svg
     aria-label="Profile"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="16"
     role="img"
     viewBox="0 0 24 24"
@@ -298,8 +298,8 @@ export const profileIcon = (
 export const savedIcon = (
   <svg
     aria-label="Saved"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="16"
     role="img"
     viewBox="0 0 24 24"
@@ -320,8 +320,8 @@ export const exploreFill = (
   <svg
     aria-label="Find people"
     className="_ab6-"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -334,8 +334,8 @@ export const exploreFill = (
 export const settingsIcon = (
   <svg
     aria-label="Settings"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="16"
     role="img"
     viewBox="0 0 24 24"
@@ -363,8 +363,8 @@ export const settingsIcon = (
 export const switchAccountIcon = (
   <svg
     aria-label="Switch Accounts"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="16"
     role="img"
     viewBox="0 0 24 24"
@@ -377,8 +377,8 @@ export const switchAccountIcon = (
 export const moreIcons = (
   <svg
     aria-label="More options"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -393,8 +393,8 @@ export const moreIcons = (
 export const likeIconOutline = (
   <svg
     aria-label="Like"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -421,8 +421,8 @@ export const likeIconFill = (
 export const commentIcon = (
   <svg
     aria-label="Comment"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -441,8 +441,8 @@ export const commentIcon = (
 export const shareIcon = (
   <svg
     aria-label="Share Post"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -471,8 +471,8 @@ export const shareIcon = (
 export const saveIconOutline = (
   <svg
     aria-label="Save"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -492,8 +492,8 @@ export const saveIconOutline = (
 export const saveIconFill = (
   <svg
     aria-label="Remove"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -506,8 +506,8 @@ export const saveIconFill = (
 export const emojiIcon = (
   <svg
     aria-label="Emoji"
-    color="#262626"
-    fill="#262626"
+    color="rgba(226, 232, 240, 0.95)"
+    fill="rgba(226, 232, 240, 0.95)"
     height="24"
     role="img"
     viewBox="0 0 24 24"
@@ -519,5 +519,5 @@ export const emojiIcon = (
 
 
 export const galleryIcon = (
-  <svg aria-label="Add Photo or Video" className="_ab6-" color="#262626" fill="#262626" height="24" role="img" viewBox="0 0 24 24" width="24"><path d="M6.549 5.013A1.557 1.557 0 1 0 8.106 6.57a1.557 1.557 0 0 0-1.557-1.557Z" fillRule="evenodd"></path><path d="m2 18.605 3.901-3.9a.908.908 0 0 1 1.284 0l2.807 2.806a.908.908 0 0 0 1.283 0l5.534-5.534a.908.908 0 0 1 1.283 0l3.905 3.905" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2"></path><path d="M18.44 2.004A3.56 3.56 0 0 1 22 5.564h0v12.873a3.56 3.56 0 0 1-3.56 3.56H5.568a3.56 3.56 0 0 1-3.56-3.56V5.563a3.56 3.56 0 0 1 3.56-3.56Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
+  <svg aria-label="Add Photo or Video" className="_ab6-" color="rgba(226, 232, 240, 0.95)" fill="rgba(226, 232, 240, 0.95)" height="24" role="img" viewBox="0 0 24 24" width="24"><path d="M6.549 5.013A1.557 1.557 0 1 0 8.106 6.57a1.557 1.557 0 0 0-1.557-1.557Z" fillRule="evenodd"></path><path d="m2 18.605 3.901-3.9a.908.908 0 0 1 1.284 0l2.807 2.806a.908.908 0 0 0 1.283 0l5.534-5.534a.908.908 0 0 1 1.283 0l3.905 3.905" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2"></path><path d="M18.44 2.004A3.56 3.56 0 0 1 22 5.564h0v12.873a3.56 3.56 0 0 1-3.56 3.56H5.568a3.56 3.56 0 0 1-3.56-3.56V5.563a3.56 3.56 0 0 1 3.56-3.56Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
 )

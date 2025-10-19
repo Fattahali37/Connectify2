@@ -4,6 +4,11 @@
     background: linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%);
     position: relative;
     gap: 40px;
+    margin-left: 280px;
+    width: calc(100% - 280px);
+    padding-left: 24px;
+    padding-right: 24px;
+    justify-content: center;
 }
 
 .home::before {
@@ -26,6 +31,7 @@
     flex: 1;
     position: relative;
     z-index: 1;
+    margin: 0 auto;
 }
 
 .right-home {
@@ -36,13 +42,26 @@
 }
 
 .stories {
-    @apply w-full mb-6 h-32 rounded-2xl flex flex-row items-center overflow-x-auto;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+    @apply w-full mb-8 rounded-3xl flex flex-row items-center overflow-x-auto;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.7) 100%);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(148, 163, 184, 0.1);
-    padding: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    gap: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    gap: 16px;
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+}
+
+.stories::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.5), transparent);
 }
 
 .stories::-webkit-scrollbar {
@@ -69,14 +88,27 @@
 @media screen and (max-width: 1400px) {
     .home {
         @apply px-6;
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        padding-left: 20px;
+        padding-right: 20px;
     }
     
     .left-home {
-        max-width: 600px;
+        max-width: 640px;
     }
     
     .right-home {
-        @apply w-[340px];
+        @apply w-[320px];
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .home {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        padding-left: 20px;
+        padding-right: 20px;
     }
 }
 
@@ -86,17 +118,40 @@
     }
     
     .left-home {
-        max-width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .home {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        justify-content: center;
     }
 }
 
 @media screen and (max-width: 850px) {
     .home {
         @apply flex-col px-4;
+        margin-left: 80px;
+        width: calc(100% - 80px);
     }
     
     .left-home {
         @apply w-full;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .home {
+        margin-left: 0;
+        width: 100%;
+        margin-bottom: 72px;
+        padding-bottom: 20px;
+    }
+    
+    .left-home {
         max-width: 100%;
     }
 }

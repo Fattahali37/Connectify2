@@ -91,7 +91,7 @@ export default function RoomName({ roomId }) {
             }
             <div className="nameandmsg" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '12px', flex: 1 }}>
                 <p style={{ fontSize: '13.75px', fontWeight: hasUnread ? 'bold' : 'normal' }}>{roomName ? roomName : "...."}</p>
-                <p style={{ fontSize: '12px', color: hasUnread ? '#000' : 'gray', fontWeight: hasUnread ? '600' : 'normal' }}>
+                <p style={{ fontSize: '12px', color: hasUnread ? 'rgba(226, 232, 240, 0.95)' : 'rgba(148, 163, 184, 0.9)', fontWeight: hasUnread ? '600' : 'normal' }}>
                     {lastmessage === "like_true" ? <FavoriteIcon sx={{ fontSize: '18px', marginTop: '4px', color: '#e33636' }} /> : lastmessage.includes("http") ? "image" : lastmessage.length > 27 ? lastmessage.slice(0, 27) + "  ..." : lastmessage}
                 </p>
             </div>
