@@ -6,7 +6,8 @@ import { url } from '../baseUrl'
 import { api } from '../Interceptor/apiCall'
 import { useContext } from 'react'
 import { AuthContext } from '../context/Auth'
-import { Dialog, DialogContent, DialogTitle, } from '@mui/material'
+import { Dialog, DialogContent, DialogTitle } from '@mui/material'
+import { Public } from '@mui/icons-material'
 import { Followers } from '../components/dialog/Followers'
 import Story from '../components/profile/Story'
 
@@ -104,100 +105,104 @@ export const Profile = ({ findStory, post = true }) => {
   }
 
   return (
-    <div className='home' style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
-      {/* Modern Profile Header with Cover */}
+    <div className='home' style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* Blocked User Notification */}
+      {user?.status === 'blocked' && (
+        <div style={{
+          backgroundColor: 'rgba(239, 68, 68, 0.95)',
+          color: '#ffffff',
+          padding: '16px',
+          margin: '20px auto',
+          width: '90%',
+          maxWidth: '900px',
+          borderRadius: '16px',
+          border: '1px solid rgba(220, 38, 38, 0.5)',
+          textAlign: 'center',
+          fontWeight: '600',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 16px rgba(239, 68, 68, 0.3)'
+        }}>
+          ⚠️ Your account has been blocked by the admin
+        </div>
+      )}
+
+      {/* Modern Profile Card */}
       <div style={{
+        maxWidth: '900px',
+        margin: '20px auto',
+        width: '90%',
+        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.7) 100%)',
+        backdropFilter: 'blur(20px)',
+        borderRadius: '24px',
+        border: '1px solid rgba(148, 163, 184, 0.15)',
+        padding: '40px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
         position: 'relative',
-        width: '100%',
-        height: '280px',
-        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)',
         overflow: 'hidden'
       }}>
-        {/* Decorative Background Pattern */}
+        {/* Decorative gradient line */}
         <div style={{
           position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 70% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), rgba(139, 92, 246, 0.6), transparent)'
         }}></div>
-        
-        {/* Blocked User Notification */}
-        {user?.status === 'blocked' && (
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(239, 68, 68, 0.95)',
-            color: '#ffffff',
-            padding: '12px 24px',
-            borderRadius: '12px',
-            border: '1px solid rgba(220, 38, 38, 0.5)',
-            textAlign: 'center',
-            fontWeight: '600',
-            fontSize: '14px',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 4px 16px rgba(239, 68, 68, 0.3)',
-            zIndex: 10
-          }}>
-            ⚠️ Your account has been blocked by the admin
-          </div>
-        )}
 
-        {/* Profile Avatar - Positioned at bottom */}
-        <div style={{
-          position: 'absolute',
-          bottom: '-60px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 5
-        }}>
-          <div style={{
-            position: 'relative',
-            padding: '4px',
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)',
-            borderRadius: '50%',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-          }}>
-            <Story profile={true} avatar={user?.avatar} uid={user?._id} />
-          </div>
-        </div>
-      </div>
-
-      {/* Profile Info Section */}
-      <div style={{
-        marginTop: '80px',
-        padding: '0 40px 40px',
-        textAlign: 'center'
-      }}>
-        {/* Username and Actions */}
+        {/* Profile Header with Avatar and Info */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '16px',
-          marginBottom: '24px'
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          gap: '40px',
+          marginBottom: '32px'
         }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            background: 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            margin: 0,
-            letterSpacing: '-0.02em'
-          }}>
-            {user?.username}
-          </h1>
-
-          {/* Action Buttons */}
+          {/* Avatar */}
           <div style={{
-            display: 'flex',
-            gap: '12px',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            justifyContent: 'center'
+            position: 'relative',
+            flexShrink: 0
           }}>
+            <div style={{
+              padding: '4px',
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)',
+              borderRadius: '50%',
+              boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)'
+            }}>
+              <Story profile={true} avatar={user?.avatar} uid={user?._id} />
+            </div>
+          </div>
+
+          {/* User Info */}
+          <div style={{ flex: 1 }}>
+            {/* Username and Actions Row */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              flexWrap: 'wrap',
+              gap: '16px'
+            }}>
+              <h1 style={{
+                fontSize: '28px',
+                fontWeight: '700',
+                background: 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                margin: 0,
+                letterSpacing: '-0.02em'
+              }}>
+                {user?.username}
+              </h1>
+
+              {/* Action Buttons */}
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center'
+              }}>
             {user?._id !== context.auth._id && (
               <button
                 onClick={() => handShake()}
@@ -332,183 +337,387 @@ export const Profile = ({ findStory, post = true }) => {
                 </svg>
               </button>
             )}
-          </div>
-
-          {/* Settings Dialog */}
-          <Dialog
-            PaperProps={{
-              sx: {
-                borderRadius: '20px',
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(148, 163, 184, 0.2)',
-                minWidth: '380px',
-                overflow: 'hidden'
-              }
-            }}
-            onClose={handleCloseMenu}
-            open={openMore}
-          >
-            <div>
-              <div
-                onClick={() => navigate('/accounts/reset')}
-                style={{
-                  padding: '16px 24px',
-                  fontSize: '15px',
-                  color: 'rgba(226, 232, 240, 0.95)',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid rgba(148, 163, 184, 0.15)',
-                  transition: 'all 0.2s ease',
-                  background: 'transparent'
-                }}
-                onMouseEnter={(e) => e.target.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)'}
-                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-              >
-                Change password
-              </div>
-              <div
-                onClick={() => context.logout()}
-                style={{
-                  padding: '16px 24px',
-                  fontSize: '15px',
-                  color: '#ef4444',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid rgba(148, 163, 184, 0.15)',
-                  transition: 'all 0.2s ease',
-                  fontWeight: '600'
-                }}
-                onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
-                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-              >
-                Logout
-              </div>
-              <div
-                onClick={() => handleCloseMenu()}
-                style={{
-                  padding: '16px 24px',
-                  fontSize: '15px',
-                  color: 'rgba(148, 163, 184, 0.9)',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.target.style.background = 'rgba(148, 163, 184, 0.05)'}
-                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-              >
-                Cancel
               </div>
             </div>
-          </Dialog>
 
-          <Dialog
-            open={open}
-            onClose={handleClose}
-            PaperProps={{
-              style: {
-                borderRadius: '20px',
-                minWidth: '400px',
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
-                backdropFilter: 'blur(16px)',
+            {/* Stats Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px',
+              marginBottom: '20px'
+            }}>
+              <div style={{
+                padding: '16px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)',
+                backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(148, 163, 184, 0.2)',
-                color: 'rgba(226, 232, 240, 0.95)'
-              }
+                textAlign: 'center',
+                transition: 'all 0.3s ease',
+                cursor: 'default'
+              }}>
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: 'rgba(226, 232, 240, 0.95)',
+                  marginBottom: '4px'
+                }}>
+                  {posts?.length || 0}
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(148, 163, 184, 0.9)',
+                  fontWeight: '500'
+                }}>
+                  Posts
+                </div>
+              </div>
+
+              <div 
+                onClick={() => handleClickOpen(1)}
+                style={{
+                  padding: '16px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(148, 163, 184, 0.2)',
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+                }}
+              >
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: 'rgba(226, 232, 240, 0.95)',
+                  marginBottom: '4px'
+                }}>
+                  {user?.followers?.length || 0}
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(148, 163, 184, 0.9)',
+                  fontWeight: '500'
+                }}>
+                  Followers
+                </div>
+              </div>
+
+              <div 
+                onClick={() => handleClickOpen(2)}
+                style={{
+                  padding: '16px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(148, 163, 184, 0.2)',
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+                }}
+              >
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: 'rgba(226, 232, 240, 0.95)',
+                  marginBottom: '4px'
+                }}>
+                  {user?.followings?.length || 0}
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(148, 163, 184, 0.9)',
+                  fontWeight: '500'
+                }}>
+                  Following
+                </div>
+              </div>
+            </div>
+
+            {/* Bio Section */}
+            {user?.name && (
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '600',
+                color: 'rgba(226, 232, 240, 0.95)',
+                marginBottom: '8px'
+              }}>
+                {user.name}
+              </div>
+            )}
+
+            {user?.bio && (
+              <div style={{
+                fontSize: '14px',
+                lineHeight: '1.5',
+                color: 'rgba(148, 163, 184, 0.9)',
+                marginBottom: '12px'
+              }}>
+                {user.bio}
+              </div>
+            )}
+
+            {user?.website && (
+              <a
+                href={user.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '14px',
+                  color: 'rgb(59, 130, 246)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgb(96, 165, 250)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgb(59, 130, 246)';
+                }}
+              >
+                <Public fontSize="small" />
+                {user.website.replace('https://', '')}
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* Settings Dialog */}
+        <Dialog
+          PaperProps={{
+            sx: {
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(148, 163, 184, 0.2)',
+              minWidth: '380px',
+              overflow: 'hidden'
+            }
+          }}
+          onClose={handleCloseMenu}
+          open={openMore}
+        >
+          <div>
+            <div
+              onClick={() => navigate('/accounts/reset')}
+              style={{
+                padding: '16px 24px',
+                fontSize: '15px',
+                color: 'rgba(226, 232, 240, 0.95)',
+                textAlign: 'center',
+                cursor: 'pointer',
+                borderBottom: '1px solid rgba(148, 163, 184, 0.15)',
+                transition: 'all 0.2s ease',
+                background: 'transparent'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              Change password
+            </div>
+            <div
+              onClick={() => context.logout()}
+              style={{
+                padding: '16px 24px',
+                fontSize: '15px',
+                color: '#ef4444',
+                textAlign: 'center',
+                cursor: 'pointer',
+                borderBottom: '1px solid rgba(148, 163, 184, 0.15)',
+                transition: 'all 0.2s ease',
+                fontWeight: '600'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              Logout
+            </div>
+            <div
+              onClick={() => handleCloseMenu()}
+              style={{
+                padding: '16px 24px',
+                fontSize: '15px',
+                color: 'rgba(148, 163, 184, 0.9)',
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(148, 163, 184, 0.05)'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              Cancel
+            </div>
+          </div>
+        </Dialog>
+
+        {/* Followers Dialog */}
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          PaperProps={{
+            style: {
+              borderRadius: '20px',
+              minWidth: '400px',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(148, 163, 184, 0.2)',
+              color: 'rgba(226, 232, 240, 0.95)'
+            }
+          }}
+        >
+          <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+            <p style={{ textAlign: 'center', fontSize: '14px', fontWeight: 'bold', marginTop: '-5px', marginBottom: '-3px' }}>
+              {toggle === 2 ? "Following" : "Followers"}
+            </p>
+          </DialogTitle>
+          <DialogContent style={{ marginTop: '-9px', minHeight: '5px' }} dividers>
+            <Followers handleClose={handleClose} toggle={toggle} userId={user?._id} />
+          </DialogContent>
+        </Dialog>
+            </div>
+
+      {/* Tabs Section */}
+      <div style={{
+        marginTop: '32px',
+        borderTop: '1px solid rgba(148, 163, 184, 0.2)'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '48px',
+          maxWidth: '900px',
+          margin: '0 auto'
+        }}>
+          <Link 
+            to={`/${user?.username}`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '20px 4px',
+              marginTop: '-1px',
+              borderTop: post ? '2px solid rgba(226, 232, 240, 0.95)' : '2px solid transparent',
+              color: post ? 'rgba(226, 232, 240, 0.95)' : 'rgba(148, 163, 184, 0.7)',
+              textDecoration: 'none',
+              transition: 'all 0.2s ease',
+              fontSize: '13px',
+              fontWeight: post ? '600' : '400',
+              letterSpacing: '0.5px'
             }}
           >
-            <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-              <p style={{ textAlign: 'center', fontSize: '14px', fontWeight: 'bold', marginTop: '-5px', marginBottom: '-3px' }}>{toggle === 2 ? "Followings" : "Followers"}</p>
-            </DialogTitle>
-            {
-              <DialogContent style={{ marginTop: '-9px', minHeight: '5px' }} dividers>
-                <Followers handleClose={handleClose} toggle={toggle} userId={user?._id} />
-              </DialogContent>
-            }
-          </Dialog>
-          <div className="bioandstuff" style={{ marginTop: '20px' }}>
-            <p style={{ fontWeight: 'bold' }}>{user?.name}</p>
-            <p style={{ marginTop: '4px', marginBottom: '3px' }}>{user?.bio ? user.bio : "-"}</p>
-            {
-              user?.website &&
-              <a href={user?.website} target="_blank" style={{ marginTop: '10px', color: '#0e4378', fontWeight: 'normal' }} rel="noreferrer">{user?.website.replace('https://', '')}</a>
-            }
-          </div>
-        </div>
-      </div>
-      <div className="highlights" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '88%', margin: 'auto', marginTop: '42px', }}>
-        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
-          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid rgba(148, 163, 184, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
-            <img src="https://images.pexels.com/photos/1371360/pexels-photo-1371360.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-          </div>
-          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: 'rgba(148, 163, 184, 0.9)' }}>Highlights</p>
-        </div>
-        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
-          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid rgba(148, 163, 184, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
-            <img src="https://images.unsplash.com/photo-1666202566722-26e17e78cb07?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-          </div>
-          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: 'rgba(148, 163, 184, 0.9)' }}>Highlights</p>
-        </div>
-        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
-          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid rgba(148, 163, 184, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
-            <img src="https://images.unsplash.com/photo-1666207482115-53756be8a995?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=735&q=80" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-          </div>
-          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: 'rgba(148, 163, 184, 0.9)' }}>Highlights</p>
-        </div>
-        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
-          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid rgba(148, 163, 184, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
-            <img src="https://images.unsplash.com/photo-1666202566722-26e17e78cb07?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-          </div>
-          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: 'rgba(148, 163, 184, 0.9)' }}>Highlights</p>
-        </div>
-        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
-          <div className="imageuser storybox" style={{ width: '82px', height: '82px', borderRadius: '50%', border: '1px solid rgba(148, 163, 184, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
-            <svg aria-label="Plus icon" className="_ab6-" color="rgba(148, 163, 184, 0.9)" fill="rgba(148, 163, 184, 0.9)" height="44" role="img" viewBox="0 0 24 24" width="44"><path d="M21 11.3h-8.2V3c0-.4-.3-.8-.8-.8s-.8.4-.8.8v8.2H3c-.4 0-.8.3-.8.8s.3.8.8.8h8.2V21c0 .4.3.8.8.8s.8-.3.8-.8v-8.2H21c.4 0 .8-.3.8-.8s-.4-.7-.8-.7z"></path></svg>
-          </div>
-          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: 'rgba(148, 163, 184, 0.9)' }}>New</p>
-        </div>
-
-      </div>
-      <div className="post-section" style={{ borderTop: '1px solid rgba(148, 163, 184, 0.2)', marginTop: '54px' }}>
-        <div className="tab-select" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
-          <Link to={`/${user?.username}`} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', margin: '18px 18px', borderTop: post ? '1px solid rgba(226, 232, 240, 0.95)' : '', paddingTop: '22px', marginTop: '-0.5px', width: '79px', paddingRight: '4px' }}>
-            <svg aria-label="" className="_ab6-" color="rgba(226, 232, 240, 0.95)" fill="rgba(226, 232, 240, 0.95)" height="12" role="img" viewBox="0 0 24 24" width="12"><rect fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" width="18" x="3" y="3"></rect><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="9.015" x2="9.015" y1="3" y2="21"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="14.985" x2="14.985" y1="3" y2="21"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="21" x2="3" y1="9.015" y2="9.015"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="21" x2="3" y1="14.985" y2="14.985"></line></svg>
-            <p style={{ fontSize: '12.4px', color: post ? 'rgba(226, 232, 240, 0.95)' : 'rgba(148, 163, 184, 0.9)', marginLeft: '4px', fontWeight: post ? 'bold' : 'normal' }}>POSTS</p>
+            <svg height="14" viewBox="0 0 24 24" width="14" fill="currentColor">
+              <rect fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" width="18" x="3" y="3"></rect>
+              <line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="9.015" x2="9.015" y1="3" y2="21"></line>
+              <line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="14.985" x2="14.985" y1="3" y2="21"></line>
+              <line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="21" x2="3" y1="9.015" y2="9.015"></line>
+              <line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="21" x2="3" y1="14.985" y2="14.985"></line>
+            </svg>
+            POSTS
           </Link>
-          {
-            user?._id === context.auth._id &&
-            <Link to={`/saved/${user?.username}`} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', margin: '18px 18px', borderTop: !post ? '1px solid rgba(226, 232, 240, 0.95)' : '', paddingTop: '22px', marginTop: '-0.5px', width: '79px', paddingRight: '4px' }}>
-              <svg aria-label="" className="_ab6-" color="rgba(226, 232, 240, 0.95)" fill="rgba(226, 232, 240, 0.95)" height="12" role="img" viewBox="0 0 24 24" width="12"><polygon fill="none" points="20 21 12 13.44 4 21 4 3 20 3 20 21" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></polygon></svg>
-              <p style={{ fontSize: '12.4px', color: !post ? 'rgba(226, 232, 240, 0.95)' : 'rgba(148, 163, 184, 0.9)', marginLeft: '4px', fontWeight: !post ? 'bold' : 'normal' }}>SAVED</p>
+
+          {user?._id === context.auth._id && (
+            <Link 
+              to={`/saved/${user?.username}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '20px 4px',
+                marginTop: '-1px',
+                borderTop: !post ? '2px solid rgba(226, 232, 240, 0.95)' : '2px solid transparent',
+                color: !post ? 'rgba(226, 232, 240, 0.95)' : 'rgba(148, 163, 184, 0.7)',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                fontSize: '13px',
+                fontWeight: !post ? '600' : '400',
+                letterSpacing: '0.5px'
+              }}
+            >
+              <svg height="14" viewBox="0 0 24 24" width="14" fill="currentColor">
+                <polygon fill="none" points="20 21 12 13.44 4 21 4 3 20 3 20 21" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></polygon>
+              </svg>
+              SAVED
             </Link>
-          }
-
+          )}
         </div>
-        <div className="post-content">
-          {
-            posts.length === 0 && loading && <Spinner />
-          }
 
-          {
-            posts.length === 0 && !loading && <p style={{ textAlign: 'center', marginTop: '72px', width: '100%', fontWeight: 'bold', fontSize: '16px' }}>No posts to see</p>
-          }
+        {/* Post Content */}
+        <div style={{
+          padding: '24px',
+          maxWidth: '900px',
+          margin: '0 auto'
+        }}>
+          {posts.length === 0 && loading && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '60px 0'
+            }}>
+              <Spinner />
+            </div>
+          )}
 
-          {
-            post ?
-              <div className='grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', rowGap: '17px' }}>
-                {
-                  posts?.map(item =>
-                    <Image userId={item.owner} postId={item._id} likes={item.likes.length} comments={item.comments.length} key={item._id} src={item.files[0].link}></Image>
-                  )
-                }
+          {posts.length === 0 && !loading && (
+            <div style={{
+              textAlign: 'center',
+              padding: '80px 24px',
+              color: 'rgba(148, 163, 184, 0.9)'
+            }}>
+              <p style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                marginBottom: '8px'
+              }}>
+                No Posts Yet
+              </p>
+              <p style={{
+                fontSize: '14px',
+                color: 'rgba(148, 163, 184, 0.7)'
+              }}>
+                {post ? 'When posts are shared, they will appear here.' : 'When you save posts, they will appear here.'}
+              </p>
+            </div>
+          )}
 
-              </div> : <div className='grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', rowGap: '17px' }}>
-                {
-                  posts?.map(item =>
-                    <Image userId={item.owner} postId={item._id} likes={item.likes.length} comments={item.comments.length} key={item._id} src={item.files[0].link}></Image>
-                  )
-                }
-              </div>
-          }
+          {posts.length > 0 && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '4px'
+            }}>
+              {posts.map(item => (
+                <Image 
+                  key={item._id}
+                  userId={item.owner}
+                  postId={item._id}
+                  likes={item.likes.length}
+                  comments={item.comments.length}
+                  src={item.files[0].link}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
