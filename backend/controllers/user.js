@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const { SendMail } = require("../utils/mail");
 const { v4: uid } = require("uuid");
 const ResetTokens = require("../models/ResetTokens");
+const { computeFeaturesForUserId } = require('../utils/profileFeatureHelper');
 
 // get a user by username
 exports.getUser = async (req, res) => {
@@ -52,6 +53,9 @@ exports.followHandle = async (req, res) => {
     if (userdb.followings.includes(userId)) {
       await User.updateOne({ _id: user }, { $pull: { followings: userId } });
       await User.updateOne({ _id: userId }, { $pull: { followers: user } });
+      // update profile features for both users (counts changed)
+      computeFeaturesForUserId(user);
+      computeFeaturesForUserId(userId);
     } else {
       await User.updateOne({ _id: user }, { $push: { followings: userId } });
       await User.updateOne({ _id: userId }, { $push: { followers: user } });
@@ -67,6 +71,9 @@ exports.followHandle = async (req, res) => {
           },
         }
       );
+      // update profile features for both users (counts changed)
+      computeFeaturesForUserId(user);
+      computeFeaturesForUserId(userId);
     }
     res.send({
       success: true,
@@ -158,14 +165,22 @@ exports.notications = async (req, res) => {
 // update user
 exports.updateUser = async (req, res) => {
   try {
-    const user = req.user._id;
-    const findUser = await User.findOne({ _id: user });
-    res.send(
-      await User.updateOne(
-        { _id: user },
-        { $set: { ...{ ...findUser }._doc, ...req.body } }
-      )
+    const userId = req.user._id;
+    // Update user with new data
+    await User.updateOne(
+      { _id: userId },
+      { $set: req.body }
     );
+    // Fetch latest user and update profile features
+    try {
+      const UserModel = require('../models/User');
+      const latestUser = await UserModel.findOne({ _id: userId });
+      const { upsertFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
+      await upsertFeaturesFromUserDoc(latestUser);
+    } catch (e) {
+      console.error('failed to schedule profile feature update', e.message || e);
+    }
+    res.send({ success: true, message: 'User updated' });
   } catch (err) {
     res.send({
       success: false,

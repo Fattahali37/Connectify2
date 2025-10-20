@@ -360,16 +360,15 @@ const countWords = (str) => {
 };
 
 // Verify profile using ML model
+
+const ProfileFeature = require("../models/ProfileFeature");
+
 exports.verifyProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    // Fetch user data with populated fields
-    const user = await User.findById(userId)
-      .populate('posts')
-      .populate('followers')
-      .populate('followings');
-
+    // Fetch user data for response (not for features)
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -377,32 +376,30 @@ exports.verifyProfile = async (req, res) => {
       });
     }
 
-    // Calculate the 11 features required by the ML model
-    const features = {
-      "profile pic": user.avatar ? 1 : 0,
-      "nums/length username": calculateNumberRatio(user.username || ""),
-      "fullname words": countWords(user.name || ""),
-      "nums/length fullname": calculateNumberRatio(user.name || ""),
-      "name==username": (user.name && user.username && user.name.toLowerCase() === user.username.toLowerCase()) ? 1 : 0,
-      "description length": (user.bio || "").length,
-      "external URL": user.website ? 1 : 0,
-      "private": user.private ? 1 : 0,
-      "#posts": user.posts.length,
-      "#followers": user.followers.length,
-      "#following": user.followings.length
-    };
+    // Fetch features from ProfileFeature collection
+    const profileFeature = await ProfileFeature.findOne({ user: userId });
+    if (!profileFeature) {
+      return res.status(404).json({
+        success: false,
+        message: "Profile features not found for user."
+      });
+    }
+
+    // Prepare features object (remove _id, user, createdAt, __v, fake)
+    const {
+      _id, user: pfUser, createdAt, __v, fake, ...features
+    } = profileFeature.toObject();
 
     // Call Python Flask API
     const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
     let predictionResponse;
-    
     try {
       predictionResponse = await axios.post(`${FLASK_API_URL}/predict`, features, {
         headers: {
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true' // Required for ngrok tunnels
+          'ngrok-skip-browser-warning': 'true'
         },
-        timeout: 10000 // 10 seconds timeout
+        timeout: 10000
       });
     } catch (apiError) {
       console.error("Flask API Error:", apiError.message);
@@ -417,8 +414,6 @@ exports.verifyProfile = async (req, res) => {
 
     const prediction = predictionResponse.data.prediction;
     const confidence = predictionResponse.data.confidence;
-
-    // Determine verification status
     const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
 
     // Update or create ProfileVerification document

@@ -1,6 +1,6 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
-const { all } = require("../routes/post");
+const { computeFeaturesForUserId } = require('../utils/profileFeatureHelper');
 
 exports.getPost = async (req, res) => {
   try {
@@ -27,6 +27,8 @@ exports.createPost = async (req, res) => {
       { _id: req.user._id },
       { $push: { posts: saved._id } }
     );
+    // update posts_count in profile features
+    computeFeaturesForUserId(req.user._id);
     res.send(saved);
   } catch (err) {
     res.send({
@@ -49,6 +51,8 @@ exports.deletePost = async (req, res) => {
       { _id: req.user._id },
       { $pull: { posts: req.params.postId } }
     );
+    // update posts_count in profile features
+    computeFeaturesForUserId(req.user._id);
     res.status(200).send({
       success: true,
       message: "done",

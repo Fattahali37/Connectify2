@@ -3,6 +3,7 @@ const DeletedUser = require("../models/DeletedUser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Token = require("../models/AuthTokens");
+const ProfileFeature = require("../models/ProfileFeature");
 const axios = require("axios");
 const qs = require("qs");
 const fs = require("fs");
@@ -35,6 +36,16 @@ exports.registerUser = async (req, res) => {
     };
     const newUser = new User(data);
     const user = await newUser.save();
+    // compute derived profile features and persist for admin analysis
+    try {
+      // Use helper to compute consistent fields
+      const { computeFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
+      const feature = computeFeaturesFromUserDoc(user);
+      if (feature) await ProfileFeature.create(feature);
+    } catch (pfErr) {
+      // don't block user registration if feature save fails; just log
+      console.error('Failed to save profile features for user', user._id, pfErr.message || pfErr);
+    }
     const access_token = jwt.sign({ _id: user._id }, process.env.JWT_Secret, {
       expiresIn: "30m",
     });
