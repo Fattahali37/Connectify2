@@ -15,7 +15,7 @@ const profileFeatureSchema = new mongoose.Schema({
   'private': { type: Number, enum: [0, 1], default: 0 },
   '#posts': { type: Number, default: 0 },
   '#followers': { type: Number, default: 0 },
-  '#follows': { type: Number, default: 0 },
+    '#following': { type: Number, default: 0 },
   'fake': { type: Number, enum: [0, 1], default: 0 },
   createdAt: { type: Date, default: Date.now }
 });

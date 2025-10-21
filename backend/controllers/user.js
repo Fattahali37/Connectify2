@@ -166,15 +166,18 @@ exports.notications = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const userId = req.user._id;
+    console.log('[updateUser] Incoming payload:', req.body);
     // Update user with new data
-    await User.updateOne(
+    const updateResult = await User.updateOne(
       { _id: userId },
       { $set: req.body }
     );
+    console.log('[updateUser] DB update result:', updateResult);
     // Fetch latest user and update profile features
     try {
       const UserModel = require('../models/User');
       const latestUser = await UserModel.findOne({ _id: userId });
+      console.log('[updateUser] Latest user after update:', latestUser);
       const { upsertFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
       await upsertFeaturesFromUserDoc(latestUser);
       // return the updated user so frontend can update state
@@ -186,6 +189,7 @@ exports.updateUser = async (req, res) => {
       return res.send({ success: true, user: latestUser });
     }
   } catch (err) {
+    console.error('[updateUser] Error:', err);
     res.send({
       success: false,
       message: err.message,
