@@ -22,6 +22,7 @@ const chatRoute = require("./routes/chat");
 const storyRoute = require("./routes/story");
 const adminRoute = require("./routes/admin");
 const User = require("./models/User");
+const adminController = require("./controllers/admin");
 
 app.use("/auth", authRoute);
 app.use("/post", postRoute);
@@ -29,6 +30,20 @@ app.use("/user", userRoute);
 app.use("/chat", chatRoute);
 app.use("/story", storyRoute);
 app.use("/api/admin", adminRoute);
+
+// Temporary debug endpoint (bypasses admin router/auth) to trigger profile verification
+// Use only in development. Calls controller directly and returns its result.
+if (process.env.NODE_ENV !== 'production') {
+  app.post('/__debug_verify/:userId', async (req, res, next) => {
+    try {
+      // attach params and body as expected by controller
+      req.params = req.params || {};
+      await adminController.verifyProfile(req, res, next);
+    } catch (err) {
+      next(err);
+    }
+  });
+}
 
 app.get("/test", (req, res) => {
   res.send("Hello from other side");

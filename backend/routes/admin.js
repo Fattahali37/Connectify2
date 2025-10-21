@@ -13,6 +13,16 @@ const {
 const { requireAdmin } = require("../middlewares/adminAuth");
 
 // Apply admin middleware to all routes
+// Debug route to call verifyProfile without admin auth (development only)
+router.post('/debug/users/:userId/verify-profile', async (req, res, next) => {
+  // call controller directly (no admin auth) for local debugging
+  try {
+    await verifyProfile(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.use(requireAdmin);
 
 // User management routes

@@ -3,7 +3,8 @@ const Post = require("../models/Post");
 const Room = require("../models/Room");
 const Story = require("../models/Story");
 const DeletedUser = require("../models/DeletedUser");
-const ProfileVerification = require("../models/ProfileFeature");
+const ProfileFeature = require("../models/ProfileFeature");
+const ProfileVerification = require("../models/ProfileVerification");
 const axios = require("axios");
 
 // Get all users (admin only)
@@ -361,11 +362,10 @@ const countWords = (str) => {
 
 // Verify profile using ML model
 
-const ProfileFeature = require("../models/ProfileFeature");
-
 exports.verifyProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
+    console.log('[verifyProfile] Start verification for userId:', userId);
 
     // Fetch user data for response (not for features)
     const user = await User.findById(userId);
@@ -378,6 +378,7 @@ exports.verifyProfile = async (req, res) => {
 
     // Fetch features from ProfileFeature collection
     const profileFeature = await ProfileFeature.findOne({ user: userId });
+    console.log('[verifyProfile] profileFeature fetched:', !!profileFeature);
     if (!profileFeature) {
       return res.status(404).json({
         success: false,
@@ -390,10 +391,48 @@ exports.verifyProfile = async (req, res) => {
       _id, user: pfUser, createdAt, __v, fake, ...features
     } = profileFeature.toObject();
 
+    console.log('[verifyProfile] features sent to ML service:', features);
+
+    // Validate features shape before calling ML service
+    const expectedKeys = [
+      'profile pic',
+      'nums/length username',
+      'fullname words',
+      'nums/length fullname',
+      'name==username',
+      'description length',
+      'external URL',
+      'private',
+      '#posts',
+      '#followers',
+      '#following'
+    ];
+
+    const missingKeys = expectedKeys.filter(k => !(k in features));
+    if (missingKeys.length) {
+      console.error('[verifyProfile] Missing ML feature keys for user', userId, missingKeys);
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required ML feature keys',
+        missing: missingKeys
+      });
+    }
+
+    // Coerce values to numbers and guard against NaN
+    for (const k of expectedKeys) {
+      const v = features[k];
+      if (typeof v !== 'number') {
+        const coerced = Number(v);
+        features[k] = Number.isFinite(coerced) ? coerced : 0;
+      }
+    }
+    console.log('[verifyProfile] features after coercion:', features);
+
     // Call Python Flask API
     const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
     let predictionResponse;
     try {
+      console.log('[verifyProfile] Calling ML service at', FLASK_API_URL + '/predict');
       predictionResponse = await axios.post(`${FLASK_API_URL}/predict`, features, {
         headers: {
           'Content-Type': 'application/json',
@@ -401,6 +440,8 @@ exports.verifyProfile = async (req, res) => {
         },
         timeout: 10000
       });
+      console.log('[verifyProfile] ML service response status:', predictionResponse.status);
+      console.log('[verifyProfile] ML service response data:', predictionResponse.data);
     } catch (apiError) {
       console.error("Flask API Error:", apiError.message);
       console.error("Flask API Response:", apiError.response?.data);
@@ -417,16 +458,18 @@ exports.verifyProfile = async (req, res) => {
     const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
 
     // Update or create ProfileVerification document
-    const verificationData = {
-      userId: userId,
-      features: features,
-      verificationStatus: verificationStatus,
-      isFake: prediction.is_fake,
-      confidence: {
-        realProfileProb: confidence.real_profile_prob,
-        fakeProfileProb: confidence.fake_profile_prob
+    const updateDoc = {
+      $set: {
+        userId: userId,
+        features: features,
+        verificationStatus: verificationStatus,
+        isFake: prediction.is_fake,
+        confidence: {
+          realProfileProb: confidence.real_profile_prob,
+          fakeProfileProb: confidence.fake_profile_prob
+        },
+        lastVerified: new Date()
       },
-      lastVerified: new Date(),
       $push: {
         verificationHistory: {
           verifiedAt: new Date(),
@@ -436,12 +479,15 @@ exports.verifyProfile = async (req, res) => {
             fakeProfileProb: confidence.fake_profile_prob
           }
         }
+      },
+      $setOnInsert: {
+        userId: userId
       }
     };
 
     const profileVerification = await ProfileVerification.findOneAndUpdate(
       { userId: userId },
-      verificationData,
+      updateDoc,
       { new: true, upsert: true }
     );
 
@@ -469,10 +515,12 @@ exports.verifyProfile = async (req, res) => {
 
   } catch (error) {
     console.error("Profile verification error:", error);
-    res.status(500).json({
+    const resp = {
       success: false,
       message: "Error verifying profile",
       error: error.message
-    });
+    };
+    if (process.env.NODE_ENV !== 'production') resp.stack = error.stack;
+    res.status(500).json(resp);
   }
 };
