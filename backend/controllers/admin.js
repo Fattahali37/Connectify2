@@ -376,14 +376,26 @@ exports.verifyProfile = async (req, res) => {
       });
     }
 
-    // Fetch features from ProfileFeature collection
-    const profileFeature = await ProfileFeature.findOne({ user: userId });
-    console.log('[verifyProfile] profileFeature fetched:', !!profileFeature);
+    // Fetch features from ProfileFeature collection (MongoDB Atlas)
+    let profileFeature = await ProfileFeature.findOne({ user: userId });
+    console.log('[verifyProfile] profileFeature fetched from MongoDB:', !!profileFeature);
+    
+    // If ProfileFeature doesn't exist, generate it automatically
     if (!profileFeature) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile features not found for user."
-      });
+      console.log('[verifyProfile] ProfileFeature not found, generating from user data...');
+      const { upsertFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
+      
+      try {
+        profileFeature = await upsertFeaturesFromUserDoc(user);
+        console.log('[verifyProfile] ProfileFeature generated and saved to MongoDB:', !!profileFeature);
+      } catch (genError) {
+        console.error('[verifyProfile] Failed to generate ProfileFeature:', genError);
+        return res.status(500).json({
+          success: false,
+          message: "Profile features not found and failed to generate automatically.",
+          error: genError.message
+        });
+      }
     }
 
     // Prepare features object (remove _id, user, createdAt, __v, fake)
@@ -391,7 +403,11 @@ exports.verifyProfile = async (req, res) => {
       _id, user: pfUser, createdAt, __v, fake, ...features
     } = profileFeature.toObject();
 
-    console.log('[verifyProfile] features sent to ML service:', features);
+    console.log('[verifyProfile] ========================================');
+    console.log('[verifyProfile] Features fetched from MongoDB ProfileFeature collection:');
+    console.log('[verifyProfile] User ID:', userId);
+    console.log('[verifyProfile] Features:', JSON.stringify(features, null, 2));
+    console.log('[verifyProfile] ========================================');
 
     // Validate features shape before calling ML service
     const expectedKeys = [
@@ -428,11 +444,16 @@ exports.verifyProfile = async (req, res) => {
     }
     console.log('[verifyProfile] features after coercion:', features);
 
-    // Call Python Flask API
+    // Call Python Flask API with features from MongoDB
     const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
     let predictionResponse;
     try {
-      console.log('[verifyProfile] Calling ML service at', FLASK_API_URL + '/predict');
+      console.log('[verifyProfile] ========================================');
+      console.log('[verifyProfile] Sending features to Flask ML API');
+      console.log('[verifyProfile] API URL:', FLASK_API_URL + '/predict');
+      console.log('[verifyProfile] Features from MongoDB Atlas being sent:', JSON.stringify(features, null, 2));
+      console.log('[verifyProfile] ========================================');
+      
       predictionResponse = await axios.post(`${FLASK_API_URL}/predict`, features, {
         headers: {
           'Content-Type': 'application/json',
@@ -441,7 +462,7 @@ exports.verifyProfile = async (req, res) => {
         timeout: 10000
       });
       console.log('[verifyProfile] ML service response status:', predictionResponse.status);
-      console.log('[verifyProfile] ML service response data:', predictionResponse.data);
+      console.log('[verifyProfile] ML service response data:', JSON.stringify(predictionResponse.data, null, 2));
     } catch (apiError) {
       console.error("Flask API Error:", apiError.message);
       console.error("Flask API Response:", apiError.response?.data);
@@ -453,13 +474,80 @@ exports.verifyProfile = async (req, res) => {
       });
     }
 
-    const prediction = predictionResponse.data.prediction;
-    const confidence = predictionResponse.data.confidence;
-    const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
+    // Validate Flask API response structure
+    if (!predictionResponse.data) {
+      console.error('[verifyProfile] Flask API returned empty response');
+      return res.status(500).json({
+        success: false,
+        message: "ML service returned invalid response (no data)",
+        receivedData: predictionResponse.data
+      });
+    }
 
-    // Update or create ProfileVerification document
-    const updateDoc = {
-      $set: {
+    const responseData = predictionResponse.data;
+    
+    // Validate prediction and confidence fields
+    if (!responseData.prediction || typeof responseData.prediction.is_fake === 'undefined') {
+      console.error('[verifyProfile] Flask API response missing prediction.is_fake:', responseData);
+      return res.status(500).json({
+        success: false,
+        message: "ML service returned invalid response format (missing prediction.is_fake)",
+        receivedData: responseData
+      });
+    }
+
+    if (!responseData.confidence || 
+        typeof responseData.confidence.real_profile_prob === 'undefined' || 
+        typeof responseData.confidence.fake_profile_prob === 'undefined') {
+      console.error('[verifyProfile] Flask API response missing confidence data:', responseData);
+      return res.status(500).json({
+        success: false,
+        message: "ML service returned invalid response format (missing confidence data)",
+        receivedData: responseData
+      });
+    }
+
+    const prediction = responseData.prediction;
+    const confidence = responseData.confidence;
+    const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
+    
+    console.log('[verifyProfile] ========================================');
+    console.log('[verifyProfile] ML Prediction Results:');
+    console.log('[verifyProfile] Status:', verificationStatus.toUpperCase());
+    console.log('[verifyProfile] is_fake:', prediction.is_fake);
+    console.log('[verifyProfile] Real Probability:', (confidence.real_profile_prob * 100).toFixed(2) + '%');
+    console.log('[verifyProfile] Fake Probability:', (confidence.fake_profile_prob * 100).toFixed(2) + '%');
+    console.log('[verifyProfile] ========================================');
+
+    // Check if ProfileVerification already exists
+    let profileVerification = await ProfileVerification.findOne({ userId: userId });
+    
+    const verificationHistoryEntry = {
+      verifiedAt: new Date(),
+      status: verificationStatus,
+      confidence: {
+        realProfileProb: confidence.real_profile_prob,
+        fakeProfileProb: confidence.fake_profile_prob
+      }
+    };
+
+    if (profileVerification) {
+      // Update existing document
+      console.log('[verifyProfile] Updating existing ProfileVerification document');
+      profileVerification.features = features;
+      profileVerification.verificationStatus = verificationStatus;
+      profileVerification.isFake = prediction.is_fake;
+      profileVerification.confidence = {
+        realProfileProb: confidence.real_profile_prob,
+        fakeProfileProb: confidence.fake_profile_prob
+      };
+      profileVerification.lastVerified = new Date();
+      profileVerification.verificationHistory.push(verificationHistoryEntry);
+      await profileVerification.save();
+    } else {
+      // Create new document
+      console.log('[verifyProfile] Creating new ProfileVerification document');
+      profileVerification = await ProfileVerification.create({
         userId: userId,
         features: features,
         verificationStatus: verificationStatus,
@@ -468,28 +556,10 @@ exports.verifyProfile = async (req, res) => {
           realProfileProb: confidence.real_profile_prob,
           fakeProfileProb: confidence.fake_profile_prob
         },
-        lastVerified: new Date()
-      },
-      $push: {
-        verificationHistory: {
-          verifiedAt: new Date(),
-          status: verificationStatus,
-          confidence: {
-            realProfileProb: confidence.real_profile_prob,
-            fakeProfileProb: confidence.fake_profile_prob
-          }
-        }
-      },
-      $setOnInsert: {
-        userId: userId
-      }
-    };
-
-    const profileVerification = await ProfileVerification.findOneAndUpdate(
-      { userId: userId },
-      updateDoc,
-      { new: true, upsert: true }
-    );
+        lastVerified: new Date(),
+        verificationHistory: [verificationHistoryEntry]
+      });
+    }
 
     // Return updated user data with verification status
     res.json({
@@ -514,7 +584,13 @@ exports.verifyProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Profile verification error:", error);
+    console.error('[verifyProfile] ========================================');
+    console.error('[verifyProfile] ERROR during profile verification');
+    console.error('[verifyProfile] User ID:', req.params.userId);
+    console.error('[verifyProfile] Error message:', error.message);
+    console.error('[verifyProfile] Error stack:', error.stack);
+    console.error('[verifyProfile] ========================================');
+    
     const resp = {
       success: false,
       message: "Error verifying profile",
