@@ -41,6 +41,15 @@ export default function ChatBox({ roomId, deleteRoom }) {
 
     useEffect(() => {
         setDetails(false)
+        
+        // Mark room as seen in localStorage
+        const lastSeenKey = `lastSeen_${roomId}_${context.auth._id}`;
+        localStorage.setItem(lastSeenKey, new Date().toISOString());
+        
+        // Update last seen when user opens this chat room
+        api.put(`${url}/chat/update-last-seen`, { roomId })
+            .catch((err) => console.error('Error updating last seen:', err));
+        
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const messages = [];
             querySnapshot.forEach((doc) => {
@@ -49,7 +58,7 @@ export default function ChatBox({ roomId, deleteRoom }) {
             setSnapShotMessages(messages)
         });
         return () => unsubscribe()
-    }, [q, roomId])
+    }, [q, roomId, context.auth._id])
 
     useEffect(() => {
         updateScroll()
@@ -87,12 +96,19 @@ export default function ChatBox({ roomId, deleteRoom }) {
     async function sendMessage(m, file) {
         try {
             setMessage('')
+            const timestamp = new Date();
             await addDoc(collection(db, roomId), {
                 message: m,
                 uid: context.auth._id,
                 timestamp: serverTimestamp(),
                 file: file ? true : false
             });
+            
+            // Update last message timestamp in MongoDB for unread tracking
+            api.put(`${url}/chat/update-last-message`, { 
+                roomId, 
+                timestamp: timestamp.toISOString() 
+            }).catch((err) => console.error('Error updating last message:', err));
         } catch (e) {
             console.error(e);
         }
