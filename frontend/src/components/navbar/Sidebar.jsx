@@ -100,6 +100,7 @@ export const Sidebar = ({ active }) => {
 
   // Track unread notification count
   const [notificationCount, setNotificationCount] = useState(0);
+  const [requestCount, setRequestCount] = useState(0);
 
   // Debug: Log badge counts whenever they change
   useEffect(() => {
@@ -107,10 +108,12 @@ export const Sidebar = ({ active }) => {
       "Badge counts - Messages:",
       messageCount,
       "Notifications:",
-      notificationCount
+      notificationCount,
+      "Requests:",
+      requestCount
     );
     console.log("Auth user:", context.auth?._id);
-  }, [messageCount, notificationCount, context.auth]);
+  }, [messageCount, notificationCount, requestCount, context.auth]);
 
   useEffect(() => {
     if (!context.auth) return;
@@ -134,6 +137,38 @@ export const Sidebar = ({ active }) => {
     checkNotifications();
     const interval = setInterval(checkNotifications, 10000); // Check every 10 seconds
     return () => clearInterval(interval);
+  }, [context.auth]);
+
+  // Track follow request count
+  useEffect(() => {
+    if (!context.auth) return;
+
+    const checkFollowRequests = async () => {
+      try {
+        const response = await api.get(`${url}/user/follow-requests/count`);
+        console.log("Follow request count response:", response.data);
+        if (response.data && response.data.success) {
+          setRequestCount(response.data.count);
+          console.log("Setting request count to:", response.data.count);
+        }
+      } catch (err) {
+        console.error("Error fetching follow requests:", err);
+      }
+    };
+
+    checkFollowRequests();
+    const interval = setInterval(checkFollowRequests, 10000); // Check every 10 seconds
+
+    // Listen for custom event when requests are updated
+    const handleRequestUpdate = () => {
+      checkFollowRequests();
+    };
+    window.addEventListener("requestCountUpdated", handleRequestUpdate);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("requestCountUpdated", handleRequestUpdate);
+    };
   }, [context.auth]);
 
   // Track unread message count
@@ -338,6 +373,44 @@ export const Sidebar = ({ active }) => {
               </Badge>
               <span>Notifications</span>
             </button>
+
+            {/* Follow Requests Link - Only show if user has private account */}
+            {context?.auth?.private && (
+              <NavLink
+                to="/followrequests"
+                className={`sidebar-item ${
+                  active === "requests" && !innerActive ? "active" : ""
+                }`}
+              >
+                <Badge
+                  badgeContent={requestCount}
+                  color="error"
+                  max={99}
+                  showZero={false}
+                >
+                  <svg
+                    aria-label="Follow Requests"
+                    className="sidebar-icon"
+                    color="#ffffff"
+                    fill="none"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                  </svg>
+                </Badge>
+                <span>Requests</span>
+              </NavLink>
+            )}
 
             <button
               className={`sidebar-item sidebar-button ${
