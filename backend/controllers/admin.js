@@ -3,7 +3,7 @@ const Post = require("../models/Post");
 const Room = require("../models/Room");
 const Story = require("../models/Story");
 const DeletedUser = require("../models/DeletedUser");
-const ProfileVerification = require("../models/ProfileVerification");
+const ProfileVerification = require("../models/ProfileFeature");
 const axios = require("axios");
 
 // Get all users (admin only)

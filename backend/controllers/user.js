@@ -177,10 +177,14 @@ exports.updateUser = async (req, res) => {
       const latestUser = await UserModel.findOne({ _id: userId });
       const { upsertFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
       await upsertFeaturesFromUserDoc(latestUser);
+      // return the updated user so frontend can update state
+      return res.send({ success: true, user: latestUser });
     } catch (e) {
       console.error('failed to schedule profile feature update', e.message || e);
+      // still attempt to return the latest user if available
+      const latestUser = await User.findOne({ _id: userId });
+      return res.send({ success: true, user: latestUser });
     }
-    res.send({ success: true, message: 'User updated' });
   } catch (err) {
     res.send({
       success: false,

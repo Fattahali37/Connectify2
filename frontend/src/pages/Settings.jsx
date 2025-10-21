@@ -62,13 +62,18 @@ export const Settings = () => {
     api
       .put(`${url}/user`, data)
       .then((res) => {
-        if (res.data) {
+        if (res.data?.success) {
           context.throwSuccess("updated");
-          context.auth = {
-            ...context.auth,
-            ...data,
-          };
-          localStorage.setItem("user", JSON.stringify(context.auth));
+          const updatedUser = res.data.user || { ...context.auth, ...data };
+          // update context state properly so UI re-renders
+          context.setAuth(updatedUser);
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+        } else if (res.data) {
+          // fallback: server returned non-standard payload
+          context.throwSuccess("updated");
+          const updatedUser = { ...context.auth, ...data };
+          context.setAuth(updatedUser);
+          localStorage.setItem("user", JSON.stringify(updatedUser));
         }
       })
       .catch((err) => {

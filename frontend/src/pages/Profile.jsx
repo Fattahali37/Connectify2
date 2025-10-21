@@ -87,7 +87,8 @@ export const Profile = ({ findStory, post = true }) => {
 
   const [open, setOpen] = React.useState(false);
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (tab) => {
+    setToggle(tab);
     setOpen(true);
   };
   const handleClose = () => {
