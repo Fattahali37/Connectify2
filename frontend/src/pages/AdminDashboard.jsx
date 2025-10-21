@@ -57,6 +57,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
   const [verifyingUsers, setVerifyingUsers] = useState({});
+  const [detailsDialog, setDetailsDialog] = useState({ open: false, user: null, features: null, loading: false });
   const [stats, setStats] = useState({
     userGrowth: [],
     activityStats: null,
@@ -201,6 +202,21 @@ export default function AdminDashboard() {
       throwErr(error.response?.data?.message || "Failed to verify profile");
     } finally {
       setVerifyingUsers((prev) => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  const handleShowDetails = async (user) => {
+    setDetailsDialog({ open: true, user, features: null, loading: true });
+    try {
+      const response = await api.get(`${url}/api/admin/users/${user._id}/profile-features`);
+      setDetailsDialog((prev) => ({ 
+        ...prev, 
+        features: response.data.features,
+        loading: false 
+      }));
+    } catch (error) {
+      throwErr(error.response?.data?.message || "Failed to fetch profile features");
+      setDetailsDialog({ open: false, user: null, features: null, loading: false });
     }
   };
 
@@ -590,6 +606,19 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-2">
                             <button
+                              onClick={() => handleShowDetails(user)}
+                              style={{
+                                padding: "6px 10px",
+                                fontSize: 12,
+                                borderRadius: 8,
+                                background: "linear-gradient(135deg, rgb(139,92,246) 0%, rgb(124,58,237) 100%)",
+                                color: "white",
+                                border: "none",
+                              }}
+                            >
+                              Details
+                            </button>
+                            <button
                               onClick={() =>
                                 user.status === "active"
                                   ? handleBlockUser(user._id)
@@ -782,6 +811,123 @@ export default function AdminDashboard() {
             }}
           >
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Profile Features Details Dialog */}
+      <Dialog
+        open={detailsDialog.open}
+        onClose={() => setDetailsDialog({ open: false, user: null, features: null, loading: false })}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          style: {
+            backgroundColor: "var(--bg-primary)",
+            borderRadius: "1rem",
+            border: "1px solid var(--border)",
+          },
+        }}
+      >
+        <DialogTitle style={{ color: "#fff", fontWeight: "bold", borderBottom: "1px solid var(--border)" }}>
+          Profile Features - {detailsDialog.user?.username}
+        </DialogTitle>
+        <DialogContent style={{ padding: "24px" }}>
+          {detailsDialog.loading ? (
+            <div className="flex items-center justify-center py-12">
+              <CircularProgress size={40} sx={{ color: "var(--text-primary)" }} />
+            </div>
+          ) : detailsDialog.features ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Profile Picture</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['profile pic'] === 1 ? "Yes" : "No"}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Private Account</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['private'] === 1 ? "Yes" : "No"}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Posts Count</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['#posts']}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Followers</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['#followers']}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Following</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['#following']}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Username/Length Ratio</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['nums/length username']?.toFixed(2) || '0.00'}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Fullname Words</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['fullname words']}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Fullname/Length Ratio</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['nums/length fullname']?.toFixed(2) || '0.00'}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Name Equals Username</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['name==username'] === 1 ? "Yes" : "No"}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Description Length</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['description length']}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">External URL</p>
+                  <p className="text-white text-lg font-semibold">
+                    {detailsDialog.features['external URL'] === 1 ? "Yes" : "No"}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                  <p className="text-slate-400 text-sm mb-1">Fake Profile Flag</p>
+                  <p className={`text-lg font-semibold ${detailsDialog.features['fake'] === 1 ? 'text-red-400' : 'text-green-400'}`}>
+                    {detailsDialog.features['fake'] === 1 ? "Flagged" : "Not Flagged"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-slate-400 text-center py-8">No profile features found for this user.</p>
+          )}
+        </DialogContent>
+        <DialogActions style={{ padding: "16px 24px", borderTop: "1px solid var(--border)" }}>
+          <Button
+            onClick={() => setDetailsDialog({ open: false, user: null, features: null, loading: false })}
+            variant="contained"
+            style={{
+              background: "var(--gradient-primary)",
+              color: "white",
+            }}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>

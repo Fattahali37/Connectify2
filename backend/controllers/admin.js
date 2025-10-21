@@ -524,3 +524,51 @@ exports.verifyProfile = async (req, res) => {
     res.status(500).json(resp);
   }
 };
+
+// Get user profile features
+exports.getUserProfileFeatures = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Fetch user to ensure they exist
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Fetch profile features
+    const profileFeature = await ProfileFeature.findOne({ user: userId });
+    if (!profileFeature) {
+      return res.status(404).json({
+        success: false,
+        message: "Profile features not found for this user"
+      });
+    }
+
+    // Remove internal fields and return features
+    const {
+      _id, user: pfUser, createdAt, __v, ...features
+    } = profileFeature.toObject();
+
+    res.json({
+      success: true,
+      features: features,
+      user: {
+        _id: user._id,
+        username: user.username,
+        name: user.name
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching profile features:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching profile features",
+      error: error.message
+    });
+  }
+};
