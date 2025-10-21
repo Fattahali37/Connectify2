@@ -412,8 +412,29 @@ exports.verifyProfile = async (req, res) => {
       });
     }
 
+    // Validate Flask API response structure
+    if (!predictionResponse.data || !predictionResponse.data.prediction || !predictionResponse.data.confidence) {
+      console.error("Invalid Flask API response structure:", predictionResponse.data);
+      return res.status(500).json({
+        success: false,
+        message: "Invalid response from ML verification service",
+        receivedData: predictionResponse.data
+      });
+    }
+
     const prediction = predictionResponse.data.prediction;
     const confidence = predictionResponse.data.confidence;
+    
+    // Validate prediction structure
+    if (prediction.is_fake === undefined && prediction.is_fake !== null) {
+      console.error("Missing 'is_fake' in prediction:", prediction);
+      return res.status(500).json({
+        success: false,
+        message: "Invalid prediction format from ML service",
+        prediction: prediction
+      });
+    }
+
     const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
 
     // Update or create ProfileVerification document
