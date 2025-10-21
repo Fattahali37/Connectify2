@@ -87,6 +87,9 @@ const profileVerificationSchema = new mongoose.Schema({
       max: 1,
     },
   },
+  reasoning: {
+    type: String,
+  },
   lastVerified: {
     type: Date,
     default: Date.now,
@@ -102,6 +105,7 @@ const profileVerificationSchema = new mongoose.Schema({
         realProfileProb: Number,
         fakeProfileProb: Number,
       },
+      reasoning: String,
     },
   ],
 });
@@ -110,4 +114,7 @@ const profileVerificationSchema = new mongoose.Schema({
 profileVerificationSchema.index({ userId: 1 });
 profileVerificationSchema.index({ verificationStatus: 1 });
 
-module.exports = mongoose.model("ProfileVerification", profileVerificationSchema);
+module.exports = mongoose.model(
+  "ProfileVerification",
+  profileVerificationSchema
+);

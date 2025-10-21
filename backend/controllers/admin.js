@@ -7,17 +7,16 @@ const ProfileFeature = require("../models/ProfileFeature");
 const ProfileVerification = require("../models/ProfileVerification");
 const axios = require("axios");
 
-// Get all users (admin only)
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find({})
-      .select('-password')
-      .populate('posts')
-      .populate('followers')
-      .populate('followings')
+      .select("-password")
+      .populate("posts")
+      .populate("followers")
+      .populate("followings")
       .sort({ createdAt: -1 });
 
-    const usersWithStats = users.map(user => ({
+    const usersWithStats = users.map((user) => ({
       _id: user._id,
       username: user.username,
       name: user.name,
@@ -38,28 +37,27 @@ exports.getAllUsers = async (req, res) => {
     res.json({
       success: true,
       users: usersWithStats,
-      total: usersWithStats.length
+      total: usersWithStats.length,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error fetching users",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-// Get blocked users only
 exports.getBlockedUsers = async (req, res) => {
   try {
-    const blockedUsers = await User.find({ status: 'blocked' })
-      .select('-password')
-      .populate('posts')
-      .populate('followers')
-      .populate('followings')
+    const blockedUsers = await User.find({ status: "blocked" })
+      .select("-password")
+      .populate("posts")
+      .populate("followers")
+      .populate("followings")
       .sort({ createdAt: -1 });
 
-    const usersWithStats = blockedUsers.map(user => ({
+    const usersWithStats = blockedUsers.map((user) => ({
       _id: user._id,
       username: user.username,
       name: user.name,
@@ -80,13 +78,13 @@ exports.getBlockedUsers = async (req, res) => {
     res.json({
       success: true,
       users: usersWithStats,
-      total: usersWithStats.length
+      total: usersWithStats.length,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error fetching blocked users",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -96,18 +94,18 @@ exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     // Store username and email in deleted users collection to prevent reuse
     const deletedUser = new DeletedUser({
       username: user.username,
-      email: user.email
+      email: user.email,
     });
     await deletedUser.save();
 
@@ -131,10 +129,7 @@ exports.deleteUser = async (req, res) => {
     );
 
     // Remove user from other users' notifications
-    await User.updateMany(
-      {},
-      { $pull: { notifications: { user: userId } } }
-    );
+    await User.updateMany({}, { $pull: { notifications: { user: userId } } });
 
     // Remove user from other users' request arrays
     await User.updateMany(
@@ -151,13 +146,13 @@ exports.deleteUser = async (req, res) => {
 
     res.json({
       success: true,
-      message: "User deleted successfully"
+      message: "User deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error deleting user",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -168,27 +163,27 @@ exports.blockUser = async (req, res) => {
     const userId = req.params.id;
     const user = await User.findByIdAndUpdate(
       userId,
-      { status: 'blocked' },
+      { status: "blocked" },
       { new: true }
-    ).select('-password');
+    ).select("-password");
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     res.json({
       success: true,
       message: "User blocked successfully",
-      user
+      user,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error blocking user",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -199,27 +194,27 @@ exports.unblockUser = async (req, res) => {
     const userId = req.params.id;
     const user = await User.findByIdAndUpdate(
       userId,
-      { status: 'active' },
+      { status: "active" },
       { new: true }
-    ).select('-password');
+    ).select("-password");
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     res.json({
       success: true,
       message: "User unblocked successfully",
-      user
+      user,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error unblocking user",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -227,20 +222,30 @@ exports.unblockUser = async (req, res) => {
 // Get user growth statistics
 exports.getUserGrowthStats = async (req, res) => {
   try {
-    const { period = 'month' } = req.query;
-    
+    const { period = "month" } = req.query;
+
     let groupBy, dateFormat;
     switch (period) {
-      case 'day':
-        groupBy = { year: { $year: "$createdAt" }, month: { $month: "$createdAt" }, day: { $dayOfMonth: "$createdAt" } };
+      case "day":
+        groupBy = {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" },
+          day: { $dayOfMonth: "$createdAt" },
+        };
         dateFormat = "%Y-%m-%d";
         break;
-      case 'week':
-        groupBy = { year: { $year: "$createdAt" }, week: { $week: "$createdAt" } };
+      case "week":
+        groupBy = {
+          year: { $year: "$createdAt" },
+          week: { $week: "$createdAt" },
+        };
         dateFormat = "%Y-W%U";
         break;
       default: // month
-        groupBy = { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } };
+        groupBy = {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" },
+        };
         dateFormat = "%Y-%m";
         break;
     }
@@ -250,28 +255,35 @@ exports.getUserGrowthStats = async (req, res) => {
         $group: {
           _id: groupBy,
           count: { $sum: 1 },
-          date: { $first: "$createdAt" }
-        }
+          date: { $first: "$createdAt" },
+        },
       },
-      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.week": 1 } }
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.week": 1 } },
     ]);
 
-    const formattedData = userGrowth.map(item => ({
-      date: new Date(item._id.year, (item._id.month || 1) - 1, item._id.day || 1, item._id.week || 0),
+    const formattedData = userGrowth.map((item) => ({
+      date: new Date(
+        item._id.year,
+        (item._id.month || 1) - 1,
+        item._id.day || 1,
+        item._id.week || 0
+      ),
       count: item.count,
-      label: `${item._id.year}-${String(item._id.month || 1).padStart(2, '0')}${item._id.day ? `-${String(item._id.day).padStart(2, '0')}` : ''}${item._id.week ? `-W${String(item._id.week).padStart(2, '0')}` : ''}`
+      label: `${item._id.year}-${String(item._id.month || 1).padStart(2, "0")}${
+        item._id.day ? `-${String(item._id.day).padStart(2, "0")}` : ""
+      }${item._id.week ? `-W${String(item._id.week).padStart(2, "0")}` : ""}`,
     }));
 
     res.json({
       success: true,
       data: formattedData,
-      period
+      period,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error fetching user growth stats",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -284,17 +296,17 @@ exports.getUserActivityStats = async (req, res) => {
       {
         $group: {
           _id: "$status",
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     // User activity levels based on post count
     const activityStats = await User.aggregate([
       {
         $addFields: {
-          postsCount: { $size: "$posts" }
-        }
+          postsCount: { $size: "$posts" },
+        },
       },
       {
         $bucket: {
@@ -303,10 +315,18 @@ exports.getUserActivityStats = async (req, res) => {
           default: "high",
           output: {
             count: { $sum: 1 },
-            category: { $push: { $cond: [{ $lt: ["$postsCount", 5] }, "low", { $cond: [{ $lt: ["$postsCount", 20] }, "medium", "high"] }] } }
-          }
-        }
-      }
+            category: {
+              $push: {
+                $cond: [
+                  { $lt: ["$postsCount", 5] },
+                  "low",
+                  { $cond: [{ $lt: ["$postsCount", 20] }, "medium", "high"] },
+                ],
+              },
+            },
+          },
+        },
+      },
     ]);
 
     // Online vs Offline users
@@ -314,9 +334,9 @@ exports.getUserActivityStats = async (req, res) => {
       {
         $group: {
           _id: "$online",
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     // Private vs Public accounts
@@ -324,9 +344,9 @@ exports.getUserActivityStats = async (req, res) => {
       {
         $group: {
           _id: "$private",
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     res.json({
@@ -335,14 +355,14 @@ exports.getUserActivityStats = async (req, res) => {
         statusDistribution: statusStats,
         activityLevels: activityStats,
         onlineDistribution: onlineStats,
-        privacyDistribution: privacyStats
-      }
+        privacyDistribution: privacyStats,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error fetching user activity stats",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -365,188 +385,254 @@ const countWords = (str) => {
 exports.verifyProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
-    console.log('[verifyProfile] Start verification for userId:', userId);
+    console.log("[verifyProfile] Start verification for userId:", userId);
 
     // Fetch user data for response (not for features)
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
-    // Fetch features from ProfileFeature collection (MongoDB Atlas)
     let profileFeature = await ProfileFeature.findOne({ user: userId });
-    console.log('[verifyProfile] profileFeature fetched from MongoDB:', !!profileFeature);
-    
+    console.log(
+      "[verifyProfile] profileFeature fetched from MongoDB:",
+      !!profileFeature
+    );
+
     // If ProfileFeature doesn't exist, generate it automatically
     if (!profileFeature) {
-      console.log('[verifyProfile] ProfileFeature not found, generating from user data...');
-      const { upsertFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
-      
+      console.log(
+        "[verifyProfile] ProfileFeature not found, generating from user data..."
+      );
+      const {
+        upsertFeaturesFromUserDoc,
+      } = require("../utils/profileFeatureHelper");
+
       try {
         profileFeature = await upsertFeaturesFromUserDoc(user);
-        console.log('[verifyProfile] ProfileFeature generated and saved to MongoDB:', !!profileFeature);
+        console.log(
+          "[verifyProfile] ProfileFeature generated and saved to MongoDB:",
+          !!profileFeature
+        );
       } catch (genError) {
-        console.error('[verifyProfile] Failed to generate ProfileFeature:', genError);
+        console.error(
+          "[verifyProfile] Failed to generate ProfileFeature:",
+          genError
+        );
         return res.status(500).json({
           success: false,
-          message: "Profile features not found and failed to generate automatically.",
-          error: genError.message
+          message:
+            "Profile features not found and failed to generate automatically.",
+          error: genError.message,
         });
       }
     }
 
     // Prepare features object (remove _id, user, createdAt, __v, fake)
     const {
-      _id, user: pfUser, createdAt, __v, fake, ...features
+      _id,
+      user: pfUser,
+      createdAt,
+      __v,
+      fake,
+      ...features
     } = profileFeature.toObject();
 
-    console.log('[verifyProfile] ========================================');
-    console.log('[verifyProfile] Features fetched from MongoDB ProfileFeature collection:');
-    console.log('[verifyProfile] User ID:', userId);
-    console.log('[verifyProfile] Features:', JSON.stringify(features, null, 2));
-    console.log('[verifyProfile] ========================================');
+    console.log("[verifyProfile] ========================================");
+    console.log(
+      "[verifyProfile] Features fetched from MongoDB ProfileFeature collection:"
+    );
+    console.log("[verifyProfile] User ID:", userId);
+    console.log("[verifyProfile] Features:", JSON.stringify(features, null, 2));
+    console.log("[verifyProfile] ========================================");
 
     // Validate features shape before calling ML service
     const expectedKeys = [
-      'profile pic',
-      'nums/length username',
-      'fullname words',
-      'nums/length fullname',
-      'name==username',
-      'description length',
-      'external URL',
-      'private',
-      '#posts',
-      '#followers',
-      '#following'
+      "profile pic",
+      "nums/length username",
+      "fullname words",
+      "nums/length fullname",
+      "name==username",
+      "description length",
+      "external URL",
+      "private",
+      "#posts",
+      "#followers",
+      "#following",
     ];
 
-    const missingKeys = expectedKeys.filter(k => !(k in features));
+    const missingKeys = expectedKeys.filter((k) => !(k in features));
     if (missingKeys.length) {
-      console.error('[verifyProfile] Missing ML feature keys for user', userId, missingKeys);
+      console.error(
+        "[verifyProfile] Missing ML feature keys for user",
+        userId,
+        missingKeys
+      );
       return res.status(400).json({
         success: false,
-        message: 'Missing required ML feature keys',
-        missing: missingKeys
+        message: "Missing required ML feature keys",
+        missing: missingKeys,
       });
     }
 
     // Coerce values to numbers and guard against NaN
     for (const k of expectedKeys) {
       const v = features[k];
-      if (typeof v !== 'number') {
+      if (typeof v !== "number") {
         const coerced = Number(v);
         features[k] = Number.isFinite(coerced) ? coerced : 0;
       }
     }
-    console.log('[verifyProfile] features after coercion:', features);
+    console.log("[verifyProfile] features after coercion:", features);
 
     // Call Python Flask API with features from MongoDB
     const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
     let predictionResponse;
     try {
-      console.log('[verifyProfile] ========================================');
-      console.log('[verifyProfile] Sending features to Flask ML API');
-      console.log('[verifyProfile] API URL:', FLASK_API_URL + '/predict');
-      console.log('[verifyProfile] Features from MongoDB Atlas being sent:', JSON.stringify(features, null, 2));
-      console.log('[verifyProfile] ========================================');
-      
-      predictionResponse = await axios.post(`${FLASK_API_URL}/predict`, features, {
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        timeout: 10000
-      });
-      console.log('[verifyProfile] ML service response status:', predictionResponse.status);
-      console.log('[verifyProfile] ML service response data:', JSON.stringify(predictionResponse.data, null, 2));
+      console.log("[verifyProfile] ========================================");
+      console.log("[verifyProfile] Sending features to Flask ML API");
+      console.log("[verifyProfile] API URL:", FLASK_API_URL + "/predict");
+      console.log(
+        "[verifyProfile] Features from MongoDB Atlas being sent:",
+        JSON.stringify(features, null, 2)
+      );
+      console.log("[verifyProfile] ========================================");
+
+      predictionResponse = await axios.post(
+        `${FLASK_API_URL}/predict`,
+        features,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+          timeout: 10000,
+        }
+      );
+      console.log(
+        "[verifyProfile] ML service response status:",
+        predictionResponse.status
+      );
+      console.log(
+        "[verifyProfile] ML service response data:",
+        JSON.stringify(predictionResponse.data, null, 2)
+      );
     } catch (apiError) {
       console.error("Flask API Error:", apiError.message);
       console.error("Flask API Response:", apiError.response?.data);
       return res.status(503).json({
         success: false,
-        message: "Failed to connect to ML verification service. Please ensure the Flask API is running at " + FLASK_API_URL,
+        message:
+          "Failed to connect to ML verification service. Please ensure the Flask API is running at " +
+          FLASK_API_URL,
         error: apiError.message,
-        details: apiError.response?.data
+        details: apiError.response?.data,
       });
     }
 
     // Validate Flask API response structure
     if (!predictionResponse.data) {
-      console.error('[verifyProfile] Flask API returned empty response');
+      console.error("[verifyProfile] Flask API returned empty response");
       return res.status(500).json({
         success: false,
         message: "ML service returned invalid response (no data)",
-        receivedData: predictionResponse.data
+        receivedData: predictionResponse.data,
       });
     }
 
     const responseData = predictionResponse.data;
-    
+
     // Validate prediction and confidence fields
-    if (!responseData.prediction || typeof responseData.prediction.is_fake === 'undefined') {
-      console.error('[verifyProfile] Flask API response missing prediction.is_fake:', responseData);
+    if (
+      !responseData.prediction ||
+      typeof responseData.prediction.is_fake === "undefined"
+    ) {
+      console.error(
+        "[verifyProfile] Flask API response missing prediction.is_fake:",
+        responseData
+      );
       return res.status(500).json({
         success: false,
-        message: "ML service returned invalid response format (missing prediction.is_fake)",
-        receivedData: responseData
+        message:
+          "ML service returned invalid response format (missing prediction.is_fake)",
+        receivedData: responseData,
       });
     }
 
-    if (!responseData.confidence || 
-        typeof responseData.confidence.real_profile_prob === 'undefined' || 
-        typeof responseData.confidence.fake_profile_prob === 'undefined') {
-      console.error('[verifyProfile] Flask API response missing confidence data:', responseData);
+    if (
+      !responseData.confidence ||
+      typeof responseData.confidence.real_profile_prob === "undefined" ||
+      typeof responseData.confidence.fake_profile_prob === "undefined"
+    ) {
+      console.error(
+        "[verifyProfile] Flask API response missing confidence data:",
+        responseData
+      );
       return res.status(500).json({
         success: false,
-        message: "ML service returned invalid response format (missing confidence data)",
-        receivedData: responseData
+        message:
+          "ML service returned invalid response format (missing confidence data)",
+        receivedData: responseData,
       });
     }
 
     const prediction = responseData.prediction;
     const confidence = responseData.confidence;
+    const reasoning = responseData.reasoning || "No reasoning provided";
     const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
-    
-    console.log('[verifyProfile] ========================================');
-    console.log('[verifyProfile] ML Prediction Results:');
-    console.log('[verifyProfile] Status:', verificationStatus.toUpperCase());
-    console.log('[verifyProfile] is_fake:', prediction.is_fake);
-    console.log('[verifyProfile] Real Probability:', (confidence.real_profile_prob * 100).toFixed(2) + '%');
-    console.log('[verifyProfile] Fake Probability:', (confidence.fake_profile_prob * 100).toFixed(2) + '%');
-    console.log('[verifyProfile] ========================================');
+
+    console.log("[verifyProfile] ========================================");
+    console.log("[verifyProfile] ML Prediction Results:");
+    console.log("[verifyProfile] Status:", verificationStatus.toUpperCase());
+    console.log("[verifyProfile] is_fake:", prediction.is_fake);
+    console.log(
+      "[verifyProfile] Real Probability:",
+      (confidence.real_profile_prob * 100).toFixed(2) + "%"
+    );
+    console.log(
+      "[verifyProfile] Fake Probability:",
+      (confidence.fake_profile_prob * 100).toFixed(2) + "%"
+    );
+    console.log("[verifyProfile] Reasoning:", reasoning);
+    console.log("[verifyProfile] ========================================");
 
     // Check if ProfileVerification already exists
-    let profileVerification = await ProfileVerification.findOne({ userId: userId });
-    
+    let profileVerification = await ProfileVerification.findOne({
+      userId: userId,
+    });
+
     const verificationHistoryEntry = {
       verifiedAt: new Date(),
       status: verificationStatus,
       confidence: {
         realProfileProb: confidence.real_profile_prob,
-        fakeProfileProb: confidence.fake_profile_prob
-      }
+        fakeProfileProb: confidence.fake_profile_prob,
+      },
+      reasoning: reasoning,
     };
 
     if (profileVerification) {
       // Update existing document
-      console.log('[verifyProfile] Updating existing ProfileVerification document');
+      console.log(
+        "[verifyProfile] Updating existing ProfileVerification document"
+      );
       profileVerification.features = features;
       profileVerification.verificationStatus = verificationStatus;
       profileVerification.isFake = prediction.is_fake;
       profileVerification.confidence = {
         realProfileProb: confidence.real_profile_prob,
-        fakeProfileProb: confidence.fake_profile_prob
+        fakeProfileProb: confidence.fake_profile_prob,
       };
+      profileVerification.reasoning = reasoning;
       profileVerification.lastVerified = new Date();
       profileVerification.verificationHistory.push(verificationHistoryEntry);
       await profileVerification.save();
     } else {
       // Create new document
-      console.log('[verifyProfile] Creating new ProfileVerification document');
+      console.log("[verifyProfile] Creating new ProfileVerification document");
       profileVerification = await ProfileVerification.create({
         userId: userId,
         features: features,
@@ -554,14 +640,13 @@ exports.verifyProfile = async (req, res) => {
         isFake: prediction.is_fake,
         confidence: {
           realProfileProb: confidence.real_profile_prob,
-          fakeProfileProb: confidence.fake_profile_prob
+          fakeProfileProb: confidence.fake_profile_prob,
         },
+        reasoning: reasoning,
         lastVerified: new Date(),
-        verificationHistory: [verificationHistoryEntry]
+        verificationHistory: [verificationHistoryEntry],
       });
-    }
-
-    // Return updated user data with verification status
+    } // Return updated user data with verification status
     res.json({
       success: true,
       message: `Profile verified as ${verificationStatus}`,
@@ -570,33 +655,33 @@ exports.verifyProfile = async (req, res) => {
         isFake: prediction.is_fake,
         confidence: {
           realProfileProb: confidence.real_profile_prob,
-          fakeProfileProb: confidence.fake_profile_prob
+          fakeProfileProb: confidence.fake_profile_prob,
         },
+        reasoning: reasoning,
         features: features,
-        lastVerified: profileVerification.lastVerified
+        lastVerified: profileVerification.lastVerified,
       },
       user: {
         _id: user._id,
         username: user.username,
         name: user.name,
-        verificationStatus: verificationStatus
-      }
+        verificationStatus: verificationStatus,
+      },
     });
-
   } catch (error) {
-    console.error('[verifyProfile] ========================================');
-    console.error('[verifyProfile] ERROR during profile verification');
-    console.error('[verifyProfile] User ID:', req.params.userId);
-    console.error('[verifyProfile] Error message:', error.message);
-    console.error('[verifyProfile] Error stack:', error.stack);
-    console.error('[verifyProfile] ========================================');
-    
+    console.error("[verifyProfile] ========================================");
+    console.error("[verifyProfile] ERROR during profile verification");
+    console.error("[verifyProfile] User ID:", req.params.userId);
+    console.error("[verifyProfile] Error message:", error.message);
+    console.error("[verifyProfile] Error stack:", error.stack);
+    console.error("[verifyProfile] ========================================");
+
     const resp = {
       success: false,
       message: "Error verifying profile",
-      error: error.message
+      error: error.message,
     };
-    if (process.env.NODE_ENV !== 'production') resp.stack = error.stack;
+    if (process.env.NODE_ENV !== "production") resp.stack = error.stack;
     res.status(500).json(resp);
   }
 };
@@ -611,7 +696,7 @@ exports.getUserProfileFeatures = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
@@ -620,13 +705,17 @@ exports.getUserProfileFeatures = async (req, res) => {
     if (!profileFeature) {
       return res.status(404).json({
         success: false,
-        message: "Profile features not found for this user"
+        message: "Profile features not found for this user",
       });
     }
 
     // Remove internal fields and return features
     const {
-      _id, user: pfUser, createdAt, __v, ...features
+      _id,
+      user: pfUser,
+      createdAt,
+      __v,
+      ...features
     } = profileFeature.toObject();
 
     res.json({
@@ -635,16 +724,15 @@ exports.getUserProfileFeatures = async (req, res) => {
       user: {
         _id: user._id,
         username: user.username,
-        name: user.name
-      }
+        name: user.name,
+      },
     });
-
   } catch (error) {
     console.error("Error fetching profile features:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching profile features",
-      error: error.message
+      error: error.message,
     });
   }
 };
