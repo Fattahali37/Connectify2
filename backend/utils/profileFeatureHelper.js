@@ -6,9 +6,9 @@ function computeFeaturesFromUserDoc(user) {
     user: user._id,
     // dataset fields
     'profile pic': user.avatar ? 1 : 0,
-    'nums/length username': Math.min(1, (user.username ? user.username.length : 0) / 30),
+    'nums/length username': Math.min(1, (user.username ? user.username.length : 0) / 50),
     'fullname words': user.name ? user.name.trim().split(/\s+/).filter(Boolean).length : 0,
-    'nums/length fullname': Math.min(1, (user.name ? user.name.replace(/\s+/g, '').length : 0) / 30),
+    'nums/length fullname': Math.min(1, (user.name ? user.name.replace(/\s+/g, '').length : 0) / 50),
     'name==username': user.name ? (user.name.split(" ").join("").toLowerCase() === (user.username || '').toLowerCase() ? 1 : 0) : 0,
     'description length': user.bio ? user.bio.length : 0,
     'external URL': user.website && user.website.trim().length > 0 ? 1 : 0,
