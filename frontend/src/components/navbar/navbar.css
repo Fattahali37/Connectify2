@@ -1,34 +1,41 @@
 .navbar {
-    @apply fixed top-0 w-full z-50 bg-dark-primary border-b border-dark-border;
+    width: 100%;
     height: 60px;
-}
-
-.nav {
-    @apply flex flex-row justify-between items-center h-full;
-}
-
-.searchbar {
-    @apply hidden md:block;
+    border-bottom: 1.75px solid var(--border);
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 999;;
 }
 
 .icons {
-    @apply flex flex-row items-center gap-4;
+    width: 25%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo{
+    width: 28%;
 }
 
-.icons svg {
-    @apply w-6 h-6 text-dark-text-primary cursor-pointer hover:text-dark-text-secondary transition-colors;
+.search {
+    height: 30px;
+    width: 259px;
+    border-radius: 7px;
+    padding: 5px 9px;
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+}
+
+input {
+    background-color: transparent;
 }
 
 .no-style {
-    @apply bg-transparent border-0 outline-none cursor-pointer p-0;
-}
-
-@media screen and (max-width: 850px) {
-    .navbar {
-        @apply bottom-0 top-auto border-t border-b-0;
-    }
-
-    .icons {
-        @apply w-full justify-around gap-2;
-    }
+    background-color: transparent;
+    outline: none;
+    border: none;
+    cursor: pointer;
 }
