@@ -9,7 +9,10 @@ const {
   getUserGrowthStats,
   getUserActivityStats,
   verifyProfile,
-  getUserProfileFeatures
+  getUserProfileFeatures,
+  getVerificationSettings,
+  updateVerificationSettings,
+  runAutoVerification
 } = require("../controllers/admin");
 const { requireAdmin } = require("../middlewares/adminAuth");
 
@@ -42,5 +45,10 @@ router.get("/users/:userId/profile-features", getUserProfileFeatures);
 // Analytics routes
 router.get("/stats/user-growth", getUserGrowthStats);
 router.get("/stats/user-activity", getUserActivityStats);
+
+// Auto-verification settings and management
+router.get("/verification/settings", getVerificationSettings);
+router.put("/verification/settings", updateVerificationSettings);
+router.post("/verification/run-auto", runAutoVerification);
 
 module.exports = router;

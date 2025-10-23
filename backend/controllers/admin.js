@@ -5,7 +5,9 @@ const Story = require("../models/Story");
 const DeletedUser = require("../models/DeletedUser");
 const ProfileFeature = require("../models/ProfileFeature");
 const ProfileVerification = require("../models/ProfileVerification");
+const VerificationSettings = require("../models/VerificationSettings");
 const axios = require("axios");
+const { sendVerificationStartEmail, sendVerificationCompleteEmail } = require("../utils/verificationMailer");
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -32,6 +34,9 @@ exports.getAllUsers = async (req, res) => {
       postsCount: user.posts.length,
       followersCount: user.followers.length,
       followingCount: user.followings.length,
+      verificationStatus: user.verificationStatus,
+      verificationConfidence: user.verificationConfidence,
+      verificationReasoning: user.verificationReasoning,
     }));
 
     res.json({
@@ -646,7 +651,19 @@ exports.verifyProfile = async (req, res) => {
         lastVerified: new Date(),
         verificationHistory: [verificationHistoryEntry],
       });
-    } // Return updated user data with verification status
+    }
+    
+    // Update User document with verification status
+    await User.findByIdAndUpdate(userId, {
+      verificationStatus: verificationStatus,
+      verificationConfidence: {
+        realProfileProb: confidence.real_profile_prob,
+        fakeProfileProb: confidence.fake_profile_prob,
+      },
+      verificationReasoning: reasoning,
+    });
+
+    // Return updated user data with verification status
     res.json({
       success: true,
       message: `Profile verified as ${verificationStatus}`,
@@ -736,3 +753,500 @@ exports.getUserProfileFeatures = async (req, res) => {
     });
   }
 };
+
+// ============================================
+// AUTO-VERIFICATION SYSTEM
+// ============================================
+
+// Get verification automation settings
+exports.getVerificationSettings = async (req, res) => {
+  try {
+    const settings = await VerificationSettings.getSettings();
+    res.json({
+      success: true,
+      settings: settings
+    });
+  } catch (error) {
+    console.error("Error fetching verification settings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching verification settings",
+      error: error.message
+    });
+  }
+};
+
+// Update verification automation settings
+exports.updateVerificationSettings = async (req, res) => {
+  try {
+    const {
+      autoVerificationEnabled,
+      waitingPeriod,
+      verificationSchedule,
+      onlyVerifyActive,
+      minPostsRequired,
+      emailNotifications,
+      adminEmail
+    } = req.body;
+
+    const settings = await VerificationSettings.getSettings();
+    
+    if (typeof autoVerificationEnabled !== 'undefined') {
+      settings.autoVerificationEnabled = autoVerificationEnabled;
+    }
+    if (waitingPeriod) {
+      settings.waitingPeriod = waitingPeriod;
+      // Manually update waitingPeriodDays to ensure it's correct
+      const periodMap = {
+        'none': 0,
+        '1day': 1,
+        '3days': 3,
+        '1week': 7,
+        '2weeks': 14,
+        '1month': 30
+      };
+      settings.waitingPeriodDays = periodMap[waitingPeriod] || 7;
+    }
+    if (verificationSchedule) {
+      settings.verificationSchedule = verificationSchedule;
+    }
+    if (typeof onlyVerifyActive !== 'undefined') {
+      settings.onlyVerifyActive = onlyVerifyActive;
+    }
+    if (typeof minPostsRequired !== 'undefined') {
+      settings.minPostsRequired = minPostsRequired;
+    }
+    if (typeof emailNotifications !== 'undefined') {
+      settings.emailNotifications = emailNotifications;
+    }
+    if (adminEmail) {
+      settings.adminEmail = adminEmail;
+    }
+    
+    settings.updatedBy = req.admin?.username || 'admin';
+    await settings.save();
+
+    console.log(`[Auto-Verification] ✅ Settings updated:`, {
+      enabled: settings.autoVerificationEnabled,
+      waitingPeriod: settings.waitingPeriod,
+      waitingPeriodDays: settings.waitingPeriodDays,
+      schedule: settings.verificationSchedule,
+      emailNotifications: settings.emailNotifications,
+      adminEmail: settings.adminEmail,
+      onlyVerifyActive: settings.onlyVerifyActive,
+      minPostsRequired: settings.minPostsRequired
+    });
+
+    res.json({
+      success: true,
+      message: "Verification settings updated successfully",
+      settings: settings
+    });
+  } catch (error) {
+    console.error("Error updating verification settings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating verification settings",
+      error: error.message
+    });
+  }
+};
+
+// Run auto-verification manually
+exports.runAutoVerification = async (req, res) => {
+  try {
+    const settings = await VerificationSettings.getSettings();
+    const { forceAll } = req.body || {}; // Option to verify all users, including already verified
+    
+    if (!settings.autoVerificationEnabled && !forceAll) {
+      return res.status(400).json({
+        success: false,
+        message: "Auto-verification is disabled. Enable it in settings first."
+      });
+    }
+
+    console.log("[Auto-Verification] Starting manual verification run...");
+    console.log("[Auto-Verification] Force all users:", forceAll || false);
+    
+    const result = await performAutoVerification(forceAll);
+    
+    res.json({
+      success: true,
+      message: "Auto-verification completed",
+      result: result
+    });
+  } catch (error) {
+    console.error("Error running auto-verification:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error running auto-verification",
+      error: error.message
+    });
+  }
+};
+
+// Core auto-verification logic
+async function performAutoVerification(forceAll = false) {
+  const settings = await VerificationSettings.getSettings();
+  
+  console.log("[Auto-Verification] ========================================");
+  console.log("[Auto-Verification] Starting automated profile verification");
+  console.log("[Auto-Verification] Force All:", forceAll || false);
+  console.log("[Auto-Verification] Waiting Period:", settings.waitingPeriod, `(${settings.waitingPeriodDays} days)`);
+  console.log("[Auto-Verification] Only Active Users:", settings.onlyVerifyActive);
+  console.log("[Auto-Verification] Min Posts Required:", settings.minPostsRequired);
+  console.log("[Auto-Verification] ========================================");
+
+  // Reset all verification data before starting new verification
+  console.log("[Auto-Verification] 🔄 Clearing all existing verification data...");
+  try {
+    const clearResult = await User.updateMany(
+      {},
+      {
+        $unset: {
+          verificationStatus: "",
+          verificationConfidence: "",
+          verificationReasoning: ""
+        }
+      }
+    );
+    console.log(`[Auto-Verification] ✅ Cleared verification data for ${clearResult.modifiedCount} users`);
+  } catch (clearError) {
+    console.error("[Auto-Verification] ⚠️ Error clearing verification data:", clearError.message);
+  }
+
+  // Send start email notification
+  if (settings.emailNotifications && settings.adminEmail) {
+    console.log("[Auto-Verification] Sending start email to:", settings.adminEmail);
+    try {
+      const emailSent = await sendVerificationStartEmail(settings.adminEmail, settings);
+      if (emailSent) {
+        console.log("[Auto-Verification] ✅ Start email sent successfully");
+      } else {
+        console.log("[Auto-Verification] ⚠️ Start email failed to send");
+      }
+    } catch (emailError) {
+      console.error("[Auto-Verification] ❌ Email error:", emailError.message);
+    }
+  } else {
+    console.log("[Auto-Verification] Email notifications disabled or no admin email configured");
+    console.log("[Auto-Verification] - emailNotifications:", settings.emailNotifications);
+    console.log("[Auto-Verification] - adminEmail:", settings.adminEmail);
+  }
+
+  // Calculate cutoff date (users created before this date can be verified)
+  const cutoffDate = new Date();
+  
+  // Build query for eligible users
+  const query = {};
+  
+  // Apply waiting period: EXCLUDE accounts created too recently
+  // Only users OLDER than waiting period will be fetched and verified
+  if (settings.waitingPeriod !== 'none' && settings.waitingPeriodDays > 0) {
+    cutoffDate.setDate(cutoffDate.getDate() - settings.waitingPeriodDays);
+    query.createdAt = { $lte: cutoffDate };
+    console.log(`[Auto-Verification] Applying waiting period: excluding accounts created after ${cutoffDate.toISOString()}`);
+    console.log(`[Auto-Verification] Only verifying accounts ${settings.waitingPeriodDays}+ days old`);
+  } else {
+    console.log(`[Auto-Verification] No waiting period - verifying all users regardless of age`);
+  }
+
+  if (settings.onlyVerifyActive) {
+    query.status = 'active';
+  }
+
+  console.log("[Auto-Verification] Query:", JSON.stringify(query));
+
+  // Fetch ALL users that meet age requirement (both verified and unverified)
+  const usersToVerify = await User.find(query).select('_id username name email createdAt posts status');
+
+  if (settings.waitingPeriod !== 'none' && settings.waitingPeriodDays > 0) {
+    console.log(`[Auto-Verification] Found ${usersToVerify.length} users older than ${settings.waitingPeriodDays} days (created before ${cutoffDate.toISOString()})`);
+  } else {
+    console.log(`[Auto-Verification] Found ${usersToVerify.length} total users`);
+  }
+  
+  if (usersToVerify.length > 0) {
+    console.log(`[Auto-Verification] Sample user:`, {
+      username: usersToVerify[0].username,
+      createdAt: usersToVerify[0].createdAt,
+      ageInDays: Math.floor((Date.now() - new Date(usersToVerify[0].createdAt).getTime()) / (24 * 60 * 60 * 1000)),
+      status: usersToVerify[0].status,
+      posts: usersToVerify[0].posts?.length || 0
+    });
+  } else {
+    console.log(`[Auto-Verification] ⚠️ No users found matching criteria:`);
+    if (settings.waitingPeriod !== 'none') {
+      console.log(`[Auto-Verification]    - All users are too new (< ${settings.waitingPeriodDays} days old)`);
+    } else {
+      console.log(`[Auto-Verification]    - No users in database`);
+    }
+    if (settings.onlyVerifyActive) {
+      console.log(`[Auto-Verification]    - Status filter: only 'active' users`);
+    }
+  }
+
+  // Apply remaining filters (posts requirement only)
+  // NOTE: We verify ALL users past waiting period, including already-verified ones
+  const eligibleUsers = [];
+  let skippedCount = { notEnoughPosts: 0 };
+  
+  for (const user of usersToVerify) {
+    // Check minimum posts requirement
+    if (settings.minPostsRequired > 0 && user.posts.length < settings.minPostsRequired) {
+      console.log(`[Auto-Verification] Skipping ${user.username} - only ${user.posts.length} posts (min: ${settings.minPostsRequired})`);
+      skippedCount.notEnoughPosts++;
+      continue;
+    }
+
+    eligibleUsers.push(user);
+  }
+
+  console.log(`[Auto-Verification] ========================================`);
+  console.log(`[Auto-Verification] Filtering Results:`);
+  console.log(`[Auto-Verification] - Total users found (past waiting period): ${usersToVerify.length}`);
+  console.log(`[Auto-Verification] - Not enough posts: ${skippedCount.notEnoughPosts}`);
+  console.log(`[Auto-Verification] - Eligible for (re)verification: ${eligibleUsers.length}`);
+  console.log(`[Auto-Verification] ========================================`);
+
+  const results = {
+    total: eligibleUsers.length,
+    verified: 0,
+    failed: 0,
+    skipped: 0,
+    real: 0,
+    fake: 0,
+    errors: []
+  };
+
+  if (eligibleUsers.length === 0) {
+    console.log(`[Auto-Verification] ⚠️ No users eligible for verification.`);
+    console.log(`[Auto-Verification] This could mean:`);
+    console.log(`[Auto-Verification]   - All users are too new (under waiting period)`);
+    console.log(`[Auto-Verification]   - Users don't meet minimum posts requirement`);
+    console.log(`[Auto-Verification]   - No users in database`);
+  }
+
+  // Verify each eligible user (including re-verification of already verified users)
+  for (const user of eligibleUsers) {
+    try {
+      // Check if user was previously verified
+      const existingVerification = await ProfileVerification.findOne({ userId: user._id });
+      const isReVerification = !!existingVerification;
+      
+      if (isReVerification) {
+        console.log(`[Auto-Verification] 🔄 RE-VERIFYING user: ${user.username} (previously: ${existingVerification.verificationStatus})`);
+      } else {
+        console.log(`[Auto-Verification] ✨ NEW VERIFICATION for user: ${user.username}`);
+      }
+      
+      // Get or generate profile features
+      let profileFeature = await ProfileFeature.findOne({ user: user._id });
+      
+      if (!profileFeature) {
+        const { upsertFeaturesFromUserDoc } = require("../utils/profileFeatureHelper");
+        try {
+          profileFeature = await upsertFeaturesFromUserDoc(user);
+        } catch (genError) {
+          console.error(`[Auto-Verification] Failed to generate features for ${user.username}:`, genError.message);
+          results.failed++;
+          results.errors.push({ username: user.username, error: "Feature generation failed" });
+          continue;
+        }
+      }
+
+      // Prepare features
+      const { _id, user: pfUser, createdAt, __v, fake, ...features } = profileFeature.toObject();
+
+      // Validate and coerce features (same as verifyProfile)
+      const expectedKeys = [
+        "profile pic",
+        "nums/length username",
+        "fullname words",
+        "nums/length fullname",
+        "name==username",
+        "description length",
+        "external URL",
+        "private",
+        "#posts",
+        "#followers",
+        "#following",
+      ];
+
+      const missingKeys = expectedKeys.filter((k) => !(k in features));
+      if (missingKeys.length) {
+        console.error(`[Auto-Verification] Missing features for ${user.username}:`, missingKeys);
+        results.failed++;
+        results.errors.push({ username: user.username, error: "Missing ML features" });
+        continue;
+      }
+
+      // Coerce values to numbers and guard against NaN
+      for (const k of expectedKeys) {
+        const v = features[k];
+        if (typeof v !== "number") {
+          const coerced = Number(v);
+          features[k] = Number.isFinite(coerced) ? coerced : 0;
+        }
+      }
+
+      // Call Flask API
+      const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
+      console.log(`[Auto-Verification] 🤖 Calling Flask ML API for ${user.username} at ${FLASK_API_URL}/predict`);
+      let predictionResponse;
+      
+      try {
+        predictionResponse = await axios.post(`${FLASK_API_URL}/predict`, features, {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+          timeout: 15000
+        });
+        console.log(`[Auto-Verification] ✅ Flask API responded for ${user.username}`);
+      } catch (apiError) {
+        console.error(`[Auto-Verification] ❌ Flask API error for ${user.username}:`, apiError.message);
+        results.failed++;
+        results.errors.push({ username: user.username, error: "ML API failed" });
+        continue;
+      }
+
+      const responseData = predictionResponse.data;
+      
+      // Validate prediction and confidence fields (same as verifyProfile)
+      if (
+        !responseData.prediction ||
+        typeof responseData.prediction.is_fake === "undefined"
+      ) {
+        console.error(`[Auto-Verification] Invalid prediction for ${user.username}:`, responseData);
+        results.failed++;
+        results.errors.push({ username: user.username, error: "Invalid ML prediction format" });
+        continue;
+      }
+
+      if (
+        !responseData.confidence ||
+        typeof responseData.confidence.real_profile_prob === "undefined" ||
+        typeof responseData.confidence.fake_profile_prob === "undefined"
+      ) {
+        console.error(`[Auto-Verification] Invalid confidence for ${user.username}:`, responseData);
+        results.failed++;
+        results.errors.push({ username: user.username, error: "Invalid ML confidence format" });
+        continue;
+      }
+
+      const prediction = responseData.prediction;
+      const confidence = responseData.confidence;
+      const reasoning = responseData.reasoning || "Auto-verified by system";
+      const verificationStatus = prediction.is_fake === 1 ? "fake" : "real";
+
+      console.log(`[Auto-Verification] ${user.username}: ${verificationStatus.toUpperCase()} (${(prediction.is_fake === 1 ? confidence.fake_profile_prob : confidence.real_profile_prob) * 100}% confidence)`);
+
+      // Update or create verification record (existingVerification already fetched at loop start)
+      if (existingVerification) {
+        // Update existing verification
+        console.log(`[Auto-Verification] Updating existing verification record (was: ${existingVerification.verificationStatus}, now: ${verificationStatus})`);
+        existingVerification.features = features;
+        existingVerification.verificationStatus = verificationStatus;
+        existingVerification.isFake = prediction.is_fake;
+        existingVerification.confidence = {
+          realProfileProb: confidence.real_profile_prob,
+          fakeProfileProb: confidence.fake_profile_prob,
+        };
+        existingVerification.reasoning = reasoning;
+        existingVerification.lastVerified = new Date();
+        existingVerification.verificationHistory.push({
+          verifiedAt: new Date(),
+          status: verificationStatus,
+          confidence: {
+            realProfileProb: confidence.real_profile_prob,
+            fakeProfileProb: confidence.fake_profile_prob,
+          },
+          reasoning: reasoning
+        });
+        await existingVerification.save();
+      } else {
+        // Create new verification
+        console.log(`[Auto-Verification] Creating new verification record`);
+        await ProfileVerification.create({
+          userId: user._id,
+          features: features,
+          verificationStatus: verificationStatus,
+          isFake: prediction.is_fake,
+          confidence: {
+            realProfileProb: confidence.real_profile_prob,
+            fakeProfileProb: confidence.fake_profile_prob,
+          },
+          reasoning: reasoning,
+          lastVerified: new Date(),
+          verificationHistory: [{
+            verifiedAt: new Date(),
+            status: verificationStatus,
+            confidence: {
+              realProfileProb: confidence.real_profile_prob,
+              fakeProfileProb: confidence.fake_profile_prob,
+            },
+            reasoning: reasoning
+          }]
+        });
+      }
+
+      // Update User document with verification status
+      await User.findByIdAndUpdate(user._id, {
+        verificationStatus: verificationStatus,
+        verificationConfidence: {
+          realProfileProb: confidence.real_profile_prob,
+          fakeProfileProb: confidence.fake_profile_prob,
+        },
+        verificationReasoning: reasoning,
+      });
+
+      results.verified++;
+      if (verificationStatus === 'real') {
+        results.real++;
+      } else {
+        results.fake++;
+      }
+
+      console.log(`[Auto-Verification] ✅ ${user.username} verified as ${verificationStatus.toUpperCase()}`);
+
+    } catch (error) {
+      console.error(`[Auto-Verification] Error verifying ${user.username}:`, error.message);
+      results.failed++;
+      results.errors.push({ username: user.username, error: error.message });
+    }
+  }
+
+  // Update settings with last run time
+  settings.lastAutoVerificationRun = new Date();
+  settings.autoVerificationCount += results.verified;
+  await settings.save();
+
+  console.log("[Auto-Verification] ========================================");
+  console.log("[Auto-Verification] Verification Complete!");
+  console.log("[Auto-Verification] Results:", results);
+  console.log("[Auto-Verification] ========================================");
+
+  // Send completion email notification
+  if (settings.emailNotifications && settings.adminEmail) {
+    console.log("[Auto-Verification] Sending completion email to:", settings.adminEmail);
+    try {
+      const emailSent = await sendVerificationCompleteEmail(settings.adminEmail, results, settings);
+      if (emailSent) {
+        console.log("[Auto-Verification] ✅ Completion email sent successfully");
+      } else {
+        console.log("[Auto-Verification] ⚠️ Completion email failed to send");
+      }
+    } catch (emailError) {
+      console.error("[Auto-Verification] ❌ Email error:", emailError.message);
+    }
+  } else {
+    console.log("[Auto-Verification] Email notifications disabled or no admin email configured");
+  }
+
+  return results;
+}
+
+// Export the auto-verification function for cron jobs
+exports.performAutoVerification = performAutoVerification;
+

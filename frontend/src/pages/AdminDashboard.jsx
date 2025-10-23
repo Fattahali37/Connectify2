@@ -9,6 +9,7 @@ import {
   Refresh as RefreshIcon,
   ArrowUpward,
   ArrowDownward,
+  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import {
   LineChart,
@@ -29,6 +30,7 @@ import { api } from "../Interceptor/apiCall";
 import { url } from "../baseUrl";
 import { AuthContext } from "../context/Auth";
 import AdminNavbar from "../components/admin/AdminNavbar";
+import AutoVerificationSettings from "../components/admin/AutoVerificationSettings";
 import {
   Dialog,
   DialogTitle,
@@ -55,8 +57,8 @@ export default function AdminDashboard() {
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [verificationTab, setVerificationTab] = useState("all"); // all, real, fake
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
-  const [verifyingUsers, setVerifyingUsers] = useState({});
   const [detailsDialog, setDetailsDialog] = useState({
     open: false,
     user: null,
@@ -67,6 +69,9 @@ export default function AdminDashboard() {
     userGrowth: [],
     activityStats: null,
   });
+  const [autoVerifyOpen, setAutoVerifyOpen] = useState(false);
+  const [runningAutoVerify, setRunningAutoVerify] = useState(false);
+  const [autoVerificationScheduled, setAutoVerificationScheduled] = useState(false);
   const { throwErr, throwSuccess } = useContext(AuthContext);
 
   const fetchUsers = useCallback(async () => {
@@ -148,7 +153,7 @@ export default function AdminDashboard() {
       await Promise.all([fetchBlockedUsers(), fetchStats()]);
       throwSuccess("User blocked successfully");
     } catch (error) {
-      throwErr("Failed to block user");
+      throwErr(error.response?.data?.message || "Failed to block user");
     }
   };
 
@@ -164,51 +169,7 @@ export default function AdminDashboard() {
       await fetchStats();
       throwSuccess("User unblocked successfully");
     } catch (error) {
-      throwErr("Failed to unblock user");
-    }
-  };
-
-  const handleVerifyProfile = async (userId) => {
-    try {
-      setVerifyingUsers((prev) => ({ ...prev, [userId]: true }));
-      const response = await api.post(
-        `${url}/api/admin/users/${userId}/verify-profile`
-      );
-
-      if (response.data.success) {
-        const verificationStatus = response.data.verification.status;
-        const confidence = response.data.verification.confidence;
-        const reasoning = response.data.verification.reasoning;
-
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user._id === userId
-              ? {
-                  ...user,
-                  verificationStatus,
-                  verificationConfidence: confidence,
-                  verificationReasoning: reasoning,
-                }
-              : user
-          )
-        );
-
-        const statusText =
-          verificationStatus === "fake" ? "Flagged as Fake" : "Verified Real";
-        const confidencePercent = (
-          (verificationStatus === "fake"
-            ? confidence.fakeProfileProb
-            : confidence.realProfileProb) * 100
-        ).toFixed(1);
-
-        throwSuccess(
-          `Profile ${statusText} (${confidencePercent}% confidence)`
-        );
-      }
-    } catch (error) {
-      throwErr(error.response?.data?.message || "Failed to verify profile");
-    } finally {
-      setVerifyingUsers((prev) => ({ ...prev, [userId]: false }));
+      throwErr(error.response?.data?.message || "Failed to unblock user");
     }
   };
 
@@ -233,6 +194,101 @@ export default function AdminDashboard() {
         features: null,
         loading: false,
       });
+    }
+  };
+
+  const handleRunAutoVerification = async () => {
+    try {
+      setRunningAutoVerify(true);
+      
+      // Clear all verification data in UI immediately
+      console.log('Clearing existing verification data in UI...');
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => ({
+          ...u,
+          verificationStatus: undefined,
+          verificationConfidence: undefined,
+          verificationReasoning: undefined,
+        }))
+      );
+      
+      console.log('Starting auto-verification...');
+      
+      // Call the batch verification endpoint with forceAll to re-verify all users
+      const response = await api.post(`${url}/api/admin/verification/run-auto`, {
+        forceAll: true
+      });
+
+      if (response.data.success) {
+        const results = response.data.result || response.data.results;
+        
+        // Show results
+        throwSuccess(
+          `Verification completed! Verified ${results.verified} profiles (${results.real} real, ${results.fake} fake)${results.failed > 0 ? `, ${results.failed} failed` : ''}`
+        );
+
+        // Refresh the user list to get updated verification data
+        console.log('Refreshing user list to show updated verification statuses...');
+        await fetchData();
+      } else {
+        throwErr(response.data.message || "Failed to run verification");
+      }
+
+    } catch (error) {
+      console.error("Auto-verification error:", error);
+      throwErr(error.response?.data?.message || "Failed to run batch verification");
+    } finally {
+      setRunningAutoVerify(false);
+    }
+  };
+
+  const handleVerifySingleUser = async (userId, username) => {
+    try {
+      console.log(`Verifying single user: ${username}`);
+      
+      // Clear this user's verification data in UI
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => 
+          u._id === userId 
+            ? {
+                ...u,
+                verificationStatus: undefined,
+                verificationConfidence: undefined,
+                verificationReasoning: undefined,
+              }
+            : u
+        )
+      );
+
+      const response = await api.post(`${url}/api/admin/users/${userId}/verify-profile`);
+
+      if (response.data.success) {
+        const verification = response.data.verification;
+        
+        // Update this user's data in state
+        setUsers((prevUsers) =>
+          prevUsers.map((u) =>
+            u._id === userId
+              ? {
+                  ...u,
+                  verificationStatus: verification.status,
+                  verificationConfidence: verification.confidence,
+                  verificationReasoning: verification.reasoning,
+                }
+              : u
+          )
+        );
+
+        throwSuccess(`${username} verified as ${verification.status.toUpperCase()}`);
+      } else {
+        throwErr(response.data.message || "Failed to verify user");
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      throwErr(error.response?.data?.message || "Failed to verify user");
+      
+      // Refresh data on error to get current state
+      await fetchData();
     }
   };
 
@@ -326,24 +382,81 @@ export default function AdminDashboard() {
                 Welcome back, here's what's happening
               </p>
             </div>
-            <button
-              onClick={fetchData}
-              style={{
-                marginTop: 16,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "12px 20px",
-                background: "var(--gradient-primary)",
-                color: "white",
-                borderRadius: 12,
-                boxShadow: "0 12px 40px rgba(59,130,246,0.12)",
-                transition: "all 0.2s",
-              }}
-            >
-              <RefreshIcon />
-              <span style={{ fontWeight: 600 }}>Refresh</span>
-            </button>
+            <div style={{ display: "flex", gap: "12px", marginTop: 16, flexWrap: "wrap", alignItems: "center" }}>
+              <button
+                onClick={() => setAutoVerifyOpen(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "12px 20px",
+                  background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+                  color: "white",
+                  borderRadius: 12,
+                  boxShadow: "0 12px 40px rgba(139,92,246,0.12)",
+                  transition: "all 0.2s",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <SettingsIcon />
+                <span style={{ fontWeight: 600 }}>Auto-Verify Settings</span>
+              </button>
+
+              <button
+                onClick={handleRunAutoVerification}
+                disabled={runningAutoVerify || autoVerificationScheduled}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "12px 20px",
+                  background: (runningAutoVerify || autoVerificationScheduled)
+                    ? "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
+                    : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  color: "white",
+                  borderRadius: 12,
+                  boxShadow: "0 12px 40px rgba(16,185,129,0.12)",
+                  transition: "all 0.2s",
+                  border: "none",
+                  cursor: (runningAutoVerify || autoVerificationScheduled) ? "not-allowed" : "pointer",
+                  opacity: (runningAutoVerify || autoVerificationScheduled) ? 0.7 : 1,
+                }}
+              >
+                {runningAutoVerify ? (
+                  <CircularProgress size={20} style={{ color: "white" }} />
+                ) : (
+                  <VerifiedUserIcon />
+                )}
+                <span style={{ fontWeight: 600 }}>
+                  {runningAutoVerify 
+                    ? "Verifying..." 
+                    : autoVerificationScheduled 
+                    ? "Scheduled in Settings"
+                    : "Verify Now"}
+                </span>
+              </button>
+
+              <button
+                onClick={fetchData}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "12px 20px",
+                  background: "var(--gradient-primary)",
+                  color: "white",
+                  borderRadius: 12,
+                  boxShadow: "0 12px 40px rgba(59,130,246,0.12)",
+                  transition: "all 0.2s",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <RefreshIcon />
+                <span style={{ fontWeight: 600 }}>Refresh</span>
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
@@ -508,17 +621,49 @@ export default function AdminDashboard() {
           {/* Users Tab */}
           {activeTab === "users" && (
             <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden">
+              {/* Verification Tabs */}
+              <div className="flex border-b border-slate-700/50 bg-slate-900/50">
+                <button
+                  onClick={() => setVerificationTab("all")}
+                  className={`px-6 py-4 font-semibold transition-all ${
+                    verificationTab === "all"
+                      ? "text-blue-400 border-b-2 border-blue-400 bg-slate-800/30"
+                      : "text-slate-400 hover:text-slate-300"
+                  }`}
+                >
+                  All Users ({users.length})
+                </button>
+                <button
+                  onClick={() => setVerificationTab("real")}
+                  className={`px-6 py-4 font-semibold transition-all ${
+                    verificationTab === "real"
+                      ? "text-green-400 border-b-2 border-green-400 bg-slate-800/30"
+                      : "text-slate-400 hover:text-slate-300"
+                  }`}
+                >
+                  🟢 Real Profiles ({users.filter(u => u.verificationStatus === "real").length})
+                </button>
+                <button
+                  onClick={() => setVerificationTab("fake")}
+                  className={`px-6 py-4 font-semibold transition-all ${
+                    verificationTab === "fake"
+                      ? "text-red-400 border-b-2 border-red-400 bg-slate-800/30"
+                      : "text-slate-400 hover:text-slate-300"
+                  }`}
+                >
+                  🔴 Fake Profiles ({users.filter(u => u.verificationStatus === "fake").length})
+                </button>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-slate-900/50">
                     <tr>
                       {[
                         "User",
-                        "Email",
-                        "Posts",
-                        "Followers",
                         "Status",
                         "Verification",
+                        "Confidence",
                         "Actions",
                       ].map((header) => (
                         <th
@@ -531,7 +676,14 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-700/50">
-                    {users.map((user) => (
+                    {users
+                      .filter((user) => {
+                        if (verificationTab === "all") return true;
+                        if (verificationTab === "real") return user.verificationStatus === "real";
+                        if (verificationTab === "fake") return user.verificationStatus === "fake";
+                        return true;
+                      })
+                      .map((user) => (
                       <tr
                         key={user._id}
                         className="hover:bg-slate-700/30 transition-colors"
@@ -552,15 +704,6 @@ export default function AdminDashboard() {
                               </p>
                             </div>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 text-slate-300">
-                          {user.email}
-                        </td>
-                        <td className="px-6 py-4 text-slate-300">
-                          {user.postsCount || 0}
-                        </td>
-                        <td className="px-6 py-4 text-slate-300">
-                          {user.followersCount || 0}
                         </td>
                         <td className="px-6 py-4">
                           <Chip
@@ -657,26 +800,84 @@ export default function AdminDashboard() {
                               />
                             </Tooltip>
                           ) : (
+                            <Chip
+                              label="Not Verified"
+                              size="small"
+                              sx={{
+                                backgroundColor: "#64748b",
+                                color: "white",
+                                fontWeight: "bold",
+                              }}
+                            />
+                          )}
+                        </td>
+                        
+                        {/* Confidence Column */}
+                        <td className="px-6 py-4">
+                          {user.verificationStatus && user.verificationConfidence ? (
+                            <Tooltip
+                              title={
+                                <div style={{ fontSize: "14px", padding: "8px" }}>
+                                  <strong>AI Reasoning:</strong>
+                                  <p style={{ marginTop: "8px", lineHeight: "1.5" }}>
+                                    {user.verificationReasoning || "No reasoning available"}
+                                  </p>
+                                </div>
+                              }
+                              placement="top"
+                              arrow
+                              componentsProps={{
+                                tooltip: {
+                                  sx: {
+                                    bgcolor: "#1e293b",
+                                    border: "1px solid #334155",
+                                    borderRadius: "8px",
+                                    maxWidth: "400px",
+                                    "& .MuiTooltip-arrow": {
+                                      color: "#1e293b",
+                                      "&::before": {
+                                        border: "1px solid #334155",
+                                      },
+                                    },
+                                  },
+                                },
+                              }}
+                            >
+                              <div className="cursor-help">
+                                <div className="text-slate-300 font-semibold">
+                                  {user.verificationStatus === "real"
+                                    ? `${(user.verificationConfidence.realProfileProb * 100).toFixed(1)}%`
+                                    : `${(user.verificationConfidence.fakeProfileProb * 100).toFixed(1)}%`
+                                  }
+                                </div>
+                                <div className="text-xs text-slate-400 mt-1">
+                                  {user.verificationStatus === "real" ? "Real Confidence" : "Fake Confidence"}
+                                </div>
+                              </div>
+                            </Tooltip>
+                          ) : (
+                            <span className="text-slate-500 text-sm">-</span>
+                          )}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => handleVerifyProfile(user._id)}
-                              disabled={verifyingUsers[user._id]}
+                              onClick={() => handleVerifySingleUser(user._id, user.username)}
                               style={{
                                 padding: "6px 10px",
                                 fontSize: 12,
                                 borderRadius: 8,
-                                background: "var(--gradient-primary)",
+                                background:
+                                  "linear-gradient(135deg, rgb(59,130,246) 0%, rgb(37,99,235) 100%)",
                                 color: "white",
                                 border: "none",
+                                cursor: "pointer",
                               }}
+                              title="Verify this user"
                             >
-                              {verifyingUsers[user._id]
-                                ? "Verifying..."
-                                : "Verify"}
+                              Verify
                             </button>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center space-x-2">
                             <button
                               onClick={() => handleShowDetails(user)}
                               style={{
@@ -1057,6 +1258,13 @@ export default function AdminDashboard() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Auto Verification Settings Dialog */}
+      <AutoVerificationSettings
+        open={autoVerifyOpen}
+        onClose={() => setAutoVerifyOpen(false)}
+        onScheduleChange={(hasSchedule) => setAutoVerificationScheduled(hasSchedule)}
+      />
     </div>
   );
 }

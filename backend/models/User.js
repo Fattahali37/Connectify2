@@ -122,6 +122,26 @@ const userSchema = new mongoose.Schema({
     enum: ['active', 'blocked'],
     default: 'active',
   },
+  verificationStatus: {
+    type: String,
+    enum: ['real', 'fake'],
+    default: undefined,
+  },
+  verificationConfidence: {
+    realProfileProb: {
+      type: Number,
+      min: 0,
+      max: 1,
+    },
+    fakeProfileProb: {
+      type: Number,
+      min: 0,
+      max: 1,
+    },
+  },
+  verificationReasoning: {
+    type: String,
+  },
 });
 
 // After user is saved, upsert profile features so they stay in sync
