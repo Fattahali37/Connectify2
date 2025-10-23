@@ -20,6 +20,8 @@ export const Profile = ({ findStory, post = true }) => {
   const [iFollow, setIFollow] = useState(false);
   const [toggle, setToggle] = useState(1);
   const [followers, setFollowers] = useState(0);
+  const [isRequested, setIsRequested] = useState(false);
+  const [followButtonState, setFollowButtonState] = useState("follow");
   const params = useParams();
 
   useEffect(() => {
@@ -28,7 +30,32 @@ export const Profile = ({ findStory, post = true }) => {
       .then((resp) => {
         setUser(resp.data);
         setFollowers(resp.data.followers.length);
-        setIFollow(resp.data.followers.includes(context.auth._id));
+        const isFollowing = resp.data.followers.includes(context.auth._id);
+        setIFollow(isFollowing);
+
+        // Check if request is pending - check if current user sent a request to this profile
+        const requestPending = resp.data.requestReceived?.some(
+          (req) => req.user.toString() === context.auth._id.toString()
+        );
+        setIsRequested(requestPending);
+
+        console.log("👤 Profile Data:", {
+          username: resp.data.username,
+          isFollowing,
+          requestPending,
+          requestReceived: resp.data.requestReceived,
+          currentUserId: context.auth._id
+        });
+
+        // Set button state
+        if (isFollowing) {
+          setFollowButtonState("unfollow");
+        } else if (requestPending) {
+          setFollowButtonState("requested");
+        } else {
+          setFollowButtonState("follow");
+        }
+
         if (resp.data._id === context.auth._id) {
           context.handleActive("myprofile");
         } else {
@@ -73,16 +100,39 @@ export const Profile = ({ findStory, post = true }) => {
   }, [post, user]);
 
   async function handleFollow() {
-    api.get(`${url}/user/handlefollow/${user._id}`).then((res) => {
-      if (res.data?.success) {
-        setIFollow((prev) => !prev);
-      }
-      if (iFollow) {
-        setFollowers((f) => f - 1);
-      } else {
-        setFollowers((f) => f + 1);
-      }
-    });
+    api
+      .get(`${url}/user/handlefollow/${user._id}`)
+      .then((res) => {
+        if (res.data?.success) {
+          const action = res.data.action;
+
+          if (action === "followed") {
+            setIFollow(true);
+            setIsRequested(false);
+            setFollowButtonState("unfollow");
+            setFollowers((f) => f + 1);
+            context.throwSuccess("Following");
+          } else if (action === "unfollowed") {
+            setIFollow(false);
+            setIsRequested(false);
+            setFollowButtonState("follow");
+            setFollowers((f) => f - 1);
+            context.throwSuccess("Unfollowed");
+          } else if (action === "requested") {
+            setIsRequested(true);
+            setFollowButtonState("requested");
+            context.throwSuccess("Follow request sent");
+          } else if (action === "request_cancelled") {
+            setIsRequested(false);
+            setFollowButtonState("follow");
+            context.throwSuccess("Request cancelled");
+          }
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        context.throwErr("Something went wrong");
+      });
   }
 
   const [open, setOpen] = React.useState(false);
@@ -213,21 +263,62 @@ export const Profile = ({ findStory, post = true }) => {
                 gap: "16px",
               }}
             >
-              <h1
+              <div
                 style={{
-                  fontSize: "28px",
-                  fontWeight: "700",
-                  background:
-                    "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  margin: 0,
-                  letterSpacing: "-0.02em",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
                 }}
               >
-                {user?.username}
-              </h1>
+                <h1
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: "700",
+                    background:
+                      "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    margin: 0,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {user?.username}
+                </h1>
+                {user?.private && (
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "4px 10px",
+                      background:
+                        "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)",
+                      border: "1px solid rgba(59, 130, 246, 0.3)",
+                      borderRadius: "8px",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      color: "rgba(59, 130, 246, 0.95)",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    PRIVATE
+                  </div>
+                )}
+              </div>
 
               {/* Action Buttons */}
               <div
@@ -299,7 +390,7 @@ export const Profile = ({ findStory, post = true }) => {
                   >
                     Edit Profile
                   </button>
-                ) : iFollow ? (
+                ) : followButtonState === "unfollow" ? (
                   <button
                     onClick={() => handleFollow()}
                     style={{
@@ -328,6 +419,36 @@ export const Profile = ({ findStory, post = true }) => {
                     }}
                   >
                     Unfollow
+                  </button>
+                ) : followButtonState === "requested" ? (
+                  <button
+                    onClick={() => handleFollow()}
+                    style={{
+                      padding: "10px 20px",
+                      fontSize: "14px",
+                      borderRadius: "12px",
+                      fontWeight: "600",
+                      border: "1px solid rgba(251, 191, 36, 0.5)",
+                      color: "rgba(251, 191, 36, 0.95)",
+                      background:
+                        "linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%)",
+                      backdropFilter: "blur(10px)",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      boxShadow: "0 4px 12px rgba(251, 191, 36, 0.2)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = "translateY(-2px)";
+                      e.target.style.boxShadow =
+                        "0 6px 16px rgba(251, 191, 36, 0.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow =
+                        "0 4px 12px rgba(251, 191, 36, 0.2)";
+                    }}
+                  >
+                    Requested
                   </button>
                 ) : (
                   <button
@@ -454,7 +575,13 @@ export const Profile = ({ findStory, post = true }) => {
               </div>
 
               <div
-                onClick={() => handleClickOpen(1)}
+                onClick={
+                  user?.private &&
+                  user?._id !== context.auth._id &&
+                  followButtonState !== "unfollow"
+                    ? undefined
+                    : () => handleClickOpen(1)
+                }
                 style={{
                   padding: "16px",
                   borderRadius: "16px",
@@ -464,16 +591,38 @@ export const Profile = ({ findStory, post = true }) => {
                   border: "1px solid rgba(148, 163, 184, 0.2)",
                   textAlign: "center",
                   transition: "all 0.3s ease",
-                  cursor: "pointer",
+                  cursor:
+                    user?.private &&
+                    user?._id !== context.auth._id &&
+                    followButtonState !== "unfollow"
+                      ? "default"
+                      : "pointer",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.4)";
+                  if (
+                    !(
+                      user?.private &&
+                      user?._id !== context.auth._id &&
+                      followButtonState !== "unfollow"
+                    )
+                  ) {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(59, 130, 246, 0.4)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.borderColor =
-                    "rgba(148, 163, 184, 0.2)";
+                  if (
+                    !(
+                      user?.private &&
+                      user?._id !== context.auth._id &&
+                      followButtonState !== "unfollow"
+                    )
+                  ) {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(148, 163, 184, 0.2)";
+                  }
                 }}
               >
                 <div
@@ -484,7 +633,11 @@ export const Profile = ({ findStory, post = true }) => {
                     marginBottom: "4px",
                   }}
                 >
-                  {user?.followers?.length || 0}
+                  {user?.private &&
+                  user?._id !== context.auth._id &&
+                  followButtonState !== "unfollow"
+                    ? "•"
+                    : user?.followers?.length || 0}
                 </div>
                 <div
                   style={{
@@ -498,7 +651,13 @@ export const Profile = ({ findStory, post = true }) => {
               </div>
 
               <div
-                onClick={() => handleClickOpen(2)}
+                onClick={
+                  user?.private &&
+                  user?._id !== context.auth._id &&
+                  followButtonState !== "unfollow"
+                    ? undefined
+                    : () => handleClickOpen(2)
+                }
                 style={{
                   padding: "16px",
                   borderRadius: "16px",
@@ -508,16 +667,38 @@ export const Profile = ({ findStory, post = true }) => {
                   border: "1px solid rgba(148, 163, 184, 0.2)",
                   textAlign: "center",
                   transition: "all 0.3s ease",
-                  cursor: "pointer",
+                  cursor:
+                    user?.private &&
+                    user?._id !== context.auth._id &&
+                    followButtonState !== "unfollow"
+                      ? "default"
+                      : "pointer",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.4)";
+                  if (
+                    !(
+                      user?.private &&
+                      user?._id !== context.auth._id &&
+                      followButtonState !== "unfollow"
+                    )
+                  ) {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(59, 130, 246, 0.4)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.borderColor =
-                    "rgba(148, 163, 184, 0.2)";
+                  if (
+                    !(
+                      user?.private &&
+                      user?._id !== context.auth._id &&
+                      followButtonState !== "unfollow"
+                    )
+                  ) {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(148, 163, 184, 0.2)";
+                  }
                 }}
               >
                 <div
@@ -528,7 +709,11 @@ export const Profile = ({ findStory, post = true }) => {
                     marginBottom: "4px",
                   }}
                 >
-                  {user?.followings?.length || 0}
+                  {user?.private &&
+                  user?._id !== context.auth._id &&
+                  followButtonState !== "unfollow"
+                    ? "•"
+                    : user?.followings?.length || 0}
                 </div>
                 <div
                   style={{
@@ -863,68 +1048,153 @@ export const Profile = ({ findStory, post = true }) => {
             margin: "0 auto",
           }}
         >
-          {posts.length === 0 && loading && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "60px 0",
-              }}
-            >
-              <Spinner />
-            </div>
-          )}
-
-          {posts.length === 0 && !loading && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "80px 24px",
-                color: "rgba(148, 163, 184, 0.9)",
-              }}
-            >
-              <p
+          {/* Show private account message for non-followers */}
+          {user?.private &&
+            user?._id !== context.auth._id &&
+            followButtonState !== "unfollow" && (
+              <div
                 style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  marginBottom: "8px",
+                  textAlign: "center",
+                  padding: "80px 24px",
+                  color: "rgba(148, 163, 184, 0.9)",
                 }}
               >
-                No Posts Yet
-              </p>
-              <p
+                <div
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)",
+                    border: "3px solid rgba(59, 130, 246, 0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                  }}
+                >
+                  <svg
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="rgba(59, 130, 246, 0.8)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </div>
+                <p
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "600",
+                    marginBottom: "12px",
+                    color: "rgba(226, 232, 240, 0.95)",
+                  }}
+                >
+                  This Account is Private
+                </p>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "rgba(148, 163, 184, 0.7)",
+                    lineHeight: "1.6",
+                    maxWidth: "380px",
+                    margin: "0 auto",
+                  }}
+                >
+                  {followButtonState === "requested"
+                    ? "You've requested to follow this account. Once they approve your request, you'll be able to see their posts."
+                    : "Follow this account to see their posts, followers, and who they follow."}
+                </p>
+              </div>
+            )}
+
+          {/* Show loading spinner */}
+          {posts.length === 0 &&
+            loading &&
+            !(
+              user?.private &&
+              user?._id !== context.auth._id &&
+              followButtonState !== "unfollow"
+            ) && (
+              <div
                 style={{
-                  fontSize: "14px",
-                  color: "rgba(148, 163, 184, 0.7)",
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "60px 0",
                 }}
               >
-                {post
-                  ? "When posts are shared, they will appear here."
-                  : "When you save posts, they will appear here."}
-              </p>
-            </div>
-          )}
+                <Spinner />
+              </div>
+            )}
 
-          {posts.length > 0 && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "4px",
-              }}
-            >
-              {posts.map((item) => (
-                <Image
-                  key={item._id}
-                  userId={item.owner}
-                  postId={item._id}
-                  likes={item.likes.length}
-                  comments={item.comments.length}
-                  src={item.files[0].link}
-                />
-              ))}
-            </div>
-          )}
+          {/* Show no posts message */}
+          {posts.length === 0 &&
+            !loading &&
+            !(
+              user?.private &&
+              user?._id !== context.auth._id &&
+              followButtonState !== "unfollow"
+            ) && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "80px 24px",
+                  color: "rgba(148, 163, 184, 0.9)",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    marginBottom: "8px",
+                  }}
+                >
+                  No Posts Yet
+                </p>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "rgba(148, 163, 184, 0.7)",
+                  }}
+                >
+                  {post
+                    ? "When posts are shared, they will appear here."
+                    : "When you save posts, they will appear here."}
+                </p>
+              </div>
+            )}
+
+          {/* Show posts grid */}
+          {posts.length > 0 &&
+            !(
+              user?.private &&
+              user?._id !== context.auth._id &&
+              followButtonState !== "unfollow"
+            ) && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "4px",
+                }}
+              >
+                {posts.map((item) => (
+                  <Image
+                    key={item._id}
+                    userId={item.owner}
+                    postId={item._id}
+                    likes={item.likes.length}
+                    comments={item.comments.length}
+                    src={item.files[0].link}
+                  />
+                ))}
+              </div>
+            )}
         </div>
       </div>
     </div>

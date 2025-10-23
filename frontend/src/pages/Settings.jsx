@@ -22,6 +22,7 @@ export const Settings = () => {
   const [resetPasword, setResetPassword] = useState("");
   const [resetNewPasword, setResetNewPassword] = useState("");
   const [resetConfirmPasword, setResetConfirmPassword] = useState("");
+  const [isPrivate, setIsPrivate] = useState(context.auth.private || false);
 
   const resizeFile = (file) =>
     new Promise((resolve) => {
@@ -48,6 +49,7 @@ export const Settings = () => {
         bio,
         website,
         avatar,
+        private: isPrivate,
       };
     } else {
       data = {
@@ -57,6 +59,7 @@ export const Settings = () => {
         bio,
         website,
         avatar,
+        private: isPrivate,
       };
     }
     api
@@ -553,6 +556,132 @@ export const Settings = () => {
                     >
                       {bio?.length || 0} / 150 characters
                     </p>
+                  </div>
+
+                  {/* Privacy Settings Divider */}
+                  <div
+                    style={{
+                      padding: "24px 0",
+                      borderTop: "1px solid rgba(148, 163, 184, 0.15)",
+                      marginTop: "16px",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        color: "rgba(226, 232, 240, 0.95)",
+                        margin: 0,
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Privacy Settings
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "rgba(148, 163, 184, 0.7)",
+                        margin: 0,
+                        lineHeight: "1.5",
+                      }}
+                    >
+                      Control who can see your posts and follow you.
+                    </p>
+                  </div>
+
+                  {/* Private Account Toggle */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "20px",
+                      background:
+                        "linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(51, 65, 85, 0.4) 100%)",
+                      borderRadius: "12px",
+                      border: "1px solid rgba(148, 163, 184, 0.15)",
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: "600",
+                          color: "rgba(226, 232, 240, 0.95)",
+                          marginBottom: "6px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{ color: "rgba(59, 130, 246, 0.8)" }}
+                        >
+                          <rect
+                            x="3"
+                            y="11"
+                            width="18"
+                            height="11"
+                            rx="2"
+                            ry="2"
+                          ></rect>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        Private Account
+                      </div>
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          color: "rgba(148, 163, 184, 0.8)",
+                          margin: 0,
+                          lineHeight: "1.5",
+                        }}
+                      >
+                        When your account is private, only people you approve
+                        can see your posts, followers, and who you follow.
+                      </p>
+                    </div>
+                    <div
+                      onClick={() => setIsPrivate(!isPrivate)}
+                      style={{
+                        width: "52px",
+                        height: "28px",
+                        background: isPrivate
+                          ? "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)"
+                          : "rgba(148, 163, 184, 0.3)",
+                        borderRadius: "14px",
+                        position: "relative",
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+                        boxShadow: isPrivate
+                          ? "0 4px 12px rgba(59, 130, 246, 0.4)"
+                          : "none",
+                        marginLeft: "20px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "22px",
+                          height: "22px",
+                          background: "white",
+                          borderRadius: "50%",
+                          position: "absolute",
+                          top: "3px",
+                          left: isPrivate ? "27px" : "3px",
+                          transition: "all 0.3s ease",
+                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                        }}
+                      ></div>
+                    </div>
                   </div>
 
                   {/* Personal Information Divider */}

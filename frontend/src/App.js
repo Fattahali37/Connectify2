@@ -23,6 +23,7 @@ import { url } from "./baseUrl";
 import io from "socket.io-client";
 import { Password } from "./pages/Password";
 import AuthRedirect from "./pages/AuthRedirect";
+import { FollowRequests } from "./pages/FollowRequests";
 import "./theme.css";
 
 export const socket = io(url, {
@@ -217,6 +218,15 @@ function App() {
             element={
               <Private>
                 <Settings />
+              </Private>
+            }
+          />
+
+          <Route
+            path="/followrequests"
+            element={
+              <Private>
+                <FollowRequests />
               </Private>
             }
           />
