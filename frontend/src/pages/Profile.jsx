@@ -1,144 +1,84 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { Image } from "../components/post/Image";
-import { Spinner } from "../assets/Spinner";
-import { url } from "../baseUrl";
-import { api } from "../Interceptor/apiCall";
-import { useContext } from "react";
-import { AuthContext } from "../context/Auth";
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
-import { Public } from "@mui/icons-material";
-import { Followers } from "../components/dialog/Followers";
-import Story from "../components/profile/Story";
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Image } from '../components/post/Image'
+import { Spinner } from '../assets/Spinner'
+import { url } from '../baseUrl'
+import { api } from '../Interceptor/apiCall'
+import { useContext } from 'react'
+import { AuthContext } from '../context/Auth'
+import { Dialog, DialogContent, DialogTitle, } from '@mui/material'
+import { Followers } from '../components/dialog/Followers'
+import Story from '../components/profile/Story'
 
 export const Profile = ({ findStory, post = true }) => {
-  const navigate = useNavigate();
-  const context = useContext(AuthContext);
-  const [user, setUser] = useState();
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [iFollow, setIFollow] = useState(false);
-  const [toggle, setToggle] = useState(1);
-  const [followers, setFollowers] = useState(0);
-  const [isRequested, setIsRequested] = useState(false);
-  const [followButtonState, setFollowButtonState] = useState("follow");
-  const params = useParams();
+  const navigate = useNavigate()
+  const context = useContext(AuthContext)
+  const [user, setUser] = useState()
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [iFollow, setIFollow] = useState(false)
+  const [toggle, setToggle] = useState(1)
+  const [followers, setFollowers] = useState(0)
+  const params = useParams()
 
   useEffect(() => {
-    api
-      .get(`${url}/user/${params.username}`)
-      .then((resp) => {
-        setUser(resp.data);
-        setFollowers(resp.data.followers.length);
-        const isFollowing = resp.data.followers.includes(context.auth._id);
-        setIFollow(isFollowing);
-
-        // Check if request is pending - check if current user sent a request to this profile
-        const requestPending = resp.data.requestReceived?.some(
-          (req) => req.user.toString() === context.auth._id.toString()
-        );
-        setIsRequested(requestPending);
-
-        console.log("👤 Profile Data:", {
-          username: resp.data.username,
-          isFollowing,
-          requestPending,
-          requestReceived: resp.data.requestReceived,
-          currentUserId: context.auth._id
-        });
-
-        // Set button state
-        if (isFollowing) {
-          setFollowButtonState("unfollow");
-        } else if (requestPending) {
-          setFollowButtonState("requested");
-        } else {
-          setFollowButtonState("follow");
-        }
-
-        if (resp.data._id === context.auth._id) {
-          context.handleActive("myprofile");
-        } else {
-          context.handleActive();
-        }
-      })
-      .catch((err) => console.log(err));
-    return () => setUser();
-  }, [context, params.username]);
+    api.get(`${url}/user/${params.username}`).then(resp => {
+      setUser(resp.data)
+      setFollowers(resp.data.followers.length)
+      setIFollow(resp.data.followers.includes(context.auth._id))
+      if (resp.data._id === context.auth._id) {
+        context.handleActive("myprofile")
+      } else {
+        context.handleActive()
+      }
+    }).catch(err => console.log(err))
+    return () => setUser()
+  }, [context, params.username])
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) return
     if (post) {
-      api
-        .get(`${url}/post/userpost/${user?._id}`)
-        .then((data) => {
-          setLoading(false);
-          if (data) {
-            setPosts(data.data);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      api.get(`${url}/post/userpost/${user?._id}`).then((data) => {
+        setLoading(false)
+        if (data) {
+          setPosts(data.data);
+        }
+      }).catch(err => {
+        console.log(err);
+      })
     }
     if (!post) {
-      api
-        .get(`${url}/post/get/saved`)
-        .then((data) => {
-          setLoading(false);
-          if (data) {
-            setPosts(data.data);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      api.get(`${url}/post/get/saved`).then((data) => {
+        setLoading(false)
+        if (data) {
+          setPosts(data.data);
+        }
+      }).catch(err => {
+        console.log(err);
+      })
     }
     return () => {
-      setPosts([]);
-    };
-  }, [post, user]);
+      setPosts([])
+    }
+  }, [post, user])
+
 
   async function handleFollow() {
-    api
-      .get(`${url}/user/handlefollow/${user._id}`)
-      .then((res) => {
-        if (res.data?.success) {
-          const action = res.data.action;
-
-          if (action === "followed") {
-            setIFollow(true);
-            setIsRequested(false);
-            setFollowButtonState("unfollow");
-            setFollowers((f) => f + 1);
-            context.throwSuccess("Following");
-          } else if (action === "unfollowed") {
-            setIFollow(false);
-            setIsRequested(false);
-            setFollowButtonState("follow");
-            setFollowers((f) => f - 1);
-            context.throwSuccess("Unfollowed");
-          } else if (action === "requested") {
-            setIsRequested(true);
-            setFollowButtonState("requested");
-            context.throwSuccess("Follow request sent");
-          } else if (action === "request_cancelled") {
-            setIsRequested(false);
-            setFollowButtonState("follow");
-            context.throwSuccess("Request cancelled");
-          }
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        context.throwErr("Something went wrong");
-      });
+    api.get(`${url}/user/handlefollow/${user._id}`).then((res) => {
+      if (res.data?.success) {
+        setIFollow(prev => !prev)
+      }
+      if (iFollow) {
+        setFollowers(f => f - 1)
+      } else {
+        setFollowers(f => f + 1)
+      }
+    })
   }
 
   const [open, setOpen] = React.useState(false);
 
-  const handleClickOpen = (tab) => {
-    setToggle(tab);
+  const handleClickOpen = () => {
     setOpen(true);
   };
   const handleClose = () => {
@@ -155,1048 +95,189 @@ export const Profile = ({ findStory, post = true }) => {
   };
 
   const handShake = () => {
-    if (!user) return;
-    api
-      .post(`${url}/chat/handshake`, {
-        people: [user._id],
-      })
-      .then((res) => {
-        navigate(`/chats/${res.data.roomId}`);
-      })
-      .catch((err) => console.log(err));
-  };
+    if (!user) return
+    api.post(`${url}/chat/handshake`, {
+      "people": [user._id]
+    }).then((res) => {
+      navigate(`/chats/${res.data.roomId}`)
+    }).catch(err => console.log(err))
+  }
 
   return (
-    <div className="home" style={{ display: "flex", flexDirection: "column" }}>
-      {/* Blocked User Notification */}
-      {user?.status === "blocked" && (
-        <div
-          style={{
-            backgroundColor: "rgba(239, 68, 68, 0.95)",
-            color: "#ffffff",
-            padding: "16px",
-            margin: "20px auto",
-            width: "90%",
-            maxWidth: "900px",
-            borderRadius: "16px",
-            border: "1px solid rgba(220, 38, 38, 0.5)",
-            textAlign: "center",
-            fontWeight: "600",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 4px 16px rgba(239, 68, 68, 0.3)",
-          }}
-        >
-          ⚠️ Your account has been blocked by the admin
+    <div className='home' style={{ display: 'flex', flexDirection: 'column' }}>
+      <div className="user-info" style={{ display: 'flex', flexDirection: 'row', width: '84%', margin: 'auto', marginTop: '20px' }}>
+        <div className="image-user">
+          <Story profile={true} avatar={user?.avatar} uid={user?._id} />
         </div>
-      )}
+        <div className="follow-details" style={{ marginLeft: '5vw' }}>
+          <div className="samline" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <p style={{ fontSize: '29px', marginRight: '22px', fontWeight: 'lighter', color: '#424141' }}>{user?.username}</p>
+            {
+              user?._id !== context.auth._id &&
+              <button onClick={() => handShake()} style={{ border: '1px solid #c1c1c1', padding: '4px 7px', fontSize: '14px', borderRadius: '4px', fontWeight: 'bold', marginRight: '22px', color: '#424141' }}>Message</button>
+              //
+            }
+            {
+              user?._id === context.auth._id ?
+                <button onClick={() => { navigate('/accounts/edit') }} style={{ border: '1px solid #c1c1c1', padding: '4px 7px', fontSize: '14px', borderRadius: '4px', fontWeight: 'bold', marginRight: '22px', color: '#424141' }}>Edit Profile</button>
+                :
+                iFollow ?
+                  <button onClick={() => handleFollow()} style={{ padding: '4px 13px', fontSize: '14px', borderRadius: '4px', fontWeight: 'bold', marginRight: '22px', border: '1px solid #c1c1c1', color: '#424141' }}>Unfollow</button>
+                  :
+                  <button onClick={() => handleFollow()} style={{ padding: '5.5px 13px', fontSize: '14px', borderRadius: '4px', fontWeight: 'bold', marginRight: '22px', backgroundColor: 'rgb(33, 150, 243)', color: 'white' }}>Follow</button>
+            }
 
-      {/* Modern Profile Card */}
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "20px auto",
-          width: "90%",
-          background:
-            "linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.7) 100%)",
-          backdropFilter: "blur(20px)",
-          borderRadius: "24px",
-          border: "1px solid rgba(148, 163, 184, 0.15)",
-          padding: "40px",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Decorative gradient line */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "2px",
-            background:
-              "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), rgba(139, 92, 246, 0.6), transparent)",
-          }}
-        ></div>
+            {
+              user?._id === context.auth._id && <button className='no-style'><svg onClick={() => handleClickMenu()} style={{ marginTop: '5px' }} aria-label="Options" className="_ab6-" color="#262626" fill="#262626" height="24" role="img" viewBox="0 0 24 24" width="24"><circle cx="12" cy="12" fill="none" r="8.635" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></circle><path d="M14.232 3.656a1.269 1.269 0 0 1-.796-.66L12.93 2h-1.86l-.505.996a1.269 1.269 0 0 1-.796.66m-.001 16.688a1.269 1.269 0 0 1 .796.66l.505.996h1.862l.505-.996a1.269 1.269 0 0 1 .796-.66M3.656 9.768a1.269 1.269 0 0 1-.66.796L2 11.07v1.862l.996.505a1.269 1.269 0 0 1 .66.796m16.688-.001a1.269 1.269 0 0 1 .66-.796L22 12.93v-1.86l-.996-.505a1.269 1.269 0 0 1-.66-.796M7.678 4.522a1.269 1.269 0 0 1-1.03.096l-1.06-.348L4.27 5.587l.348 1.062a1.269 1.269 0 0 1-.096 1.03m11.8 11.799a1.269 1.269 0 0 1 1.03-.096l1.06.348 1.318-1.317-.348-1.062a1.269 1.269 0 0 1 .096-1.03m-14.956.001a1.269 1.269 0 0 1 .096 1.03l-.348 1.06 1.317 1.318 1.062-.348a1.269 1.269 0 0 1 1.03.096m11.799-11.8a1.269 1.269 0 0 1-.096-1.03l.348-1.06-1.317-1.318-1.062.348a1.269 1.269 0 0 1-1.03-.096" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2"></path></svg></button>
 
-        {/* Profile Header with Avatar and Info */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "flex-start",
-            gap: "40px",
-            marginBottom: "32px",
-          }}
-        >
-          {/* Avatar */}
-          <div
-            style={{
-              position: "relative",
-              flexShrink: 0,
+            }
+            <Dialog
+              PaperProps={{
+                style: {
+                  minHeight: '10%',
+                  maxHeight: '55%',
+                  minWidth: '350px',
+                  maxWidth: '350px',
+                  padding: 0,
+                  overflowY: 'auto',
+                  borderRadius: '15px'
+                }
+              }}
+              onClose={handleCloseMenu}
+              aria-labelledby="customized-dialog-title"
+              open={openMore}
+            >
+              <div>
+                <div onClick={() => navigate('/accounts/reset')} className="option" style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'black', marginTop: '0px', textAlign: 'center', cursor: 'pointer' }}>
+                  Change password
+                </div>
+                <div onClick={() => context.logout()} className="option" style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'black', textAlign: 'center', cursor: 'pointer' }}>
+                  Logout
+                </div>
+                <div onClick={() => handleCloseMenu()} className="option" style={{ borderBottom: '1px solid #dfdfdf', width: '100%', padding: '12px 0', fontSize: '14.17px', color: 'black', marginBottom: '0px', textAlign: 'center', cursor: 'pointer' }}>
+                  Cancel
+                </div>
+
+              </div>
+            </Dialog>
+
+          </div>
+          <div className="singleline" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '20px' }}>
+            <p style={{ marginRight: '28px' }}><span style={{ fontWeight: 'bold', marginRight: '4px' }}>{user?.posts?.length}</span> Posts</p>
+            <p onClick={() => { setToggle(1); handleClickOpen() }} style={{ marginRight: '28px', cursor: 'pointer' }}><span style={{ fontWeight: 'bold', marginRight: '4px' }}>{followers}</span> Followers</p>
+            <p onClick={() => { setToggle(2); handleClickOpen() }} style={{ marginRight: '28px', cursor: 'pointer' }}><span style={{ fontWeight: 'bold', marginRight: '4px', cursor: 'pointer' }}>{user?.followings?.length}</span> Followings</p>
+          </div>
+          <Dialog
+            PaperProps={{
+              style: {
+                minHeight: '15%',
+                maxHeight: '55%',
+                minWidth: '400px',
+                maxWidth: '400px',
+                padding: 0,
+                overflowY: 'auto',
+                borderRadius: '15px'
+              }
             }}
+            onClose={handleClose}
+            aria-labelledby="customized-dialog-title"
+            open={open}
           >
-            <div
-              style={{
-                padding: "4px",
-                background:
-                  "linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)",
-                borderRadius: "50%",
-                boxShadow: "0 8px 24px rgba(59, 130, 246, 0.3)",
-              }}
-            >
-              <Story profile={true} avatar={user?.avatar} uid={user?._id} />
-            </div>
-          </div>
-
-          {/* User Info */}
-          <div style={{ flex: 1 }}>
-            {/* Username and Actions Row */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "20px",
-                flexWrap: "wrap",
-                gap: "16px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <h1
-                  style={{
-                    fontSize: "28px",
-                    fontWeight: "700",
-                    background:
-                      "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                    margin: 0,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {user?.username}
-                </h1>
-                {user?.private && (
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      padding: "4px 10px",
-                      background:
-                        "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)",
-                      border: "1px solid rgba(59, 130, 246, 0.3)",
-                      borderRadius: "8px",
-                      fontSize: "11px",
-                      fontWeight: "600",
-                      color: "rgba(59, 130, 246, 0.95)",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    PRIVATE
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  alignItems: "center",
-                }}
-              >
-                {user?._id !== context.auth._id && (
-                  <button
-                    onClick={() => handShake()}
-                    style={{
-                      padding: "10px 20px",
-                      fontSize: "14px",
-                      borderRadius: "12px",
-                      fontWeight: "600",
-                      border: "1px solid rgba(148, 163, 184, 0.3)",
-                      color: "rgba(226, 232, 240, 0.95)",
-                      background:
-                        "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
-                      backdropFilter: "blur(10px)",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow =
-                        "0 6px 16px rgba(0, 0, 0, 0.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow =
-                        "0 4px 12px rgba(0, 0, 0, 0.2)";
-                    }}
-                  >
-                    Message
-                  </button>
-                )}
-
-                {user?._id === context.auth._id ? (
-                  <button
-                    onClick={() => navigate("/accounts/edit")}
-                    style={{
-                      padding: "10px 20px",
-                      fontSize: "14px",
-                      borderRadius: "12px",
-                      fontWeight: "600",
-                      border: "1px solid rgba(148, 163, 184, 0.3)",
-                      color: "rgba(226, 232, 240, 0.95)",
-                      background:
-                        "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
-                      backdropFilter: "blur(10px)",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow =
-                        "0 6px 16px rgba(0, 0, 0, 0.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow =
-                        "0 4px 12px rgba(0, 0, 0, 0.2)";
-                    }}
-                  >
-                    Edit Profile
-                  </button>
-                ) : followButtonState === "unfollow" ? (
-                  <button
-                    onClick={() => handleFollow()}
-                    style={{
-                      padding: "10px 20px",
-                      fontSize: "14px",
-                      borderRadius: "12px",
-                      fontWeight: "600",
-                      border: "1px solid rgba(148, 163, 184, 0.3)",
-                      color: "rgba(226, 232, 240, 0.95)",
-                      background:
-                        "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
-                      backdropFilter: "blur(10px)",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow =
-                        "0 6px 16px rgba(0, 0, 0, 0.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow =
-                        "0 4px 12px rgba(0, 0, 0, 0.2)";
-                    }}
-                  >
-                    Unfollow
-                  </button>
-                ) : followButtonState === "requested" ? (
-                  <button
-                    onClick={() => handleFollow()}
-                    style={{
-                      padding: "10px 20px",
-                      fontSize: "14px",
-                      borderRadius: "12px",
-                      fontWeight: "600",
-                      border: "1px solid rgba(251, 191, 36, 0.5)",
-                      color: "rgba(251, 191, 36, 0.95)",
-                      background:
-                        "linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%)",
-                      backdropFilter: "blur(10px)",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      boxShadow: "0 4px 12px rgba(251, 191, 36, 0.2)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow =
-                        "0 6px 16px rgba(251, 191, 36, 0.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow =
-                        "0 4px 12px rgba(251, 191, 36, 0.2)";
-                    }}
-                  >
-                    Requested
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleFollow()}
-                    style={{
-                      padding: "10px 24px",
-                      fontSize: "14px",
-                      borderRadius: "12px",
-                      fontWeight: "600",
-                      background:
-                        "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
-                      color: "white",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      boxShadow: "0 4px 16px rgba(59, 130, 246, 0.4)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow =
-                        "0 6px 20px rgba(59, 130, 246, 0.5)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow =
-                        "0 4px 16px rgba(59, 130, 246, 0.4)";
-                    }}
-                  >
-                    Follow
-                  </button>
-                )}
-
-                {user?._id === context.auth._id && (
-                  <button
-                    onClick={() => handleClickMenu()}
-                    className="no-style"
-                    style={{
-                      padding: "10px",
-                      borderRadius: "12px",
-                      border: "1px solid rgba(148, 163, 184, 0.3)",
-                      background:
-                        "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
-                      backdropFilter: "blur(10px)",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <svg
-                      aria-label="Options"
-                      color="rgba(226, 232, 240, 0.95)"
-                      fill="rgba(226, 232, 240, 0.95)"
-                      height="20"
-                      role="img"
-                      viewBox="0 0 24 24"
-                      width="20"
-                    >
-                      <circle
-                        cx="12"
-                        cy="12"
-                        fill="none"
-                        r="8.635"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                      ></circle>
-                      <path
-                        d="M14.232 3.656a1.269 1.269 0 0 1-.796-.66L12.93 2h-1.86l-.505.996a1.269 1.269 0 0 1-.796.66m-.001 16.688a1.269 1.269 0 0 1 .796.66l.505.996h1.862l.505-.996a1.269 1.269 0 0 1 .796-.66M3.656 9.768a1.269 1.269 0 0 1-.66.796L2 11.07v1.862l.996.505a1.269 1.269 0 0 1 .66.796m16.688-.001a1.269 1.269 0 0 1 .66-.796L22 12.93v-1.86l-.996-.505a1.269 1.269 0 0 1-.66-.796M7.678 4.522a1.269 1.269 0 0 1-1.03.096l-1.06-.348L4.27 5.587l.348 1.062a1.269 1.269 0 0 1-.096 1.03m11.8 11.799a1.269 1.269 0 0 1 1.03-.096l1.06.348 1.318-1.317-.348-1.062a1.269 1.269 0 0 1 .096-1.03m-14.956.001a1.269 1.269 0 0 1 .096 1.03l-.348 1.06 1.317 1.318 1.062-.348a1.269 1.269 0 0 1 1.03.096m11.799-11.8a1.269 1.269 0 0 1-.096-1.03l.348-1.06-1.317-1.318-1.062.348a1.269 1.269 0 0 1-1.03-.096"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                      ></path>
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "12px",
-                marginBottom: "20px",
-              }}
-            >
-              <div
-                style={{
-                  padding: "16px",
-                  borderRadius: "16px",
-                  background:
-                    "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(148, 163, 184, 0.2)",
-                  textAlign: "center",
-                  transition: "all 0.3s ease",
-                  cursor: "default",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    color: "rgba(226, 232, 240, 0.95)",
-                    marginBottom: "4px",
-                  }}
-                >
-                  {posts?.length || 0}
-                </div>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    color: "rgba(148, 163, 184, 0.9)",
-                    fontWeight: "500",
-                  }}
-                >
-                  Posts
-                </div>
-              </div>
-
-              <div
-                onClick={
-                  user?.private &&
-                  user?._id !== context.auth._id &&
-                  followButtonState !== "unfollow"
-                    ? undefined
-                    : () => handleClickOpen(1)
-                }
-                style={{
-                  padding: "16px",
-                  borderRadius: "16px",
-                  background:
-                    "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(148, 163, 184, 0.2)",
-                  textAlign: "center",
-                  transition: "all 0.3s ease",
-                  cursor:
-                    user?.private &&
-                    user?._id !== context.auth._id &&
-                    followButtonState !== "unfollow"
-                      ? "default"
-                      : "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  if (
-                    !(
-                      user?.private &&
-                      user?._id !== context.auth._id &&
-                      followButtonState !== "unfollow"
-                    )
-                  ) {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(59, 130, 246, 0.4)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (
-                    !(
-                      user?.private &&
-                      user?._id !== context.auth._id &&
-                      followButtonState !== "unfollow"
-                    )
-                  ) {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(148, 163, 184, 0.2)";
-                  }
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    color: "rgba(226, 232, 240, 0.95)",
-                    marginBottom: "4px",
-                  }}
-                >
-                  {user?.private &&
-                  user?._id !== context.auth._id &&
-                  followButtonState !== "unfollow"
-                    ? "•"
-                    : user?.followers?.length || 0}
-                </div>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    color: "rgba(148, 163, 184, 0.9)",
-                    fontWeight: "500",
-                  }}
-                >
-                  Followers
-                </div>
-              </div>
-
-              <div
-                onClick={
-                  user?.private &&
-                  user?._id !== context.auth._id &&
-                  followButtonState !== "unfollow"
-                    ? undefined
-                    : () => handleClickOpen(2)
-                }
-                style={{
-                  padding: "16px",
-                  borderRadius: "16px",
-                  background:
-                    "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(148, 163, 184, 0.2)",
-                  textAlign: "center",
-                  transition: "all 0.3s ease",
-                  cursor:
-                    user?.private &&
-                    user?._id !== context.auth._id &&
-                    followButtonState !== "unfollow"
-                      ? "default"
-                      : "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  if (
-                    !(
-                      user?.private &&
-                      user?._id !== context.auth._id &&
-                      followButtonState !== "unfollow"
-                    )
-                  ) {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(59, 130, 246, 0.4)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (
-                    !(
-                      user?.private &&
-                      user?._id !== context.auth._id &&
-                      followButtonState !== "unfollow"
-                    )
-                  ) {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(148, 163, 184, 0.2)";
-                  }
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    color: "rgba(226, 232, 240, 0.95)",
-                    marginBottom: "4px",
-                  }}
-                >
-                  {user?.private &&
-                  user?._id !== context.auth._id &&
-                  followButtonState !== "unfollow"
-                    ? "•"
-                    : user?.followings?.length || 0}
-                </div>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    color: "rgba(148, 163, 184, 0.9)",
-                    fontWeight: "500",
-                  }}
-                >
-                  Following
-                </div>
-              </div>
-            </div>
-
-            {/* Bio Section */}
-            {user?.name && (
-              <div
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "600",
-                  color: "rgba(226, 232, 240, 0.95)",
-                  marginBottom: "8px",
-                }}
-              >
-                {user.name}
-              </div>
-            )}
-
-            {user?.bio && (
-              <div
-                style={{
-                  fontSize: "14px",
-                  lineHeight: "1.5",
-                  color: "rgba(148, 163, 184, 0.9)",
-                  marginBottom: "12px",
-                }}
-              >
-                {user.bio}
-              </div>
-            )}
-
-            {user?.website && (
-              <a
-                href={user.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontSize: "14px",
-                  color: "rgb(59, 130, 246)",
-                  textDecoration: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "rgb(96, 165, 250)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "rgb(59, 130, 246)";
-                }}
-              >
-                <Public fontSize="small" />
-                {user.website.replace("https://", "")}
-              </a>
-            )}
+            <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+              <p style={{ textAlign: 'center', fontSize: '14px', fontWeight: 'bold', marginTop: '-5px', marginBottom: '-3px' }}>{toggle === 2 ? "Followings" : "Followers"}</p>
+            </DialogTitle>
+            {
+              <DialogContent style={{ marginTop: '-9px', minHeight: '5px' }} dividers>
+                <Followers handleClose={handleClose} toggle={toggle} userId={user?._id} />
+              </DialogContent>
+            }
+          </Dialog>
+          <div className="bioandstuff" style={{ marginTop: '20px' }}>
+            <p style={{ fontWeight: 'bold' }}>{user?.name}</p>
+            <p style={{ marginTop: '4px', marginBottom: '3px' }}>{user?.bio ? user.bio : "-"}</p>
+            {
+              user?.website &&
+              <a href={user?.website} target="_blank" style={{ marginTop: '10px', color: '#0e4378', fontWeight: 'normal' }} rel="noreferrer">{user?.website.replace('https://', '')}</a>
+            }
           </div>
         </div>
-
-        {/* Settings Dialog */}
-        <Dialog
-          PaperProps={{
-            sx: {
-              borderRadius: "20px",
-              background:
-                "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(148, 163, 184, 0.2)",
-              minWidth: "380px",
-              overflow: "hidden",
-            },
-          }}
-          onClose={handleCloseMenu}
-          open={openMore}
-        >
-          <div>
-            <div
-              onClick={() => navigate("/accounts/reset")}
-              style={{
-                padding: "16px 24px",
-                fontSize: "15px",
-                color: "rgba(226, 232, 240, 0.95)",
-                textAlign: "center",
-                cursor: "pointer",
-                borderBottom: "1px solid rgba(148, 163, 184, 0.15)",
-                transition: "all 0.2s ease",
-                background: "transparent",
-              }}
-              onMouseEnter={(e) =>
-                (e.target.style.background =
-                  "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)")
-              }
-              onMouseLeave={(e) => (e.target.style.background = "transparent")}
-            >
-              Change password
-            </div>
-            <div
-              onClick={() => context.logout()}
-              style={{
-                padding: "16px 24px",
-                fontSize: "15px",
-                color: "#ef4444",
-                textAlign: "center",
-                cursor: "pointer",
-                borderBottom: "1px solid rgba(148, 163, 184, 0.15)",
-                transition: "all 0.2s ease",
-                fontWeight: "600",
-              }}
-              onMouseEnter={(e) =>
-                (e.target.style.background = "rgba(239, 68, 68, 0.1)")
-              }
-              onMouseLeave={(e) => (e.target.style.background = "transparent")}
-            >
-              Logout
-            </div>
-            <div
-              onClick={() => handleCloseMenu()}
-              style={{
-                padding: "16px 24px",
-                fontSize: "15px",
-                color: "rgba(148, 163, 184, 0.9)",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) =>
-                (e.target.style.background = "rgba(148, 163, 184, 0.05)")
-              }
-              onMouseLeave={(e) => (e.target.style.background = "transparent")}
-            >
-              Cancel
-            </div>
-          </div>
-        </Dialog>
-
-        {/* Followers Dialog */}
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          PaperProps={{
-            style: {
-              borderRadius: "20px",
-              minWidth: "400px",
-              background:
-                "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
-              backdropFilter: "blur(16px)",
-              border: "1px solid rgba(148, 163, 184, 0.2)",
-              color: "rgba(226, 232, 240, 0.95)",
-            },
-          }}
-        >
-          <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-            <p
-              style={{
-                textAlign: "center",
-                fontSize: "14px",
-                fontWeight: "bold",
-                marginTop: "-5px",
-                marginBottom: "-3px",
-              }}
-            >
-              {toggle === 2 ? "Following" : "Followers"}
-            </p>
-          </DialogTitle>
-          <DialogContent
-            style={{ marginTop: "-9px", minHeight: "5px" }}
-            dividers
-          >
-            <Followers
-              handleClose={handleClose}
-              toggle={toggle}
-              userId={user?._id}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
-
-      {/* Tabs Section */}
-      <div
-        style={{
-          marginTop: "32px",
-          borderTop: "1px solid rgba(148, 163, 184, 0.2)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "48px",
-            maxWidth: "900px",
-            margin: "0 auto",
-          }}
-        >
-          <Link
-            to={`/${user?.username}`}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "20px 4px",
-              marginTop: "-1px",
-              borderTop: post
-                ? "2px solid rgba(226, 232, 240, 0.95)"
-                : "2px solid transparent",
-              color: post
-                ? "rgba(226, 232, 240, 0.95)"
-                : "rgba(148, 163, 184, 0.7)",
-              textDecoration: "none",
-              transition: "all 0.2s ease",
-              fontSize: "13px",
-              fontWeight: post ? "600" : "400",
-              letterSpacing: "0.5px",
-            }}
-          >
-            <svg height="14" viewBox="0 0 24 24" width="14" fill="currentColor">
-              <rect
-                fill="none"
-                height="18"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                width="18"
-                x="3"
-                y="3"
-              ></rect>
-              <line
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                x1="9.015"
-                x2="9.015"
-                y1="3"
-                y2="21"
-              ></line>
-              <line
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                x1="14.985"
-                x2="14.985"
-                y1="3"
-                y2="21"
-              ></line>
-              <line
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                x1="21"
-                x2="3"
-                y1="9.015"
-                y2="9.015"
-              ></line>
-              <line
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                x1="21"
-                x2="3"
-                y1="14.985"
-                y2="14.985"
-              ></line>
-            </svg>
-            POSTS
-          </Link>
-
-          {user?._id === context.auth._id && (
-            <Link
-              to={`/saved/${user?.username}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "20px 4px",
-                marginTop: "-1px",
-                borderTop: !post
-                  ? "2px solid rgba(226, 232, 240, 0.95)"
-                  : "2px solid transparent",
-                color: !post
-                  ? "rgba(226, 232, 240, 0.95)"
-                  : "rgba(148, 163, 184, 0.7)",
-                textDecoration: "none",
-                transition: "all 0.2s ease",
-                fontSize: "13px",
-                fontWeight: !post ? "600" : "400",
-                letterSpacing: "0.5px",
-              }}
-            >
-              <svg
-                height="14"
-                viewBox="0 0 24 24"
-                width="14"
-                fill="currentColor"
-              >
-                <polygon
-                  fill="none"
-                  points="20 21 12 13.44 4 21 4 3 20 3 20 21"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                ></polygon>
-              </svg>
-              SAVED
-            </Link>
-          )}
+      <div className="highlights" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '88%', margin: 'auto', marginTop: '42px', }}>
+        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
+          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid #c1c1c1', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
+            <img src="https://images.pexels.com/photos/1371360/pexels-photo-1371360.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+          </div>
+          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: '#424141' }}>Highlights</p>
+        </div>
+        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
+          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid #c1c1c1', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
+            <img src="https://images.unsplash.com/photo-1666202566722-26e17e78cb07?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+          </div>
+          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: '#424141' }}>Highlights</p>
+        </div>
+        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
+          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid #c1c1c1', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
+            <img src="https://images.unsplash.com/photo-1666207482115-53756be8a995?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=735&q=80" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+          </div>
+          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: '#424141' }}>Highlights</p>
+        </div>
+        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
+          <div className="imageuser storybox" style={{ width: '85px', height: '85px', borderRadius: '50%', border: '3px solid #c1c1c1', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
+            <img src="https://images.unsplash.com/photo-1666202566722-26e17e78cb07?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80" style={{ width: '75px', height: '75px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+          </div>
+          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: '#424141' }}>Highlights</p>
+        </div>
+        <div className="highlight-story" style={{ display: 'flex', flexDirection: 'column', marginRight: '35px' }}>
+          <div className="imageuser storybox" style={{ width: '82px', height: '82px', borderRadius: '50%', border: '1px solid #c1c1c1', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', }}>
+            <svg aria-label="Plus icon" className="_ab6-" color="#c7c7c7" fill="#c7c7c7" height="44" role="img" viewBox="0 0 24 24" width="44"><path d="M21 11.3h-8.2V3c0-.4-.3-.8-.8-.8s-.8.4-.8.8v8.2H3c-.4 0-.8.3-.8.8s.3.8.8.8h8.2V21c0 .4.3.8.8.8s.8-.3.8-.8v-8.2H21c.4 0 .8-.3.8-.8s-.4-.7-.8-.7z"></path></svg>
+          </div>
+          <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '14px', fontWeight: 'bold', color: '#424141' }}>New</p>
         </div>
 
-        {/* Post Content */}
-        <div
-          style={{
-            padding: "24px",
-            maxWidth: "900px",
-            margin: "0 auto",
-          }}
-        >
-          {/* Show private account message for non-followers */}
-          {user?.private &&
-            user?._id !== context.auth._id &&
-            followButtonState !== "unfollow" && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "80px 24px",
-                  color: "rgba(148, 163, 184, 0.9)",
-                }}
-              >
-                <div
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    borderRadius: "50%",
-                    background:
-                      "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)",
-                    border: "3px solid rgba(59, 130, 246, 0.3)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto 24px",
-                  }}
-                >
-                  <svg
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="rgba(59, 130, 246, 0.8)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                </div>
-                <p
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "600",
-                    marginBottom: "12px",
-                    color: "rgba(226, 232, 240, 0.95)",
-                  }}
-                >
-                  This Account is Private
-                </p>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "rgba(148, 163, 184, 0.7)",
-                    lineHeight: "1.6",
-                    maxWidth: "380px",
-                    margin: "0 auto",
-                  }}
-                >
-                  {followButtonState === "requested"
-                    ? "You've requested to follow this account. Once they approve your request, you'll be able to see their posts."
-                    : "Follow this account to see their posts, followers, and who they follow."}
-                </p>
-              </div>
-            )}
+      </div>
+      <div className="post-section" style={{ borderTop: '1px solid #d2cfcf', marginTop: '54px' }}>
+        <div className="tab-select" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
+          <Link to={`/${user?.username}`} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', margin: '18px 18px', borderTop: post ? '1px solid black' : '', paddingTop: '22px', marginTop: '-0.5px', width: '79px', paddingRight: '4px' }}>
+            <svg aria-label="" className="_ab6-" color="#262626" fill="#262626" height="12" role="img" viewBox="0 0 24 24" width="12"><rect fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" width="18" x="3" y="3"></rect><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="9.015" x2="9.015" y1="3" y2="21"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="14.985" x2="14.985" y1="3" y2="21"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="21" x2="3" y1="9.015" y2="9.015"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="21" x2="3" y1="14.985" y2="14.985"></line></svg>
+            <p style={{ fontSize: '12.4px', color: post ? 'black' : 'gray', marginLeft: '4px', fontWeight: post ? 'bold' : 'normal' }}>POSTS</p>
+          </Link>
+          {
+            user?._id === context.auth._id &&
+            <Link to={`/saved/${user?.username}`} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', margin: '18px 18px', borderTop: !post ? '1px solid black' : '', paddingTop: '22px', marginTop: '-0.5px', width: '79px', paddingRight: '4px' }}>
+              <svg aria-label="" className="_ab6-" color="#8e8e8e" fill="#8e8e8e" height="12" role="img" viewBox="0 0 24 24" width="12"><polygon fill="none" points="20 21 12 13.44 4 21 4 3 20 3 20 21" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></polygon></svg>
+              <p style={{ fontSize: '12.4px', color: !post ? 'black' : 'gray', marginLeft: '4px', fontWeight: !post ? 'bold' : 'normal' }}>SAVED</p>
+            </Link>
+          }
 
-          {/* Show loading spinner */}
-          {posts.length === 0 &&
-            loading &&
-            !(
-              user?.private &&
-              user?._id !== context.auth._id &&
-              followButtonState !== "unfollow"
-            ) && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: "60px 0",
-                }}
-              >
-                <Spinner />
-              </div>
-            )}
+        </div>
+        <div className="post-content">
+          {
+            posts.length === 0 && loading && <Spinner />
+          }
 
-          {/* Show no posts message */}
-          {posts.length === 0 &&
-            !loading &&
-            !(
-              user?.private &&
-              user?._id !== context.auth._id &&
-              followButtonState !== "unfollow"
-            ) && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "80px 24px",
-                  color: "rgba(148, 163, 184, 0.9)",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "600",
-                    marginBottom: "8px",
-                  }}
-                >
-                  No Posts Yet
-                </p>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "rgba(148, 163, 184, 0.7)",
-                  }}
-                >
-                  {post
-                    ? "When posts are shared, they will appear here."
-                    : "When you save posts, they will appear here."}
-                </p>
-              </div>
-            )}
+          {
+            posts.length === 0 && !loading && <p style={{ textAlign: 'center', marginTop: '72px', width: '100%', fontWeight: 'bold', fontSize: '16px' }}>No posts to see</p>
+          }
 
-          {/* Show posts grid */}
-          {posts.length > 0 &&
-            !(
-              user?.private &&
-              user?._id !== context.auth._id &&
-              followButtonState !== "unfollow"
-            ) && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "4px",
-                }}
-              >
-                {posts.map((item) => (
-                  <Image
-                    key={item._id}
-                    userId={item.owner}
-                    postId={item._id}
-                    likes={item.likes.length}
-                    comments={item.comments.length}
-                    src={item.files[0].link}
-                  />
-                ))}
+          {
+            post ?
+              <div className='grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', rowGap: '17px' }}>
+                {
+                  posts?.map(item =>
+                    <Image userId={item.owner} postId={item._id} likes={item.likes.length} comments={item.comments.length} key={item._id} src={item.files[0].link}></Image>
+                  )
+                }
+
+              </div> : <div className='grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', rowGap: '17px' }}>
+                {
+                  posts?.map(item =>
+                    <Image userId={item.owner} postId={item._id} likes={item.likes.length} comments={item.comments.length} key={item._id} src={item.files[0].link}></Image>
+                  )
+                }
               </div>
-            )}
+          }
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

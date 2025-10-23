@@ -84,26 +84,9 @@ exports.addSeen = async (req, res) => {
 
 exports.homeStory = async (req, res) => {
   try {
-    // Check if user is authenticated
-    if (!req.user || !req.user._id) {
-      return res.status(401).send({
-        success: false,
-        message: "User not authenticated",
-      });
-    }
-
     const user = await User.findOne({ _id: req.user._id });
-    
-    if (!user) {
-      return res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
-
     const allStories = [];
-    
-    await Promise.all(
+    Promise.all(
       user.followings.map(async (item) => {
         const t = await Story.find({
           $and: [
@@ -113,11 +96,10 @@ exports.homeStory = async (req, res) => {
         });
         if (t.length != 0) allStories.push(t);
       })
-    );
-    
-    res.send(allStories);
+    ).then(() => {
+      res.send(allStories);
+    });
   } catch (err) {
-    console.error("Error in homeStory:", err);
     res.status(400).send({
       success: false,
       message: err.message,

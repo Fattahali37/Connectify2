@@ -1,47 +1,34 @@
-import { Sidebar } from "./components/navbar/Sidebar";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Navbar } from "./components/navbar/Navbar";
+import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
 import { AuthContext } from "./context/Auth";
-import { AdminAuthProvider } from "./context/AdminAuth";
 import { useEffect, useState } from "react";
 import { Private } from "./routers/Private";
 import Redirect from "./routers/Redirect";
-import AdminProtected from "./routers/AdminProtected";
 import { Forgot } from "./pages/Forgot";
 import { Profile } from "./pages/Profile";
 import { Settings } from "./pages/Settings";
 import toast, { Toaster } from "react-hot-toast";
 import { Chat } from "./pages/Chat";
 import Story from "./pages/Story";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminLogin from "./components/admin/AdminLogin";
 import { api } from "./Interceptor/apiCall";
 import { url } from "./baseUrl";
 import io from "socket.io-client";
 import { Password } from "./pages/Password";
 import AuthRedirect from "./pages/AuthRedirect";
-import { FollowRequests } from "./pages/FollowRequests";
-import "./theme.css";
 
-export const socket = io(url, {
-  transports: ["websocket", "polling"],
-  reconnectionDelay: 1000,
-  reconnection: true,
-  reconnectionAttempts: 10,
-  autoConnect: true,
-});
+export const socket = io(url);
 
 function App() {
-  const location = useLocation();
+  socket.on("connection", function (data) {
+    console.log(data);
+  });
   const [auth, setAuth] = useState(JSON.parse(localStorage.getItem("user")));
   const [active, setActive] = useState("home");
   const [stories, setStories] = useState([]);
-
-  // Check if current route is admin route
-  const isAdminRoute = location.pathname.startsWith("/admin");
 
   const throwErr = (err) => {
     toast.error(err, {
@@ -65,38 +52,16 @@ function App() {
     api
       .get(`${url}/story/home`)
       .then((res) => {
-        // Ensure the response is an array
-        setStories(Array.isArray(res.data) ? res.data : []);
+        setStories(res.data);
       })
-      .catch((err) => {
-        console.log(err);
-        setStories([]);
-      });
+      .catch((err) => console.log(err));
   }, [auth]);
 
   useEffect(() => {
-    if (!auth) return;
-
-    const handleConnect = () => {
-      console.log("Socket connected");
-      socket.emit("online", { uid: auth._id });
-    };
-
-    const handleConnectError = (error) => {
-      console.log("Socket connection error:", error);
-    };
-
-    socket.on("connect", handleConnect);
-    socket.on("connect_error", handleConnectError);
-
-    // If already connected, emit online status
-    if (socket.connected) {
-      socket.emit("online", { uid: auth._id });
-    }
-
+    socket.on("connect");
+    if (auth) socket.emit("online", { uid: auth._id });
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("connect_error", handleConnectError);
+      socket.off("connect");
     };
   }, [auth]);
 
@@ -130,19 +95,12 @@ function App() {
   };
 
   return (
-    <AdminAuthProvider>
-      <AuthContext.Provider
-        value={{
-          auth,
-          setAuth,
-          throwErr,
-          throwSuccess,
-          handleActive,
-          findStory,
-        }}
-      >
-        <Toaster />
-        {auth && !isAdminRoute && <Sidebar active={active} />}
+    <AuthContext.Provider
+      value={{ auth, setAuth, throwErr, throwSuccess, handleActive, findStory }}
+    >
+      <Toaster />
+      {auth && <Navbar active={active} />}
+      <div className="width60">
         <Routes>
           <Route
             path="/login"
@@ -221,29 +179,9 @@ function App() {
               </Private>
             }
           />
-
-          <Route
-            path="/followrequests"
-            element={
-              <Private>
-                <FollowRequests />
-              </Private>
-            }
-          />
-
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route
-            path="/admin/dashboard"
-            element={
-              <AdminProtected>
-                <AdminDashboard />
-              </AdminProtected>
-            }
-          />
         </Routes>
-      </AuthContext.Provider>
-    </AdminAuthProvider>
+      </div>
+    </AuthContext.Provider>
   );
 }
 

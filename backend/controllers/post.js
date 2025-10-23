@@ -1,6 +1,6 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
-const { computeFeaturesForUserId } = require('../utils/profileFeatureHelper');
+const { all } = require("../routes/post");
 
 exports.getPost = async (req, res) => {
   try {
@@ -27,8 +27,6 @@ exports.createPost = async (req, res) => {
       { _id: req.user._id },
       { $push: { posts: saved._id } }
     );
-    // update posts_count in profile features
-    computeFeaturesForUserId(req.user._id);
     res.send(saved);
   } catch (err) {
     res.send({
@@ -51,8 +49,6 @@ exports.deletePost = async (req, res) => {
       { _id: req.user._id },
       { $pull: { posts: req.params.postId } }
     );
-    // update posts_count in profile features
-    computeFeaturesForUserId(req.user._id);
     res.status(200).send({
       success: true,
       message: "done",
@@ -266,28 +262,10 @@ exports.userPosts = async (req, res) => {
 // explore post
 exports.explore = async (req, res) => {
   try {
-    const currentUser = await User.findOne({ _id: req.user._id });
-    
-    // Get all posts except current user's
-    const allPosts = await Post.find({ owner: { $ne: req.user._id } }).sort({
+    const posts = await Post.find({ owner: { $ne: req.user._id } }).sort({
       createdAt: -1,
     });
-    
-    // Filter out posts from private accounts that user is not following
-    const filteredPosts = [];
-    
-    for (const post of allPosts) {
-      const postOwner = await User.findOne({ _id: post.owner });
-      
-      // Show post if:
-      // 1. Owner is public (not private), OR
-      // 2. Current user is following the owner
-      if (!postOwner.private || currentUser.followings.includes(postOwner._id.toString())) {
-        filteredPosts.push(post);
-      }
-    }
-    
-    res.send(filteredPosts);
+    res.send(posts);
   } catch (err) {
     res.send({
       success: false,
@@ -320,36 +298,18 @@ exports.savedPosts = async (req, res) => {
 exports.homePosts = async (req, res) => {
   try {
     const userId = req.user._id;
-    const user = await User.findOne({ _id: userId });
-    
-    // Get current user's own posts
     const posts = await Post.find({ owner: userId });
-    
-    // Get posts from followings
-    await Promise.all(
+    const user = await User.findOne({ _id: userId });
+    Promise.all(
       user.followings.map(async (item) => {
         posts.push(...(await Post.find({ owner: item })));
       })
-    );
-    
-    // Get posts from public accounts that user is NOT following
-    const publicUsers = await User.find({ 
-      private: { $ne: true },
-      _id: { $nin: [...user.followings, userId] }
+    ).then(() => {
+      const arr = posts.sort((a, b) => {
+        return b.createdAt - a.createdAt;
+      });
+      res.send(arr);
     });
-    
-    await Promise.all(
-      publicUsers.map(async (publicUser) => {
-        posts.push(...(await Post.find({ owner: publicUser._id })));
-      })
-    );
-    
-    // Sort by date
-    const arr = posts.sort((a, b) => {
-      return b.createdAt - a.createdAt;
-    });
-    
-    res.send(arr);
   } catch (err) {
     res.send({
       success: false,

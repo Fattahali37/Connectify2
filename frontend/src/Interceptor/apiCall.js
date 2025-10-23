@@ -5,32 +5,9 @@ const axiosInstance = axios.create({});
 
 axiosInstance.interceptors.request.use(
   async (config) => {
-    // Preserve any Authorization header already set elsewhere
-    const existingAuthHeader =
-      config.headers?.Authorization || config.headers?.authorization;
-
-    if (existingAuthHeader) {
-      return config;
-    }
-
-    // Prefer admin token if available
-    const adminAuthRaw = localStorage.getItem("adminAuth");
-    const adminToken = (() => {
-      try {
-        return adminAuthRaw ? JSON.parse(adminAuthRaw)?.token : null;
-      } catch (_) {
-        return null;
-      }
-    })();
-
-    const userAccessToken = localStorage.getItem("access_token");
-
-    const tokenToUse = adminToken || userAccessToken;
-
-    if (!config.headers) config.headers = {};
-    if (tokenToUse) {
-      config.headers["Authorization"] = `Bearer ${tokenToUse}`;
-    }
+    config.headers = {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    };
     return config;
   },
   (error) => {
@@ -41,16 +18,6 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Check if error.response exists (network errors won't have a response)
-    if (!error.response) {
-      console.error("Network Error: Backend server may be down", error.message);
-      // Add a more user-friendly error message
-      error.message =
-        "Unable to connect to server. Please ensure the backend is running on " +
-        (error.config?.baseURL || "http://localhost:8000");
-      return Promise.reject(error);
-    }
-
     const originalRequest = error.config;
 
     if (error.response.status === 401) {

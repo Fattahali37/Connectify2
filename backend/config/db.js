@@ -1,15 +1,15 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
-
-// Suppress Mongoose 7 deprecation warning
-mongoose.set("strictQuery", false);
+require('dotenv').config();
+const mongoose = require('mongoose');
 
 exports.connectToDB = async () => {
   try {
-    await mongoose.connect(process.env.DataBaseURL);
-    console.log("✅ MongoDB connected:", mongoose.connection.host);
+    const connection = await mongoose.connect(process.env.Mongo_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(`✅ MongoDB connected: ${connection.connection.host}`);
   } catch (err) {
-    console.log("❌ Failed to connect to database", err);
+    console.error('❌ MongoDB connection error:', err.message);
     process.exit(1);
   }
 };
