@@ -12,3 +12,11 @@ redirect_url=http://localhost:8000/auth/google/oauth
 # Admin Dashboard Configuration
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=admin123
+
+# Email Configuration for Auto-Verification Notifications
+EMAIL_SERVICE=gmail
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-specific-password
+ADMIN_EMAIL=admin@example.com
+
+#the select schedule should be available only in auto verify setting and if the auto verify setting is running or set then verify now button should be disabled and ina uto verify setting the button should be start now instead o run now and the flask api should be used there and make sure that newly created account doesnt get verified if the user has selected anytime other then "none"
