@@ -237,7 +237,10 @@ exports.hasNotications = async (req, res) => {
 exports.notications = async (req, res) => {
   try {
     const user = req.user._id;
+    console.log("📧 Fetching notifications for user:", user);
     const notifications = await User.findOne({ _id: user });
+    console.log("📧 User found:", notifications?.username);
+    console.log("📧 Notification count:", notifications?.notifications?.length || 0);
     const unSorted = notifications.notifications;
     res.send(unSorted.reverse());
   } catch (err) {
