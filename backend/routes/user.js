@@ -1,4 +1,4 @@
-const { getUser, followHandle, getFollowings, getFollowers, notications, hasNotications, updateUser, search, getUserById, suggestions, changePassword, getAllUsers, resetPassword, checkResetToken, handleNewPassword } = require('../controllers/user')
+const { getUser, followHandle, getFollowings, getFollowers, notications, hasNotications, updateUser, search, getUserById, suggestions, changePassword, getAllUsers, resetPassword, checkResetToken, handleNewPassword, getUnreadNotificationCount, markNotificationsAsRead, getFollowRequests, acceptFollowRequest, rejectFollowRequest, getFollowRequestCount } = require('../controllers/user')
 const { isAuthenticated } = require('../middlewares/auth')
 
 const router = require('express').Router()
@@ -14,8 +14,6 @@ router.route("/changepassword").put(isAuthenticated, changePassword)
 router.route("/reset").post(resetPassword)
 
 router.route('/newpassword').post(handleNewPassword)
-
-router.route('/:username').get(getUser)
 
 router.route("/checkreset/:token").get(checkResetToken)
 
@@ -33,7 +31,20 @@ router.route("/view/notifications").get(isAuthenticated, notications)
 
 router.route("/view/has-notifications").get(isAuthenticated, hasNotications)
 
+router.route("/notifications/unread-count").get(isAuthenticated, getUnreadNotificationCount)
 
+router.route("/notifications/mark-read").put(isAuthenticated, markNotificationsAsRead)
 
+// Follow request routes
+router.route("/follow-requests").get(isAuthenticated, getFollowRequests)
+
+router.route("/follow-requests/count").get(isAuthenticated, getFollowRequestCount)
+
+router.route("/follow-requests/accept/:userId").post(isAuthenticated, acceptFollowRequest)
+
+router.route("/follow-requests/reject/:userId").post(isAuthenticated, rejectFollowRequest)
+
+// IMPORTANT: Keep /:username route at the bottom to avoid catching other routes
+router.route('/:username').get(getUser)
 
 module.exports = router

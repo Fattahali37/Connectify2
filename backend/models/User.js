@@ -117,6 +117,22 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  status: {
+    type: String,
+    enum: ['active', 'blocked'],
+    default: 'active',
+  },
+});
+
+// After user is saved, upsert profile features so they stay in sync
+userSchema.post('save', function(doc) {
+  try {
+    const { upsertFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
+    // call async but don't await here
+    upsertFeaturesFromUserDoc(doc).catch(err => console.error('post-save profile feature upsert failed', err.message || err));
+  } catch (e) {
+    console.error('failed to schedule profile feature upsert', e.message || e);
+  }
 });
 
 module.exports = new mongoose.model("User", userSchema);

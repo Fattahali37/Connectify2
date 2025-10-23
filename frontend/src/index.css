@@ -1,217 +1,247 @@
-:root {
-  --border: #dbdbdb;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  position: relative !important;
-  height: 100vh;
-  width: 100vw;
-}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-.width60 {
-  width: 52%;
-  margin: auto;
-}
+@layer base {
+  :root {
+    --border: rgba(148, 163, 184, 0.2);
+    --bg-primary: rgba(15, 23, 42, 0.95);
+    --bg-secondary: rgba(30, 41, 59, 0.95);
+    --bg-tertiary: rgba(51, 65, 85, 0.95);
+    --text-primary: rgba(226, 232, 240, 0.95);
+    --text-secondary: rgba(148, 163, 184, 0.9);
+    --text-tertiary: rgba(100, 116, 139, 0.9);
+    
+    /* Gradient theme colors */
+    --gradient-primary: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%);
+    --gradient-primary-hover: linear-gradient(135deg, rgb(37, 99, 235) 0%, rgb(109, 40, 217) 100%);
+    --gradient-slate: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    --gradient-slate-light: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    --gradient-success: linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(21, 128, 61) 100%);
+    --gradient-danger: linear-gradient(135deg, rgb(239, 68, 68) 0%, rgb(220, 38, 38) 100%);
+    --gradient-warning: linear-gradient(135deg, rgb(234, 179, 8) 0%, rgb(202, 138, 4) 100%);
+  }
 
-.flex {
-  display: flex;
-}
+  * {
+    @apply m-0 p-0 font-sans;
+  }
 
-.flex-row {
-  flex-direction: row;
-}
+  html {
+    min-height: 100%;
+  }
 
-.border {
-  border: 1.75px solid var(--border);
-}
+  body {
+    @apply relative h-screen w-screen text-dark-text-primary overflow-x-hidden;
+    background: linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%);
+    background-attachment: fixed;
+  }
 
-.noborder {
-  outline: none;
-  border: none;
-}
+  a {
+    @apply text-inherit no-underline;
+  }
 
-button {
-  border: none;
-  outline: none;
-  cursor: pointer;
-}
+  button {
+    @apply border-0 outline-none cursor-pointer;
+  }
 
-.flex-col {
-  flex-direction: column;
-}
+  /* Hide scrollbars */
+  *::-webkit-scrollbar {
+    @apply hidden;
+  }
 
-
-.align {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.justify-btwn {
-  justify-content: space-between;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  font-family: 'Poppins', sans-serif;
-}
-
-body {
-  background-color: #FAFAFA;
-}
-
-*::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-* {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-.lg-sg {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  margin-top: 9.5vh;
-  height: fit-content;
-}
-
-.login-left {
-  width: 47%;
-}
-
-.right-login {
-  width: 37%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.login-box {
-  background-color: white;
-  min-height: 450px;
-  width: 350px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 14px;
-  padding-top: 22px;
-}
-
-.signup-box {
-  background-color: white;
-  min-height: 630px;
-  width: 350px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 22px;
-  margin-top: -3.8vh;
-
-}
-
-.forgot-box {
-  background-color: white;
-  min-height: 610px;
-  width: 380px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 14px;
-  padding-top: 22px;
-  position: relative;
-
-}
-
-.separate {
-  position: absolute;
-  bottom: 0;
-  border-top: 1px solid var(--border);
-}
-
-.signup-action-box {
-  background-color: white;
-  min-height: 70px;
-  width: 350px;
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.phone {
-  position: relative !important;
-}
-
-.images {
-  position: absolute !important;
-  top: 19.9px;
-  right: 46.2px;
-}
-
-@media screen and (max-width:1500px) {
-  .width60 {
-    width: 85%;
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
-.storybox {
-  width: 70px !important;
-  height: 70px !important;
-}
+@layer components {
+  .width60 {
+    @apply w-full mx-auto px-6;
+    max-width: 100%;
+  }
 
-@media screen and (max-width:980px) {
+  @media screen and (max-width: 1500px) {
+    .width60 {
+      max-width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 850px) {
+    .width60 {
+      max-width: 100%;
+      @apply px-4;
+    }
+  }
+
+  /* Main content area with sidebar offset */
+  .main-content {
+    @apply transition-all duration-300 ease-in-out;
+    margin-left: 280px;
+    min-height: 100vh;
+    width: calc(100% - 280px);
+  }
+
+  @media screen and (max-width: 1200px) {
+    .main-content {
+      margin-left: 80px;
+      width: calc(100% - 80px);
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .main-content {
+      @apply ml-0 mb-16;
+      width: 100%;
+    }
+  }
+
+  /* Legacy classes - converted to Tailwind */
+  .lg-sg {
+    @apply flex flex-row justify-around h-fit;
+    margin-top: 9.5vh;
+  }
+
+  .login-left {
+    @apply w-full lg:w-5/12;
+  }
+
+  .right-login {
+    @apply w-full lg:w-1/3 flex flex-col justify-start;
+  }
+
+  .login-box,
+  .signup-box,
+  .forgot-box {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    @apply flex flex-col items-center pt-6 rounded-lg;
+  }
+
+  .login-box {
+    @apply min-h-[450px] w-full max-w-[350px] mt-4;
+  }
+
+  .signup-box {
+    @apply min-h-[630px] w-full max-w-[350px];
+  }
+
+  .forgot-box {
+    @apply min-h-[610px] w-full max-w-[380px] mt-4 relative;
+  }
+
+  .separate {
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    @apply absolute bottom-0;
+  }
+
+  .signup-action-box {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    @apply min-h-[70px] w-full max-w-[350px] mt-3 flex items-center justify-center rounded-lg;
+  }
+
+  .phone {
+    @apply relative;
+  }
+
+  .images {
+    @apply absolute;
+    top: 19.9px;
+    right: 46.2px;
+  }
+
+  .storybox {
+    @apply w-[70px] h-[70px];
+  }
+
   .grid {
-    grid-template-columns: repeat(3, 1fr) !important;
+    display: grid;
+    gap: 1rem;
   }
 
-  .ppp {
-    width: 200px !important;
-    height: 220px !important;
-    margin: auto;
-  }
-}
+  @media screen and (max-width: 980px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
 
-@media screen and (max-width:850px) {
-  .width60 {
-    width: 95%;
+    .ppp {
+      @apply w-[200px] h-[220px] mx-auto;
+    }
   }
 
-  .right-home {
-    display: none;
+  @media screen and (max-width: 1200px) {
+    /* Collapsed sidebar - adjust margins */
+    .home {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
+    
+    .explore-page,
+    .chatpage,
+    .settings-container {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
   }
 
-  .left-home {
-    width: 100% !important;
+  @media screen and (max-width: 850px) {
+    .right-home {
+      @apply hidden;
+    }
+
+    .left-home {
+      @apply w-full;
+    }
+
+    .search {
+      @apply hidden;
+    }
+
+    .logo {
+      @apply hidden;
+    }
+
+    .icons {
+      @apply w-full;
+    }
+
+    .navbar {
+      @apply w-full flex justify-center;
+    }
+    
+    /* Sidebar switches to collapsed */
+    .home {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
+    
+    .explore-page,
+    .chatpage,
+    .settings-container {
+      margin-left: 80px !important;
+      width: calc(100% - 80px) !important;
+    }
   }
 
-  .search {
-    display: none !important;
-  }
-
-  .logo {
-    display: none !important;
-  }
-
-  .icons {
-    width: 100% !important;
-  }
-
-  .navbar {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+  @media screen and (max-width: 768px) {
+    /* Mobile bottom nav - remove left margin */
+    .home {
+      margin-left: 0 !important;
+      width: 100% !important;
+      margin-bottom: 72px;
+    }
+    
+    .explore-page,
+    .chatpage,
+    .settings-container {
+      margin-left: 0 !important;
+      width: 100% !important;
+      margin-bottom: 72px;
+    }
   }
 }
