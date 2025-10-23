@@ -164,6 +164,7 @@ exports.followHandle = async (req, res) => {
 exports.getFollowings = async (req, res) => {
   try {
     const { userId } = req.params;
+    
     const currentUser = req.user._id;
     const user = await User.findOne({ _id: userId });
     
