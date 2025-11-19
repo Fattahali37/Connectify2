@@ -166,21 +166,22 @@ exports.getFollowings = async (req, res) => {
     const { userId } = req.params;
     
     const currentUser = req.user._id;
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ _id: userId }).select('private followers followings').lean();
     
     // If account is private and current user is not a follower, return empty
     if (user.private && !user.followers.includes(currentUser.toString())) {
       return res.send([]);
     }
     
-    let followings = [];
-    Promise.all(
-      user.followings.map(async (item) => {
-        followings.push(await User.findOne({ _id: item.toString() }));
-      })
-    ).then(() => {
-      res.send(followings);
-    });
+    // Optimized: Use single query with $in operator - limit to 200 users
+    const followings = await User.find({ 
+      _id: { $in: user.followings } 
+    })
+    .limit(200)
+    .select('username name avatar bio private followers')
+    .lean();
+    
+    res.send(followings);
   } catch (err) {
     res.send({
       success: false,
@@ -193,22 +194,24 @@ exports.getFollowings = async (req, res) => {
 exports.getFollowers = async (req, res) => {
   try {
     const { userId } = req.params;
+    
     const currentUser = req.user._id;
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ _id: userId }).select('private followers').lean();
     
     // If account is private and current user is not a follower, return empty
     if (user.private && !user.followers.includes(currentUser.toString())) {
       return res.send([]);
     }
     
-    let followers = [];
-    Promise.all(
-      user.followers.map(async (item) => {
-        followers.push(await User.findOne({ _id: item.toString() }));
-      })
-    ).then(() => {
-      res.send(followers);
-    });
+    // Optimized: Use single query with $in operator - limit to 200 users
+    const followers = await User.find({ 
+      _id: { $in: user.followers } 
+    })
+    .limit(200)
+    .select('username name avatar bio private followers')
+    .lean();
+    
+    res.send(followers);
   } catch (err) {
     res.send({
       success: false,

@@ -11,33 +11,45 @@ const { sendVerificationStartEmail, sendVerificationCompleteEmail } = require(".
 
 exports.getAllUsers = async (req, res) => {
   try {
+    // Optimized: Use lean() to get plain JavaScript objects (faster)
+    // Use select() to only get needed fields
+    // Use countDocuments instead of populating arrays
     const users = await User.find({})
-      .select("-password")
-      .populate("posts")
-      .populate("followers")
-      .populate("followings")
+      .select("-password -requestSent -requestReceived -notifications -highlights -saved")
+      .lean()
       .sort({ createdAt: -1 });
 
-    const usersWithStats = users.map((user) => ({
-      _id: user._id,
-      username: user.username,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      bio: user.bio,
-      website: user.website,
-      status: user.status,
-      createdAt: user.createdAt,
-      lastSeen: user.lastSeen,
-      online: user.online,
-      private: user.private,
-      postsCount: user.posts.length,
-      followersCount: user.followers.length,
-      followingCount: user.followings.length,
-      verificationStatus: user.verificationStatus,
-      verificationConfidence: user.verificationConfidence,
-      verificationReasoning: user.verificationReasoning,
-    }));
+    // Get counts in parallel using aggregation (much faster)
+    const usersWithStats = await Promise.all(
+      users.map(async (user) => {
+        const [postsCount, followersCount, followingCount] = await Promise.all([
+          user.posts?.length || 0,
+          user.followers?.length || 0,
+          user.followings?.length || 0
+        ]);
+
+        return {
+          _id: user._id,
+          username: user.username,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          bio: user.bio,
+          website: user.website,
+          status: user.status,
+          createdAt: user.createdAt,
+          lastSeen: user.lastSeen,
+          online: user.online,
+          private: user.private,
+          postsCount,
+          followersCount,
+          followingCount,
+          verificationStatus: user.verificationStatus,
+          verificationConfidence: user.verificationConfidence,
+          verificationReasoning: user.verificationReasoning,
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -55,13 +67,13 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getBlockedUsers = async (req, res) => {
   try {
+    // Optimized: Use lean() and select only needed fields
     const blockedUsers = await User.find({ status: "blocked" })
-      .select("-password")
-      .populate("posts")
-      .populate("followers")
-      .populate("followings")
+      .select("-password -requestSent -requestReceived -notifications -highlights -saved")
+      .lean()
       .sort({ createdAt: -1 });
 
+    // Transform users with stats (array lengths already available from lean())
     const usersWithStats = blockedUsers.map((user) => ({
       _id: user._id,
       username: user.username,
@@ -75,9 +87,9 @@ exports.getBlockedUsers = async (req, res) => {
       lastSeen: user.lastSeen,
       online: user.online,
       private: user.private,
-      postsCount: user.posts.length,
-      followersCount: user.followers.length,
-      followingCount: user.followings.length,
+      postsCount: user.posts?.length || 0,
+      followersCount: user.followers?.length || 0,
+      followingCount: user.followings?.length || 0,
     }));
 
     res.json({

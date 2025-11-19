@@ -32,23 +32,23 @@ import Emoji from "../../emoji/Emoji";
 
 export default function Card({
   img,
-  likes,
+  likes = [],
   caption,
   time,
-  comments,
+  comments = [],
   userId,
   id,
-  saved,
+  saved = [],
   filterPosts,
   filterUserPosts,
 }) {
   const context = useContext(AuthContext);
   const [comment, setComment] = useState("");
-  const [commnetsCount, setCommentsCount] = useState(comments.length);
-  const [likesCount, setLikesCount] = useState(likes.length);
-  const [iLiked, setIliked] = useState(likes.includes(context.auth._id));
+  const [commnetsCount, setCommentsCount] = useState(comments?.length || 0);
+  const [likesCount, setLikesCount] = useState(likes?.length || 0);
+  const [iLiked, setIliked] = useState(likes?.includes(context.auth._id) || false);
   const [user, setUser] = useState();
-  const [iSaved, setIsaved] = useState(saved.includes(context.auth._id));
+  const [iSaved, setIsaved] = useState(saved?.includes(context.auth._id) || false);
 
   const [captionText, setCaptionText] = useState(caption);
   const [captionShow, setCaptionShow] = useState(caption);

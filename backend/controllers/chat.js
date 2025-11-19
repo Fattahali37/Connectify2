@@ -5,6 +5,9 @@ const Room = require('../models/Room')
 exports.getRooms = async (req, res) => {
     try {
         const rooms = await Chat.find({ people: req.user._id })
+            .select('roomId people lastMessage lastSeen createdAt')
+            .lean()
+            .sort({ 'lastMessage.timestamp': -1 });
         res.send(rooms)
     } catch (err) {
         res.send({
@@ -16,7 +19,7 @@ exports.getRooms = async (req, res) => {
 
 exports.createOrGetRoom = async (req, res) => {
     try {
-        const have = await Chat.findOne({ people: { $all: [...req.body.people, req.user._id] } })
+        const have = await Chat.findOne({ people: { $all: [...req.body.people, req.user._id] } }).lean();
         if (have) {
             return res.send(have)
         }
@@ -41,6 +44,8 @@ exports.createOrGetRoom = async (req, res) => {
 exports.findRoom = async (req, res) => {
     try {
         const result = await Chat.findOne({ roomId: req.params.roomId })
+            .select('roomId people lastMessage lastSeen createdAt')
+            .lean();
         res.send(result)
     } catch (err) {
         res.send({
@@ -133,13 +138,15 @@ exports.getUnreadMessageCount = async (req, res) => {
         const userId = req.user._id;
         
         // Get all rooms the user is part of
-        const rooms = await Room.find({ people: userId });
+        const rooms = await Room.find({ people: userId })
+            .select('lastMessage lastSeen')
+            .lean();
         
         let unreadCount = 0;
         
         for (const room of rooms) {
             // Find when this user last saw this room
-            const userLastSeen = room.lastSeen.find(ls => ls.userId.toString() === userId.toString());
+            const userLastSeen = room.lastSeen?.find(ls => ls.userId.toString() === userId.toString());
             
             // If there's a last message and either:
             // 1. User has never seen the room, or

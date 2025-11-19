@@ -381,6 +381,12 @@ cd backend
 
 Comprehensive guides available in the root directory:
 
+### ⚡ Performance & Optimization (NEW)
+- `PERFORMANCE_QUICK_START.md` - **Quick overview of optimizations**
+- `PERFORMANCE_OPTIMIZATION.md` - Detailed performance guide
+- `PERFORMANCE_SETUP.md` - Database indexing setup
+- `PAGINATION_IMPLEMENTATION.md` - Frontend infinite scroll guide
+
 ### Setup & Configuration
 - `QUICK_START.md` - Fast setup guide
 - `EMAIL_SETUP_GUIDE.md` - Email configuration

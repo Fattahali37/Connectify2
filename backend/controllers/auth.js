@@ -13,7 +13,7 @@ exports.registerUser = async (req, res) => {
     // Check if user already exists
     const isUser = await User.findOne({ 
       $or: [{ email: req.body.email }, { username: req.body.username }] 
-    });
+    }).lean();
     if (isUser)
       return res.status(400).send({
         success: false,
@@ -23,7 +23,7 @@ exports.registerUser = async (req, res) => {
     // Check if username/email was previously deleted (reserved)
     const isDeletedUser = await DeletedUser.findOne({
       $or: [{ email: req.body.email }, { username: req.body.username }]
-    });
+    }).lean();
     if (isDeletedUser)
       return res.status(400).send({
         success: false,
@@ -124,10 +124,12 @@ exports.loginUser = async (req, res) => {
       token: refresh_token,
     });
     await refToken.save();
-    user.password = undefined;
+    // Remove password from response
+    const userResponse = { ...user._doc };
+    delete userResponse.password;
     res.send({
       success: true,
-      user,
+      user: userResponse,
       access_token,
       refresh_token,
     });
@@ -192,7 +194,7 @@ exports.googleoauth = async (req, res) => {
         email: user.email,
         avatar: user.picture,
       });
-      isUser = temp.save();
+      isUser = await temp.save();
     }
     const access_token_server = jwt.sign(
       { _id: isUser._id },

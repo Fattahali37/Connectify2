@@ -73,12 +73,15 @@ export const Profile = ({ findStory, post = true }) => {
         .get(`${url}/post/userpost/${user?._id}`)
         .then((data) => {
           setLoading(false);
-          if (data) {
-            setPosts(data.data);
+          if (data && data.data) {
+            // Handle both old and new response formats
+            const postsData = Array.isArray(data.data) ? data.data : data.data.posts || [];
+            setPosts(postsData);
           }
         })
         .catch((err) => {
           console.log(err);
+          setLoading(false);
         });
     }
     if (!post) {
@@ -86,12 +89,15 @@ export const Profile = ({ findStory, post = true }) => {
         .get(`${url}/post/get/saved`)
         .then((data) => {
           setLoading(false);
-          if (data) {
-            setPosts(data.data);
+          if (data && data.data) {
+            // Handle both old and new response formats
+            const postsData = Array.isArray(data.data) ? data.data : data.data.posts || [];
+            setPosts(postsData);
           }
         })
         .catch((err) => {
           console.log(err);
+          setLoading(false);
         });
     }
     return () => {
@@ -1188,9 +1194,9 @@ export const Profile = ({ findStory, post = true }) => {
                     key={item._id}
                     userId={item.owner}
                     postId={item._id}
-                    likes={item.likes.length}
-                    comments={item.comments.length}
-                    src={item.files[0].link}
+                    likes={item.likes?.length || 0}
+                    comments={item.comments?.length || 0}
+                    src={item.image || item.files?.[0]?.link || ''}
                   />
                 ))}
               </div>

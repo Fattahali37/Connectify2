@@ -5,7 +5,9 @@ const User = require("../models/User");
 exports.getStory = async (req, res) => {
   try {
     if (req.query.highlight === "true") {
-      const story = await Story.findOne({ id: req.params.id });
+      const story = await Story.findOne({ id: req.params.id })
+        .select('id owner data seen createdAt')
+        .lean();
       return res.send(story);
     }
     const story = await Story.findOne({
@@ -13,7 +15,9 @@ exports.getStory = async (req, res) => {
         { id: req.params.id },
         { createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
       ],
-    });
+    })
+    .select('id owner data seen createdAt')
+    .lean();
     res.send(story);
   } catch (err) {
     res.status(400).send({
@@ -30,7 +34,10 @@ exports.userStory = async (req, res) => {
         { owner: req.params.uid },
         { createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
       ],
-    });
+    })
+    .select('id owner data seen createdAt')
+    .sort({ createdAt: -1 })
+    .lean();
     res.send(stories);
   } catch (err) {
     res.status(400).send({
@@ -92,7 +99,9 @@ exports.homeStory = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ _id: req.user._id });
+    const user = await User.findOne({ _id: req.user._id })
+      .select('followings')
+      .lean();
     
     if (!user) {
       return res.status(404).send({
@@ -101,21 +110,30 @@ exports.homeStory = async (req, res) => {
       });
     }
 
-    const allStories = [];
+    // Get all stories from followed users in a single query
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const allStories = await Story.find({
+      owner: { $in: user.followings || [] },
+      createdAt: { $gt: twentyFourHoursAgo }
+    })
+    .select('id owner data seen createdAt')
+    .sort({ createdAt: -1 })
+    .lean();
+
+    // Group stories by owner
+    const groupedStories = [];
+    const storyMap = new Map();
     
-    await Promise.all(
-      user.followings.map(async (item) => {
-        const t = await Story.find({
-          $and: [
-            { owner: item },
-            { createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
-          ],
-        });
-        if (t.length != 0) allStories.push(t);
-      })
-    );
+    allStories.forEach(story => {
+      const ownerId = story.owner.toString();
+      if (!storyMap.has(ownerId)) {
+        storyMap.set(ownerId, []);
+        groupedStories.push(storyMap.get(ownerId));
+      }
+      storyMap.get(ownerId).push(story);
+    });
     
-    res.send(allStories);
+    res.send(groupedStories);
   } catch (err) {
     console.error("Error in homeStory:", err);
     res.status(400).send({

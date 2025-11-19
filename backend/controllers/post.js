@@ -253,7 +253,14 @@ exports.save = async (req, res) => {
 exports.userPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    const posts = await Post.find({ owner: userId }).sort({ createdAt: -1 });
+    
+    // Get user posts with only needed fields - limit to 100 most recent
+    const posts = await Post.find({ owner: userId })
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .select('owner files caption likes comments saved createdAt')
+      .lean();
+    
     res.send(posts);
   } catch (err) {
     res.send({
@@ -266,28 +273,37 @@ exports.userPosts = async (req, res) => {
 // explore post
 exports.explore = async (req, res) => {
   try {
-    const currentUser = await User.findOne({ _id: req.user._id });
+    // Optimized: Get user with only needed fields
+    const currentUser = await User.findOne({ _id: req.user._id })
+      .select('followings')
+      .lean();
     
-    // Get all posts except current user's
-    const allPosts = await Post.find({ owner: { $ne: req.user._id } }).sort({
-      createdAt: -1,
-    });
+    // Get all public user IDs
+    const publicUsers = await User.find({ 
+      private: { $ne: true },
+      _id: { $ne: req.user._id }
+    })
+    .select('_id')
+    .lean();
     
-    // Filter out posts from private accounts that user is not following
-    const filteredPosts = [];
+    // Get IDs of users whose posts should be shown:
+    // 1. Public users, OR
+    // 2. Private users that current user is following
+    const visibleUserIds = [
+      ...publicUsers.map(u => u._id),
+      ...(currentUser.followings || [])
+    ];
     
-    for (const post of allPosts) {
-      const postOwner = await User.findOne({ _id: post.owner });
-      
-      // Show post if:
-      // 1. Owner is public (not private), OR
-      // 2. Current user is following the owner
-      if (!postOwner.private || currentUser.followings.includes(postOwner._id.toString())) {
-        filteredPosts.push(post);
-      }
-    }
+    // Single optimized query - limit to 150 most recent posts
+    const posts = await Post.find({ 
+      owner: { $in: visibleUserIds, $ne: req.user._id } 
+    })
+    .sort({ createdAt: -1 })
+    .limit(150)
+    .select('owner files caption likes comments saved createdAt')
+    .lean();
     
-    res.send(filteredPosts);
+    res.send(posts);
   } catch (err) {
     res.send({
       success: false,
@@ -299,15 +315,21 @@ exports.explore = async (req, res) => {
 // saved posts
 exports.savedPosts = async (req, res) => {
   try {
-    const findUser = await User.findOne({ _id: req.user._id });
-    let savedPost = [];
-    Promise.all(
-      findUser.saved.map(async (item) => {
-        savedPost.push(await Post.findOne({ _id: item }));
-      })
-    ).then(() => {
-      res.send(savedPost.reverse());
-    });
+    // Optimized: Get only saved field
+    const findUser = await User.findOne({ _id: req.user._id })
+      .select('saved')
+      .lean();
+    
+    // Single query with $in operator - limit to 100 most recent
+    const savedPosts = await Post.find({ 
+      _id: { $in: findUser.saved || [] } 
+    })
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .select('owner files caption likes comments saved createdAt')
+    .lean();
+    
+    res.send(savedPosts);
   } catch (err) {
     res.send({
       success: false,
@@ -320,36 +342,36 @@ exports.savedPosts = async (req, res) => {
 exports.homePosts = async (req, res) => {
   try {
     const userId = req.user._id;
-    const user = await User.findOne({ _id: userId });
     
-    // Get current user's own posts
-    const posts = await Post.find({ owner: userId });
+    // Optimized: Get user with only needed fields
+    const user = await User.findOne({ _id: userId })
+      .select('followings')
+      .lean();
     
-    // Get posts from followings
-    await Promise.all(
-      user.followings.map(async (item) => {
-        posts.push(...(await Post.find({ owner: item })));
-      })
-    );
+    // Get IDs of users whose posts we want to show
+    const userIdsToShow = [userId, ...(user.followings || [])];
     
-    // Get posts from public accounts that user is NOT following
-    const publicUsers = await User.find({ 
+    // Get all public users NOT in our following list
+    const publicUserIds = await User.find({ 
       private: { $ne: true },
-      _id: { $nin: [...user.followings, userId] }
-    });
+      _id: { $nin: userIdsToShow }
+    })
+    .select('_id')
+    .lean();
     
-    await Promise.all(
-      publicUsers.map(async (publicUser) => {
-        posts.push(...(await Post.find({ owner: publicUser._id })));
-      })
-    );
+    // Add public user IDs to the list
+    const allUserIds = [...userIdsToShow, ...publicUserIds.map(u => u._id)];
     
-    // Sort by date
-    const arr = posts.sort((a, b) => {
-      return b.createdAt - a.createdAt;
-    });
+    // Single optimized query - limit to recent 100 posts for better performance
+    const posts = await Post.find({ 
+      owner: { $in: allUserIds } 
+    })
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .select('owner files caption likes comments saved createdAt')
+    .lean();
     
-    res.send(arr);
+    res.send(posts);
   } catch (err) {
     res.send({
       success: false,

@@ -9,7 +9,7 @@ import { api } from "../../Interceptor/apiCall";
 export const User = ({ user, setShow = undefined, handleClose }) => {
   const context = useContext(AuthContext);
   const [iFollow, setIFollow] = useState(
-    user.followers.includes(context.auth._id)
+    user?.followers?.includes(context.auth._id) || false
   );
 
   async function handleFollow() {
