@@ -166,21 +166,19 @@ exports.getFollowings = async (req, res) => {
     const { userId } = req.params;
     
     const currentUser = req.user._id;
-    const user = await User.findOne({ _id: userId }).select('private followers followings').lean();
+    const user = await User.findOne({ _id: userId });
     
     // If account is private and current user is not a follower, return empty
     if (user.private && !user.followers.includes(currentUser.toString())) {
       return res.send([]);
     }
-    
-    // Optimized: Use single query with $in operator - limit to 200 users
-    const followings = await User.find({ 
-      _id: { $in: user.followings } 
-    })
-    .limit(200)
-    .select('username name avatar bio private followers')
-    .lean();
-    
+    // Fetch followings with a single query and project only needed fields
+    const limit = parseInt(req.query.limit ?? 0);
+    const ids = (user.followings || []).map((i) => i.toString());
+    if (ids.length === 0) return res.send([]);
+    let query = User.find({ _id: { $in: ids } }).select("username name avatar _id");
+    if (limit > 0) query = query.limit(limit);
+    const followings = await query.lean();
     res.send(followings);
   } catch (err) {
     res.send({
@@ -194,23 +192,20 @@ exports.getFollowings = async (req, res) => {
 exports.getFollowers = async (req, res) => {
   try {
     const { userId } = req.params;
-    
     const currentUser = req.user._id;
-    const user = await User.findOne({ _id: userId }).select('private followers').lean();
+    const user = await User.findOne({ _id: userId });
     
     // If account is private and current user is not a follower, return empty
     if (user.private && !user.followers.includes(currentUser.toString())) {
       return res.send([]);
     }
-    
-    // Optimized: Use single query with $in operator - limit to 200 users
-    const followers = await User.find({ 
-      _id: { $in: user.followers } 
-    })
-    .limit(200)
-    .select('username name avatar bio private followers')
-    .lean();
-    
+    // Fetch followers with a single query and project only needed fields
+    const limit = parseInt(req.query.limit ?? 0);
+    const ids = (user.followers || []).map((i) => i.toString());
+    if (ids.length === 0) return res.send([]);
+    let query = User.find({ _id: { $in: ids } }).select("username name avatar _id");
+    if (limit > 0) query = query.limit(limit);
+    const followers = await query.lean();
     res.send(followers);
   } catch (err) {
     res.send({
@@ -224,11 +219,12 @@ exports.getFollowers = async (req, res) => {
 exports.hasNotications = async (req, res) => {
   try {
     const user = req.user._id;
+    // Use projection to check existence of unseen notifications
     const notificationsUser = await User.findOne(
-      { _id: user },
-      { notifications: { $elemMatch: { seen: false } } }
-    );
-    res.send({ notifications: notificationsUser.notifications !== undefined });
+      { _id: user, "notifications.seen": false },
+      { _id: 1 }
+    ).lean();
+    res.send({ notifications: !!notificationsUser });
   } catch (err) {
     res.send({
       success: false,
@@ -241,12 +237,23 @@ exports.hasNotications = async (req, res) => {
 exports.notications = async (req, res) => {
   try {
     const user = req.user._id;
-    console.log("📧 Fetching notifications for user:", user);
-    const notifications = await User.findOne({ _id: user });
-    console.log("📧 User found:", notifications?.username);
-    console.log("📧 Notification count:", notifications?.notifications?.length || 0);
-    const unSorted = notifications.notifications;
-    res.send(unSorted.reverse());
+    // Support pagination for notifications
+    const page = Math.max(parseInt(req.query.page || 1), 1);
+    const limit = Math.min(parseInt(req.query.limit || 20), 100);
+    const skip = (page - 1) * limit;
+
+    // Fetch only notifications slice using projection and aggregation to avoid large arrays
+    const result = await User.aggregate([
+      { $match: { _id: require('mongoose').Types.ObjectId(user) } },
+      { $project: { notifications: 1 } },
+      { $unwind: { path: "$notifications", preserveNullAndEmptyArrays: true } },
+      { $sort: { "notifications.time": -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      { $replaceRoot: { newRoot: "$notifications" } }
+    ]);
+
+    res.send(result);
   } catch (err) {
     console.log(err);
     res.send({
@@ -451,20 +458,13 @@ exports.handleNewPassword = async (req, res) => {
 exports.getUnreadNotificationCount = async (req, res) => {
   try {
     const user = req.user._id;
-    const userData = await User.findOne({ _id: user });
-
-    if (!userData) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    // Count notifications where seen is false
-    const unreadCount = userData.notifications.filter(
-      (notification) => !notification.seen
-    ).length;
-
-    res.json({ success: true, count: unreadCount });
+    // Use aggregation to count unseen notifications without pulling full array
+    const result = await User.aggregate([
+      { $match: { _id: require('mongoose').Types.ObjectId(user) } },
+      { $project: { unreadCount: { $size: { $filter: { input: "$notifications", cond: { $eq: ["$$this.seen", false] } } } } } }
+    ]);
+    const count = (result[0] && result[0].unreadCount) || 0;
+    res.json({ success: true, count });
   } catch (err) {
     res.status(400).json({
       success: false,

@@ -155,4 +155,8 @@ userSchema.post('save', function(doc) {
   }
 });
 
+// Ensure indexes for fast lookup
+userSchema.index({ username: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true });
+
 module.exports = new mongoose.model("User", userSchema);
