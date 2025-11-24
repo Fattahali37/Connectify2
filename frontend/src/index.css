@@ -7,6 +7,7 @@
 @layer base {
   :root {
     --border: rgba(148, 163, 184, 0.2);
+    --sidebar-width: 280px;
     --bg-primary: rgba(15, 23, 42, 0.95);
     --bg-secondary: rgba(30, 41, 59, 0.95);
     --bg-tertiary: rgba(51, 65, 85, 0.95);
@@ -26,6 +27,12 @@
 
   * {
     @apply m-0 p-0 font-sans;
+  }
+
+  /* Fluid media - scale to container width */
+  img, picture, video, iframe {
+    max-width: 100%;
+    height: auto;
   }
 
   html {
@@ -79,12 +86,15 @@
   /* Main content area with sidebar offset */
   .main-content {
     @apply transition-all duration-300 ease-in-out;
-    margin-left: 280px;
+    margin-left: var(--sidebar-width, 280px);
     min-height: 100vh;
-    width: calc(100% - 280px);
+    width: calc(100% - var(--sidebar-width, 280px));
   }
 
   @media screen and (max-width: 1200px) {
+    :root {
+      --sidebar-width: 80px;
+    }
     .main-content {
       margin-left: 80px;
       width: calc(100% - 80px);
@@ -92,6 +102,9 @@
   }
 
   @media screen and (max-width: 768px) {
+    :root {
+      --sidebar-width: 0px;
+    }
     .main-content {
       @apply ml-0 mb-16;
       width: 100%;
@@ -242,6 +255,74 @@
       margin-left: 0 !important;
       width: 100% !important;
       margin-bottom: 72px;
+    }
+  }
+
+  /* Additional mobile responsive overrides */
+  @media screen and (max-width: 768px) {
+    /* Stack chat layout vertically on mobile */
+    .chatpage {
+      flex-direction: column !important;
+      padding: 0 !important;
+      padding-bottom: 72px !important;
+    }
+
+    .left_chat_bar {
+      width: 100% !important;
+      max-height: 40vh !important;
+      border-right: none !important;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+      overflow-y: auto !important;
+      padding: 0 !important;
+    }
+
+    .right_chatbar {
+      width: 100% !important;
+      flex: 1;
+      overflow-y: auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    /* Adjust dialog sizes for mobile */
+    .MuiDialog-paper {
+      width: 90vw !important;
+      max-width: 90vw !important;
+      margin: auto !important;
+      max-height: 90vh !important;
+    }
+
+    .MuiDialogContent-root {
+      max-height: calc(90vh - 120px) !important;
+      overflow-y: auto !important;
+    }
+
+    /* Ensure images scale properly */
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Stack story viewer properly */
+    .story_box_view {
+      width: 100% !important;
+      height: auto !important;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .main-content {
+      padding: 0 !important;
+    }
+
+    .sidebar-item span {
+      font-size: 10px;
+    }
+
+    /* Ensure all modals are mobile-safe */
+    .MuiDialog-paper {
+      width: 95vw !important;
+      max-height: 95vh !important;
     }
   }
 }

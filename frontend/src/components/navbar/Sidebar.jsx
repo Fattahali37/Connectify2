@@ -508,13 +508,13 @@ export const Sidebar = ({ active }) => {
       </div>
 
       {/* Search Panel Backdrop - covers content area only */}
-      {showSearch && (
+      {showSearch && window.innerWidth > 768 && (
         <div
           onClick={() => setShowSearch(false)}
           style={{
             position: "fixed",
             top: 0,
-            left: "280px",
+            left: window.innerWidth <= 1200 ? "80px" : "280px",
             right: 0,
             bottom: 0,
             background: "rgba(0, 0, 0, 0.5)",
@@ -541,6 +541,23 @@ export const Sidebar = ({ active }) => {
         </div>
       </div>
 
+      {/* Search Panel Backdrop - Mobile Only */}
+      {showSearch && window.innerWidth <= 768 && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 72,
+            left: 0,
+            right: 0,
+            width: "100%",
+            height: "100vh",
+            background: "rgba(0, 0, 0, 0.7)",
+            zIndex: 998,
+            onClick: () => setShowSearch(false),
+          }}
+        />
+      )}
+
       {/* Notifications Menu */}
       <Menu
         anchorEl={anchorElNot}
@@ -553,9 +570,9 @@ export const Sidebar = ({ active }) => {
           sx: {
             overflow: "visible",
             filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-            width: "470px",
+            width: "min(90vw, 470px)",
             minHeight: "30px",
-            maxHeight: "400px",
+            maxHeight: "min(90vh, 400px)",
             mt: 1.5,
             background:
               "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
@@ -598,7 +615,7 @@ export const Sidebar = ({ active }) => {
           sx: {
             overflow: "visible",
             filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-            width: "250px",
+            width: "min(85vw, 250px)",
             mt: 1.5,
             background:
               "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
@@ -728,8 +745,8 @@ export const Sidebar = ({ active }) => {
           <div
             className="post"
             style={{
-              width: "45vw",
-              height: "70vh",
+              width: window.innerWidth < 768 ? "90vw" : "45vw",
+              height: window.innerWidth < 768 ? "80vh" : "70vh",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",

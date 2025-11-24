@@ -180,10 +180,10 @@ export const Profile = ({ findStory, post = true }) => {
           style={{
             backgroundColor: "rgba(239, 68, 68, 0.95)",
             color: "#ffffff",
-            padding: "16px",
+            padding: window.innerWidth < 768 ? "12px" : "16px",
             margin: "20px auto",
-            width: "90%",
-            maxWidth: "900px",
+            width: window.innerWidth < 768 ? "95%" : "90%",
+            maxWidth: window.innerWidth < 768 ? "100%" : "900px",
             borderRadius: "16px",
             border: "1px solid rgba(220, 38, 38, 0.5)",
             textAlign: "center",
@@ -199,15 +199,15 @@ export const Profile = ({ findStory, post = true }) => {
       {/* Modern Profile Card */}
       <div
         style={{
-          maxWidth: "900px",
+          maxWidth: window.innerWidth < 768 ? "100%" : "900px",
           margin: "20px auto",
-          width: "90%",
+          width: window.innerWidth < 768 ? "95%" : "90%",
           background:
             "linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.7) 100%)",
           backdropFilter: "blur(20px)",
           borderRadius: "24px",
           border: "1px solid rgba(148, 163, 184, 0.15)",
-          padding: "40px",
+          padding: window.innerWidth < 768 ? "20px" : "40px",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25)",
           position: "relative",
           overflow: "hidden",
@@ -230,10 +230,10 @@ export const Profile = ({ findStory, post = true }) => {
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
-            alignItems: "flex-start",
-            gap: "40px",
-            marginBottom: "32px",
+            flexDirection: window.innerWidth < 768 ? "column" : "row",
+            alignItems: window.innerWidth < 768 ? "center" : "flex-start",
+            gap: window.innerWidth < 768 ? "20px" : "40px",
+            marginBottom: window.innerWidth < 768 ? "20px" : "32px",
           }}
         >
           {/* Avatar */}
@@ -278,7 +278,7 @@ export const Profile = ({ findStory, post = true }) => {
               >
                 <h1
                   style={{
-                    fontSize: "28px",
+                    fontSize: window.innerWidth < 768 ? "22px" : "28px",
                     fontWeight: "700",
                     background:
                       "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
@@ -541,14 +541,14 @@ export const Profile = ({ findStory, post = true }) => {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "12px",
-                marginBottom: "20px",
+                gridTemplateColumns: window.innerWidth < 768 ? "repeat(3, 1fr)" : "repeat(3, 1fr)",
+                gap: window.innerWidth < 768 ? "8px" : "12px",
+                marginBottom: window.innerWidth < 768 ? "12px" : "20px",
               }}
             >
               <div
                 style={{
-                  padding: "16px",
+                  padding: window.innerWidth < 768 ? "12px" : "16px",
                   borderRadius: "16px",
                   background:
                     "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
@@ -561,7 +561,7 @@ export const Profile = ({ findStory, post = true }) => {
               >
                 <div
                   style={{
-                    fontSize: "20px",
+                    fontSize: window.innerWidth < 768 ? "18px" : "20px",
                     fontWeight: "700",
                     color: "rgba(226, 232, 240, 0.95)",
                     marginBottom: "4px",
@@ -571,7 +571,7 @@ export const Profile = ({ findStory, post = true }) => {
                 </div>
                 <div
                   style={{
-                    fontSize: "13px",
+                    fontSize: window.innerWidth < 768 ? "12px" : "13px",
                     color: "rgba(148, 163, 184, 0.9)",
                     fontWeight: "500",
                   }}
@@ -589,7 +589,7 @@ export const Profile = ({ findStory, post = true }) => {
                     : () => handleClickOpen(1)
                 }
                 style={{
-                  padding: "16px",
+                  padding: window.innerWidth < 768 ? "12px" : "16px",
                   borderRadius: "16px",
                   background:
                     "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
@@ -633,7 +633,7 @@ export const Profile = ({ findStory, post = true }) => {
               >
                 <div
                   style={{
-                    fontSize: "20px",
+                    fontSize: window.innerWidth < 768 ? "18px" : "20px",
                     fontWeight: "700",
                     color: "rgba(226, 232, 240, 0.95)",
                     marginBottom: "4px",
@@ -647,9 +647,12 @@ export const Profile = ({ findStory, post = true }) => {
                 </div>
                 <div
                   style={{
-                    fontSize: "13px",
+                    fontSize: window.innerWidth < 768 ? "12px" : "13px",
                     color: "rgba(148, 163, 184, 0.9)",
                     fontWeight: "500",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   Followers
@@ -709,7 +712,7 @@ export const Profile = ({ findStory, post = true }) => {
               >
                 <div
                   style={{
-                    fontSize: "20px",
+                    fontSize: window.innerWidth < 768 ? "18px" : "20px",
                     fontWeight: "700",
                     color: "rgba(226, 232, 240, 0.95)",
                     marginBottom: "4px",
@@ -723,9 +726,12 @@ export const Profile = ({ findStory, post = true }) => {
                 </div>
                 <div
                   style={{
-                    fontSize: "13px",
+                    fontSize: window.innerWidth < 768 ? "12px" : "13px",
                     color: "rgba(148, 163, 184, 0.9)",
                     fontWeight: "500",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   Following
@@ -737,7 +743,7 @@ export const Profile = ({ findStory, post = true }) => {
             {user?.name && (
               <div
                 style={{
-                  fontSize: "15px",
+                  fontSize: window.innerWidth < 768 ? "14px" : "15px",
                   fontWeight: "600",
                   color: "rgba(226, 232, 240, 0.95)",
                   marginBottom: "8px",
@@ -750,7 +756,7 @@ export const Profile = ({ findStory, post = true }) => {
             {user?.bio && (
               <div
                 style={{
-                  fontSize: "14px",
+                  fontSize: window.innerWidth < 768 ? "13px" : "14px",
                   lineHeight: "1.5",
                   color: "rgba(148, 163, 184, 0.9)",
                   marginBottom: "12px",
@@ -797,7 +803,7 @@ export const Profile = ({ findStory, post = true }) => {
                 "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
               backdropFilter: "blur(20px)",
               border: "1px solid rgba(148, 163, 184, 0.2)",
-              minWidth: "380px",
+              minWidth: window.innerWidth < 768 ? "85vw" : "380px",
               overflow: "hidden",
             },
           }}
@@ -918,8 +924,8 @@ export const Profile = ({ findStory, post = true }) => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            gap: "48px",
-            maxWidth: "900px",
+            gap: window.innerWidth < 768 ? "24px" : "48px",
+            maxWidth: window.innerWidth < 768 ? "100%" : "900px",
             margin: "0 auto",
           }}
         >
@@ -1049,8 +1055,8 @@ export const Profile = ({ findStory, post = true }) => {
         {/* Post Content */}
         <div
           style={{
-            padding: "24px",
-            maxWidth: "900px",
+            padding: window.innerWidth < 768 ? "12px" : "24px",
+            maxWidth: window.innerWidth < 768 ? "100%" : "900px",
             margin: "0 auto",
           }}
         >
@@ -1067,8 +1073,8 @@ export const Profile = ({ findStory, post = true }) => {
               >
                 <div
                   style={{
-                    width: "80px",
-                    height: "80px",
+                    width: window.innerWidth < 768 ? "60px" : "80px",
+                    height: window.innerWidth < 768 ? "60px" : "80px",
                     borderRadius: "50%",
                     background:
                       "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)",
@@ -1105,10 +1111,10 @@ export const Profile = ({ findStory, post = true }) => {
                 </p>
                 <p
                   style={{
-                    fontSize: "14px",
+                    fontSize: window.innerWidth < 768 ? "12px" : "14px",
                     color: "rgba(148, 163, 184, 0.7)",
                     lineHeight: "1.6",
-                    maxWidth: "380px",
+                    maxWidth: window.innerWidth < 768 ? "280px" : "380px",
                     margin: "0 auto",
                   }}
                 >

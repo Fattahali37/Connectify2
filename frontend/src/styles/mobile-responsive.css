@@ -1,0 +1,1018 @@
+/* ========================================
+   COMPREHENSIVE MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+/* Base Mobile Responsive Settings */
+* {
+    box-sizing: border-box;
+}
+
+/* Extra Small Phones (320px - 480px) */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 24px !important;
+        margin: 0 !important;
+    }
+
+    h2 {
+        font-size: 20px !important;
+    }
+
+    h3 {
+        font-size: 16px !important;
+    }
+
+    h4, h5, h6 {
+        font-size: 14px !important;
+    }
+
+    p {
+        font-size: 13px !important;
+    }
+
+    /* Common Padding & Margin */
+    .container {
+        padding: 12px !important;
+    }
+
+    .section {
+        margin: 12px 0 !important;
+        padding: 12px !important;
+    }
+
+    /* Button Sizing */
+    button {
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
+        min-height: 44px !important;
+    }
+
+    /* Input Fields */
+    input,
+    textarea,
+    select {
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+        width: 100% !important;
+        border-radius: 8px !important;
+        min-height: 44px !important;
+    }
+
+    /* Dialog/Modal Adjustments */
+    .MuiDialog-paper,
+    [role="dialog"] {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin: 12px !important;
+        max-height: 90vh !important;
+    }
+
+    /* Card Styling */
+    .card,
+    [role="card"],
+    .MuiCard-root {
+        padding: 12px !important;
+        margin: 8px 0 !important;
+        border-radius: 12px !important;
+    }
+
+    /* Grid Layouts */
+    .grid,
+    [role="grid"] {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    /* Flex Layouts */
+    .flex-row-mobile {
+        flex-direction: column !important;
+    }
+
+    /* Image Sizing */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Avatar Sizing */
+    .avatar,
+    [class*="avatar"] {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+    }
+
+    /* Tabs & Navigation */
+    .tabs,
+    [role="tablist"] {
+        flex-wrap: wrap !important;
+    }
+
+    .tab,
+    [role="tab"] {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+    }
+
+    /* List Items */
+    .list-item,
+    [role="listitem"] {
+        padding: 10px 8px !important;
+        margin: 4px 0 !important;
+    }
+
+    /* Modal Header */
+    .modal-header,
+    [class*="header"] {
+        padding: 12px !important;
+    }
+
+    /* Modal Footer */
+    .modal-footer,
+    [class*="footer"] {
+        padding: 12px !important;
+        gap: 8px !important;
+    }
+
+    /* Spacing utilities */
+    .space-x-4 {
+        gap: 8px !important;
+    }
+
+    .space-y-4 {
+        gap: 8px !important;
+    }
+
+    /* Hide non-essential elements on small screens */
+    .hide-mobile {
+        display: none !important;
+    }
+
+    /* Text truncation */
+    .truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .truncate-1 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Dialog Content - Fix for small screens */
+    .MuiDialog-container {
+        display: flex !important;
+        align-items: flex-end !important;
+        justify-content: center !important;
+    }
+
+    .MuiDialogContent-root {
+        padding: 12px !important;
+        overflow-y: auto !important;
+        max-height: calc(90vh - 100px) !important;
+    }
+
+    .MuiDialogTitle-root {
+        padding: 12px 12px !important;
+        font-size: 13px !important;
+    }
+
+    .MuiTextField-root {
+        width: 100% !important;
+    }
+
+    .MuiOutlinedInput-root {
+        font-size: 13px !important;
+    }
+
+    .MuiOutlinedInput-input {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* Small Phones (480px - 600px) */
+@media (max-width: 600px) and (min-width: 481px) {
+    body {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 26px !important;
+    }
+
+    h2 {
+        font-size: 22px !important;
+    }
+
+    h3 {
+        font-size: 18px !important;
+    }
+
+    .container {
+        padding: 14px !important;
+    }
+
+    .section {
+        margin: 14px 0 !important;
+        padding: 14px !important;
+    }
+
+    button {
+        padding: 10px 18px !important;
+        font-size: 13px !important;
+    }
+
+    input,
+    textarea,
+    select {
+        padding: 10px 14px !important;
+        font-size: 14px !important;
+    }
+
+    .card {
+        padding: 14px !important;
+        margin: 10px 0 !important;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 14px !important;
+    }
+
+    .avatar {
+        width: 56px !important;
+        height: 56px !important;
+    }
+
+    .tab {
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* Tablet (600px - 768px) */
+@media (max-width: 768px) and (min-width: 601px) {
+    body {
+        font-size: 15px;
+    }
+
+    h1 {
+        font-size: 28px !important;
+    }
+
+    h2 {
+        font-size: 24px !important;
+    }
+
+    h3 {
+        font-size: 20px !important;
+    }
+
+    .container {
+        padding: 16px !important;
+    }
+
+    .section {
+        margin: 16px 0 !important;
+        padding: 16px !important;
+    }
+
+    button {
+        padding: 11px 20px !important;
+        font-size: 14px !important;
+    }
+
+    input,
+    textarea,
+    select {
+        padding: 11px 15px !important;
+        font-size: 15px !important;
+    }
+
+    .card {
+        padding: 16px !important;
+        margin: 12px 0 !important;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+
+    .avatar {
+        width: 64px !important;
+        height: 64px !important;
+    }
+
+    .tab {
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* ========================================
+   COMPONENT-SPECIFIC MOBILE STYLES
+   ======================================== */
+
+/* ===== HOME PAGE MOBILE FIXES ===== */
+@media (max-width: 768px) {
+    .home {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 12px !important;
+        gap: 0 !important;
+        justify-content: flex-start !important;
+    }
+
+    .left-home {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .right-home {
+        display: none !important;
+    }
+
+    .stories {
+        margin-bottom: 16px !important;
+        padding: 12px !important;
+        height: 120px !important;
+    }
+
+    .stories .story-item {
+        width: 80px !important;
+        height: 100px !important;
+        margin-right: 8px !important;
+    }
+
+    .posts {
+        gap: 12px !important;
+    }
+
+    .posts .card {
+        margin-bottom: 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .posts .post {
+        max-height: 300px !important;
+    }
+
+    .posts .user-details {
+        padding: 12px !important;
+    }
+
+    .posts .labels {
+        padding: 10px !important;
+    }
+
+    .posts .caption {
+        padding: 10px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* ===== PROFILE PAGE MOBILE FIXES ===== */
+@media (max-width: 768px) {
+    .profile-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+        margin-bottom: 72px !important;
+        padding: 12px !important;
+    }
+
+    .profile-header {
+        padding: 16px 12px !important;
+        gap: 16px !important;
+        flex-direction: column !important;
+    }
+
+    .profile-avatar {
+        width: 120px !important;
+        height: 120px !important;
+        margin: 0 auto !important;
+    }
+
+    .profile-info {
+        flex: 1 !important;
+        text-align: center !important;
+    }
+
+    .profile-info h1 {
+        font-size: 22px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .profile-info p {
+        font-size: 13px !important;
+        margin: 4px 0 !important;
+    }
+
+    .profile-stats {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        margin: 12px 0 !important;
+    }
+
+    .stat-card {
+        padding: 12px !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+    }
+
+    .stat-card h3 {
+        font-size: 16px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .stat-card p {
+        font-size: 12px !important;
+    }
+
+    .profile-actions {
+        display: flex !important;
+        gap: 8px !important;
+        margin: 12px 0 !important;
+        flex-wrap: wrap !important;
+    }
+
+    .profile-actions button {
+        flex: 1 !important;
+        padding: 10px !important;
+        font-size: 13px !important;
+        min-width: 100px !important;
+        min-height: 44px !important;
+    }
+
+    .profile-tabs {
+        margin: 16px 0 12px !important;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+        display: flex !important;
+        overflow-x: auto !important;
+    }
+
+    .profile-tabs button {
+        padding: 12px 16px !important;
+        font-size: 12px !important;
+        margin-right: 0 !important;
+        white-space: nowrap !important;
+    }
+
+    .profile-posts {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        margin-top: 12px !important;
+    }
+
+    .profile-post-item {
+        aspect-ratio: 1 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+
+    .profile-post-item img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .profile-container {
+        padding: 8px !important;
+    }
+
+    .profile-header {
+        padding: 12px 8px !important;
+        gap: 12px !important;
+    }
+
+    .profile-avatar {
+        width: 100px !important;
+        height: 100px !important;
+    }
+
+    .profile-info h1 {
+        font-size: 18px !important;
+    }
+
+    .profile-posts {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+    }
+
+    .profile-actions button {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+    }
+}
+
+/* ===== CHAT PAGE MOBILE FIXES ===== */
+@media (max-width: 768px) {
+    .chat-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+        flex-direction: column !important;
+        height: calc(100vh - 72px) !important;
+        margin-bottom: 72px !important;
+    }
+
+    .left_chat_bar,
+    .chat-list {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-height: 38vh !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+        overflow-y: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .username {
+        padding: 12px 16px !important;
+        height: auto !important;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+    }
+
+    .right_chatbar,
+    .chat-main {
+        width: 100% !important;
+        height: auto !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        border-radius: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .chat-header {
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+        min-height: 50px !important;
+    }
+
+    .chat-messages {
+        padding: 12px !important;
+        gap: 8px !important;
+        flex: 1 !important;
+        overflow-y: auto !important;
+    }
+
+    .chat-message {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
+        max-width: 85% !important;
+    }
+
+    .chat-input-area {
+        padding: 12px !important;
+        gap: 8px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-end !important;
+    }
+
+    .chat-input {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+        flex: 1 !important;
+    }
+
+    .chat-input button {
+        padding: 10px 12px !important;
+        font-size: 12px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+
+    /* Room list items */
+    .RoomName {
+        padding: 12px 16px !important;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.05) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .left_chat_bar,
+    .chat-list {
+        max-height: 35vh !important;
+    }
+
+    .chat-input-area {
+        padding: 8px !important;
+        gap: 6px !important;
+    }
+
+    .chat-input {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+    }
+
+    .chat-message {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* ===== SETTINGS PAGE MOBILE FIXES ===== */
+@media (max-width: 768px) {
+    .settings-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+        flex-direction: column !important;
+    }
+
+    .settings-sidebar {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+        padding: 12px 0 !important;
+        margin-bottom: 12px !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+
+    .settings-nav {
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        padding: 8px 12px !important;
+        gap: 8px !important;
+    }
+
+    .settings-nav-item {
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
+        white-space: nowrap !important;
+    }
+
+    .settings-content {
+        width: 100% !important;
+        padding: 12px !important;
+        margin: 0 !important;
+    }
+
+    .settings-header {
+        margin-bottom: 16px !important;
+    }
+
+    .settings-header h2 {
+        font-size: 20px !important;
+    }
+
+    .settings-header p {
+        font-size: 13px !important;
+    }
+
+    .settings-form-group {
+        margin-bottom: 16px !important;
+    }
+
+    .settings-form-group label {
+        font-size: 13px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .settings-form-group input,
+    .settings-form-group textarea {
+        width: 100% !important;
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+        border-radius: 8px !important;
+    }
+
+    .settings-menu-item {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+        border-radius: 8px !important;
+        flex-direction: row !important;
+    }
+
+    .settings-menu-item-icon {
+        width: 28px !important;
+        height: 28px !important;
+        margin-right: 12px !important;
+        font-size: 18px !important;
+    }
+
+    .settings-menu-item-content {
+        flex: 1 !important;
+    }
+
+    .settings-menu-item-title {
+        font-size: 14px !important;
+        font-weight: 600 !important;
+    }
+
+    .settings-menu-item-description {
+        font-size: 12px !important;
+        margin-top: 4px !important;
+    }
+}
+
+/* ===== EXPLORE PAGE MOBILE FIXES ===== */
+@media (max-width: 768px) {
+    .explore-page {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    .explore-header {
+        margin-bottom: 16px !important;
+        padding: 16px 12px !important;
+    }
+
+    .explore-header h1 {
+        font-size: 24px !important;
+    }
+
+    .explore-header p {
+        font-size: 13px !important;
+    }
+
+    .masonry-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .masonry-item {
+        aspect-ratio: 1 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+
+    .masonry-item img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+}
+
+/* ===== STORY PAGE MOBILE FIXES ===== */
+@media (max-width: 768px) {
+    .story-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 0 !important;
+        max-height: calc(100vh - 72px) !important;
+    }
+
+    .story-viewer {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+    }
+
+    .story-image {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: calc(100vh - 72px) !important;
+    }
+
+    .story-header {
+        padding: 12px !important;
+    }
+
+    .story-user-info {
+        font-size: 13px !important;
+    }
+
+    .story-controls {
+        padding: 12px !important;
+        gap: 8px !important;
+    }
+
+    .story-controls button {
+        padding: 10px 12px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* ===== UTILITY CLASSES ===== */
+@media (max-width: 768px) {
+    .mobile-hidden {
+        display: none !important;
+    }
+
+    .mobile-visible {
+        display: block !important;
+    }
+
+    .mobile-flex {
+        display: flex !important;
+    }
+
+    .mobile-grid {
+        display: grid !important;
+    }
+
+    .mobile-w-full {
+        width: 100% !important;
+    }
+
+    .mobile-h-auto {
+        height: auto !important;
+    }
+
+    .mobile-p-2 {
+        padding: 8px !important;
+    }
+
+    .mobile-p-3 {
+        padding: 12px !important;
+    }
+
+    .mobile-m-0 {
+        margin: 0 !important;
+    }
+
+    .mobile-gap-2 {
+        gap: 8px !important;
+    }
+
+    .mobile-gap-3 {
+        gap: 12px !important;
+    }
+
+    .mobile-text-sm {
+        font-size: 12px !important;
+    }
+
+    .mobile-text-base {
+        font-size: 14px !important;
+    }
+
+    .mobile-text-lg {
+        font-size: 16px !important;
+    }
+
+    .mobile-text-center {
+        text-align: center !important;
+    }
+
+    .mobile-text-left {
+        text-align: left !important;
+    }
+
+    .mobile-mx-auto {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+/* ===== EXTRA OPTIMIZATIONS FOR VERY SMALL DEVICES (320px - 375px) ===== */
+@media (max-width: 375px) {
+    /* General improvements */
+    body {
+        font-size: 13px !important;
+    }
+
+    h1 {
+        font-size: 20px !important;
+    }
+
+    h2 {
+        font-size: 18px !important;
+    }
+
+    h3 {
+        font-size: 15px !important;
+    }
+
+    /* Buttons need better touch targets */
+    button,
+    input,
+    textarea,
+    select {
+        min-height: 44px !important;
+        min-width: 44px !important;
+    }
+
+    /* Dialogs */
+    .MuiDialog-paper {
+        width: 96vw !important;
+        max-width: 96vw !important;
+        margin: 6px !important;
+    }
+
+    /* Sidebar adjustments */
+    .sidebar-item {
+        padding: 6px 2px !important;
+        gap: 2px !important;
+    }
+
+    .sidebar-item svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    /* Home page */
+    .home {
+        padding: 6px !important;
+        gap: 8px !important;
+    }
+
+    .stories {
+        padding: 6px !important;
+        gap: 4px !important;
+        height: auto !important;
+        min-height: 100px !important;
+    }
+
+    .stories .story-item {
+        min-width: 60px !important;
+        width: 60px !important;
+        height: 80px !important;
+    }
+
+    /* Profile */
+    .profile-container {
+        padding: 6px !important;
+    }
+
+    .profile-avatar {
+        width: 90px !important;
+        height: 90px !important;
+    }
+
+    .profile-info h1 {
+        font-size: 16px !important;
+    }
+
+    /* Chat */
+    .left_chat_bar {
+        max-height: 32vh !important;
+    }
+
+    .chat-input-area {
+        padding: 6px !important;
+        gap: 4px !important;
+    }
+
+    /* Settings */
+    .settings-nav-item {
+        padding: 8px 10px !important;
+        font-size: 11px !important;
+    }
+
+    /* Explore */
+    .masonry-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 4px !important;
+    }
+}
+
+/* ===== SCROLLBAR STYLING FOR MOBILE ===== */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.5);
+    }
+}
+
+/* ===== SAFE AREA INSETS FOR NOTCHED PHONES ===== */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-bottom: max(72px, env(safe-area-inset-bottom));
+    }
+
+    .sidebar-container {
+        padding-bottom: max(0px, env(safe-area-inset-bottom));
+    }
+}

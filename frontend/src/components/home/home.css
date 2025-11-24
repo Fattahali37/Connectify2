@@ -149,9 +149,96 @@
         width: 100%;
         margin-bottom: 72px;
         padding-bottom: 20px;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 12px;
+        gap: 12px;
     }
     
     .left-home {
         max-width: 100%;
+        padding: 0;
+        margin: 0 auto;
+    }
+
+    .stories {
+        padding: 12px;
+        height: auto;
+        min-height: 120px;
+        margin-bottom: 16px;
+    }
+
+    .stories .story-item {
+        min-width: 80px;
+        width: 80px;
+        height: 100px;
+    }
+
+    .posts {
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .posts .card {
+        margin-bottom: 8px;
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .right-home {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .home {
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-top: 8px;
+        margin-bottom: 72px;
+    }
+
+    .left-home {
+        max-width: 100%;
+    }
+
+    .stories {
+        padding: 8px;
+        height: auto;
+        min-height: 110px;
+        gap: 8px;
+    }
+
+    .stories .story-item {
+        min-width: 70px;
+        width: 70px;
+        height: 90px;
+    }
+
+    .posts {
+        gap: 8px;
+    }
+
+    .posts .card {
+        padding: 8px;
+        border-radius: 10px;
+    }
+}
+
+@media screen and (max-width: 375px) {
+    .home {
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+    .stories {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .stories .story-item {
+        min-width: 60px;
+        width: 60px;
+        height: 80px;
     }
 }

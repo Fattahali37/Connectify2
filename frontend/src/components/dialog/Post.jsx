@@ -188,13 +188,74 @@ export const Post = ({ postId, userId, filterPosts, setOpenDilaog }) => {
   return (
     <div
       style={{
-        height: "100vh",
+        height: window.innerWidth <= 1024 ? "auto" : "100vh",
         display: "flex",
-        flexDirection: "row",
-        overflow: "hidden",
+        flexDirection: window.innerWidth <= 1024 ? "column" : "row",
+        overflow: window.innerWidth <= 1024 ? "visible" : "hidden",
         justifyContent: "space-between",
       }}
     >
+      <div
+        className="user-post-details-mobile"
+        style={{
+          display: window.innerWidth <= 1024 ? "flex" : "none",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid #dbdbdb",
+          padding: "16px",
+          order: 0,
+          width: "100%",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            marginLeft: "0px",
+          }}
+        >
+          <div
+            style={{
+              minWidth: "35px",
+              height: "35px",
+              objectFit: "cover",
+              borderRadius: "50%",
+            }}
+          >
+            {
+              <Link to={`/${user?.username}`}>
+                <img
+                  src={user?.avatar ? user.avatar : defaultImg}
+                  style={{
+                    minWidth: "35px",
+                    height: "35px",
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                  }}
+                  alt=""
+                />
+              </Link>
+            }
+          </div>
+          <div
+            style={{
+              marginLeft: "9px",
+            }}
+          >
+            <Link
+              to={`/${user?.username}`}
+              style={{
+                fontWeight: "bold",
+                fontSize: "13.15px",
+              }}
+            >
+              {user?.username}
+            </Link>
+          </div>
+        </div>
+      </div>
       <div
         className="left-dialog"
         style={{
@@ -202,10 +263,19 @@ export const Post = ({ postId, userId, filterPosts, setOpenDilaog }) => {
           justifyContent: "center",
           alignItems: "center",
           margin: "auto",
+          width: window.innerWidth <= 1024 ? "100%" : "auto",
+          minHeight: window.innerWidth <= 1024 ? "400px" : "auto",
+          padding: window.innerWidth <= 1024 ? "20px" : "0",
+          order: window.innerWidth <= 1024 ? 1 : 0,
         }}
       >
         <img
-          style={{ width: "90%", margin: "auto", objectFit: "contain" }}
+          style={{
+            width: window.innerWidth <= 1024 ? "100%" : "90%",
+            margin: "auto",
+            objectFit: "contain",
+            maxHeight: window.innerWidth <= 1024 ? "400px" : "auto",
+          }}
           src={post && post.files[0].link}
           alt=""
         />
@@ -213,12 +283,15 @@ export const Post = ({ postId, userId, filterPosts, setOpenDilaog }) => {
       <div
         className="right-dialog"
         style={{
-          minWidth: "460px",
-          overflowY: "scroll",
-          borderLeft: "2px solid rgb(231 231 231)",
-          padding: "10px 0px",
+          minWidth: window.innerWidth <= 1024 ? "100%" : "460px",
+          overflowY: window.innerWidth <= 1024 ? "auto" : "scroll",
+          borderLeft: window.innerWidth <= 1024 ? "none" : "2px solid rgb(231 231 231)",
+          borderTop: window.innerWidth <= 1024 ? "2px solid rgb(231 231 231)" : "none",
+          padding: window.innerWidth <= 1024 ? "16px" : "10px 0px",
           display: "flex",
           flexDirection: "column",
+          minHeight: window.innerWidth <= 1024 ? "300px" : "auto",
+          order: window.innerWidth <= 1024 ? 2 : 1,
         }}
         onClick={() => setEmojiPicker(false)}
       >
@@ -226,7 +299,7 @@ export const Post = ({ postId, userId, filterPosts, setOpenDilaog }) => {
           className="user-post-details"
           style={{
             marginBottom: "7px",
-            display: "flex",
+            display: window.innerWidth <= 1024 ? "none" : "flex",
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",

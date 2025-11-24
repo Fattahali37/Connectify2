@@ -11,8 +11,12 @@ export const Masonary = ({ posts }) => {
       className="masonry-grid"
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-        gap: "24px",
+        gridTemplateColumns: window.innerWidth < 768 
+          ? "repeat(auto-fill, minmax(150px, 1fr))"
+          : window.innerWidth < 1200
+          ? "repeat(auto-fill, minmax(250px, 1fr))"
+          : "repeat(auto-fill, minmax(300px, 1fr))",
+        gap: window.innerWidth < 768 ? "12px" : "24px",
         padding: "4px",
       }}
     >

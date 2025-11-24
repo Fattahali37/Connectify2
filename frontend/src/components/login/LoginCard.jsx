@@ -136,20 +136,7 @@ export const LoginCard = () => {
           </div>
 
           {/* Divider */}
-          <div className="flex items-center my-8">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
-            <span className="px-4 text-xs text-slate-500 font-medium">OR</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
-          </div>
 
-          {/* Google Login */}
-          <button
-            onClick={() => handleGoogleAuth()}
-            className="w-full flex items-center justify-center gap-3 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 text-white rounded-xl transition-all duration-300"
-          >
-            <img src={googleicon} className="w-5 h-5" alt="Google" />
-            <span className="font-medium">Continue with Google</span>
-          </button>
         </div>
       </div>
 

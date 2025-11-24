@@ -151,9 +151,9 @@ export const Settings = () => {
       <div
         className="settings-container"
         style={{
-          width: "calc(100% - 280px)",
-          marginLeft: "280px",
-          padding: "40px",
+          width: "calc(100% - var(--sidebar-width, 280px))",
+          marginLeft: "var(--sidebar-width, 280px)",
+          padding: window.innerWidth < 768 ? "20px" : "40px",
           minHeight: "100vh",
           background:
             "linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%)",
@@ -178,7 +178,7 @@ export const Settings = () => {
         {/* Main Content Card */}
         <div
           style={{
-            maxWidth: "1000px",
+            maxWidth: window.innerWidth < 768 ? "100%" : "1000px",
             margin: "0 auto",
             background:
               "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",
@@ -194,7 +194,7 @@ export const Settings = () => {
           {/* Header */}
           <div
             style={{
-              padding: "32px",
+              padding: window.innerWidth < 768 ? "20px 16px" : "32px",
               borderBottom: "1px solid rgba(148, 163, 184, 0.15)",
               background:
                 "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%)",
@@ -202,7 +202,7 @@ export const Settings = () => {
           >
             <h1
               style={{
-                fontSize: "28px",
+                fontSize: window.innerWidth < 768 ? "22px" : "28px",
                 fontWeight: "700",
                 background:
                   "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
@@ -217,7 +217,7 @@ export const Settings = () => {
             </h1>
             <p
               style={{
-                fontSize: "14px",
+                fontSize: window.innerWidth < 768 ? "12px" : "14px",
                 color: "rgba(148, 163, 184, 0.9)",
                 marginTop: "8px",
                 marginBottom: 0,
@@ -227,15 +227,19 @@ export const Settings = () => {
             </p>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: window.innerWidth < 768 ? "column" : "row" }}>
             {/* Sidebar Navigation */}
             <div
               style={{
-                width: "260px",
-                padding: "24px",
-                borderRight: "1px solid rgba(148, 163, 184, 0.15)",
+                width: window.innerWidth < 768 ? "100%" : "260px",
+                padding: window.innerWidth < 768 ? "16px" : "24px",
+                borderRight: window.innerWidth < 768 ? "none" : "1px solid rgba(148, 163, 184, 0.15)",
+                borderBottom: window.innerWidth < 768 ? "1px solid rgba(148, 163, 184, 0.15)" : "none",
                 background:
                   "linear-gradient(135deg, rgba(15, 23, 42, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%)",
+                display: window.innerWidth < 768 ? "flex" : "flex",
+                flexDirection: window.innerWidth < 768 ? "row" : "column",
+                gap: window.innerWidth < 768 ? "12px" : "0px",
               }}
             >
               <Link
@@ -288,19 +292,20 @@ export const Settings = () => {
             </div>
             {/* Content Area */}
             {params?.params === "edit" ? (
-              <div style={{ flex: 1, padding: "32px" }}>
+              <div style={{ flex: 1, padding: window.innerWidth < 768 ? "16px" : "32px" }}>
                 {/* Avatar Section */}
                 <div
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: "24px",
-                    padding: "24px",
+                    alignItems: window.innerWidth < 768 ? "flex-start" : "center",
+                    gap: window.innerWidth < 768 ? "16px" : "24px",
+                    flexDirection: window.innerWidth < 768 ? "column" : "row",
+                    padding: window.innerWidth < 768 ? "16px" : "24px",
                     background:
                       "linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(51, 65, 85, 0.4) 100%)",
                     borderRadius: "16px",
                     border: "1px solid rgba(148, 163, 184, 0.15)",
-                    marginBottom: "32px",
+                    marginBottom: window.innerWidth < 768 ? "24px" : "32px",
                   }}
                 >
                   <div style={{ position: "relative" }}>
@@ -383,6 +388,8 @@ export const Settings = () => {
                       value={name}
                       style={{
                         width: "100%",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
                         padding: "12px 16px",
                         background: "rgba(15, 23, 42, 0.6)",
                         border: "1px solid rgba(148, 163, 184, 0.3)",
@@ -432,6 +439,8 @@ export const Settings = () => {
                       value={username}
                       style={{
                         width: "100%",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
                         padding: "12px 16px",
                         background: "rgba(15, 23, 42, 0.6)",
                         border: "1px solid rgba(148, 163, 184, 0.3)",
@@ -480,6 +489,8 @@ export const Settings = () => {
                       placeholder="https://example.com"
                       style={{
                         width: "100%",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
                         padding: "12px 16px",
                         background: "rgba(15, 23, 42, 0.6)",
                         border: "1px solid rgba(148, 163, 184, 0.3)",
@@ -528,6 +539,8 @@ export const Settings = () => {
                       maxLength="150"
                       style={{
                         width: "100%",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
                         padding: "12px 16px",
                         background: "rgba(15, 23, 42, 0.6)",
                         border: "1px solid rgba(148, 163, 184, 0.3)",
@@ -807,7 +820,7 @@ export const Settings = () => {
                 </div>
               </div>
             ) : (
-              <div style={{ flex: 1, padding: "32px" }}>
+              <div style={{ flex: 1, padding: window.innerWidth < 768 ? "16px" : "32px" }}>
                 {/* User Info */}
                 <div
                   style={{
@@ -1075,29 +1088,33 @@ export const Settings = () => {
 const activeStyle = {
   display: "flex",
   alignItems: "center",
-  padding: "14px 20px",
-  margin: "8px 0",
-  fontSize: "14px",
+  padding: window.innerWidth < 768 ? "12px 16px" : "14px 20px",
+  margin: window.innerWidth < 768 ? "0" : "8px 0",
+  fontSize: window.innerWidth < 768 ? "13px" : "14px",
   fontWeight: "600",
   color: "rgba(226, 232, 240, 0.95)",
   background:
     "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)",
-  borderLeft: "3px solid rgb(59, 130, 246)",
-  borderRadius: "0 12px 12px 0",
+  borderLeft: window.innerWidth < 768 ? "none" : "3px solid rgb(59, 130, 246)",
+  borderBottom: window.innerWidth < 768 ? "2px solid rgb(59, 130, 246)" : "none",
+  borderRadius: window.innerWidth < 768 ? "12px" : "0 12px 12px 0",
   textDecoration: "none",
   transition: "all 0.2s",
+  flex: window.innerWidth < 768 ? "1" : "auto",
 };
 
 const inactiveStyle = {
   display: "flex",
   alignItems: "center",
-  padding: "14px 20px",
-  margin: "8px 0",
-  fontSize: "14px",
-  fontWeight: "500",
+  padding: window.innerWidth < 768 ? "12px 16px" : "14px 20px",
+  margin: window.innerWidth < 768 ? "0" : "8px 0",
+  fontSize: window.innerWidth < 768 ? "13px" : "14px",
+  fontWeight: window.innerWidth < 768 ? "600" : "500",
   color: "rgba(148, 163, 184, 0.9)",
   textDecoration: "none",
-  borderLeft: "3px solid transparent",
-  borderRadius: "0 12px 12px 0",
+  borderLeft: window.innerWidth < 768 ? "none" : "3px solid transparent",
+  borderBottom: window.innerWidth < 768 ? "2px solid transparent" : "none",
+  borderRadius: window.innerWidth < 768 ? "12px" : "0 12px 12px 0",
   transition: "all 0.2s",
+  flex: window.innerWidth < 768 ? "1" : "auto",
 };

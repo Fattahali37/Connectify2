@@ -191,7 +191,12 @@ export const Navbar = ({ active }) => {
             aria-describedby="alert-dialog-description"
             PaperProps={{
               style: {
-                borderRadius: "15px",
+                borderRadius: window.innerWidth < 480 ? "12px" : "15px",
+                maxWidth: window.innerWidth < 375 ? "92vw" : window.innerWidth < 480 ? "94vw" : window.innerWidth < 600 ? "90vw" : "85vw",
+                width: window.innerWidth < 375 ? "92vw" : window.innerWidth < 480 ? "94vw" : window.innerWidth < 600 ? "90vw" : "85vw",
+                maxHeight: "95vh",
+                margin: window.innerWidth < 480 ? "4px auto" : "12px auto",
+                padding: 0,
               },
             }}
           >
@@ -199,24 +204,35 @@ export const Navbar = ({ active }) => {
               style={{
                 fontFamily: "Poppins",
                 textAlign: "center",
-                fontSize: "15.5px",
+                fontSize: window.innerWidth < 375 ? "12px" : window.innerWidth < 480 ? "13px" : "15.5px",
+                padding: window.innerWidth < 480 ? "12px 12px" : "16px 24px",
               }}
               id="alert-dialog-title"
             >
               {"Create new post"}
             </DialogTitle>
             <Divider style={{ marginTop: "-10px" }} />
-            <DialogContent style={{}}>
+            <DialogContent style={{ 
+              padding: window.innerWidth < 375 ? "6px" : window.innerWidth < 480 ? "8px" : "12px",
+              overflowY: "auto",
+              maxHeight: "calc(95vh - 70px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-start",
+              "&::-webkit-scrollbar": { width: "4px" },
+            }}>
               <div
                 className="post"
                 style={{
-                  width: "45vw",
-                  height: "70vh",
+                  width: "100%",
+                  maxWidth: window.innerWidth < 375 ? "250px" : window.innerWidth < 480 ? "300px" : window.innerWidth < 600 ? "100%" : "45vw",
+                  height: "auto",
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  margin: "auto",
+                  justifyContent: "flex-start",
+                  alignItems: "stretch",
+                  margin: "0 auto",
+                  gap: window.innerWidth < 375 ? "4px" : window.innerWidth < 480 ? "6px" : "10px",
                 }}
               >
                 {imgurl ? (
@@ -225,33 +241,44 @@ export const Navbar = ({ active }) => {
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      height: "100%",
+                      width: "100%",
+                      gap: window.innerWidth < 375 ? "4px" : window.innerWidth < 480 ? "6px" : "10px",
+                      padding: "0",
                     }}
                   >
-                    <div className="imageup" style={{ height: "65%" }}>
+                    <div 
+                      className="imageup" 
+                      style={{ 
+                        height: window.innerWidth < 375 ? "140px" : window.innerWidth < 480 ? "180px" : window.innerWidth < 600 ? "220px" : "65%",
+                        width: "100%",
+                        borderRadius: "6px",
+                        overflow: "hidden",
+                        flexShrink: 0,
+                      }}
+                    >
                       <img
-                        style={{ width: "95%", height: "100%", margin: "auto" }}
+                        style={{ width: "100%", height: "100%", margin: "auto", objectFit: "cover" }}
                         src={imgurl}
-                        alt=""
+                        alt="Preview"
                       />
                     </div>
                     <div
                       style={{
                         display: "flex",
                         flexDirection: "column",
-                        width: "80%",
-                        position: "absolute",
-                        bottom: 15,
-                        margin: "auto",
+                        width: "100%",
+                        gap: window.innerWidth < 375 ? "4px" : "6px",
                       }}
                     >
                       <TextField
                         id="outlined-multiline-static"
                         label="Caption"
                         multiline
-                        rows={4}
+                        rows={window.innerWidth < 375 ? 1 : window.innerWidth < 480 ? 1 : window.innerWidth < 600 ? 2 : 3}
+                        fullWidth
+                        size="small"
                         InputProps={{
-                          style: { fontSize: "13.5px", fontFamily: "Poppins" },
+                          style: { fontSize: window.innerWidth < 375 ? "10px" : window.innerWidth < 480 ? "11px" : "12px", fontFamily: "Poppins" },
                         }}
                         value={caption}
                         onChange={(e) => setCaption(e.target.value)}
@@ -263,14 +290,17 @@ export const Navbar = ({ active }) => {
                           outline: "none",
                           background:
                             "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
-                          padding: "3.5px 9px",
-                          borderRadius: "8px",
+                          padding: window.innerWidth < 375 ? "9px 12px" : window.innerWidth < 480 ? "10px 14px" : "12px 18px",
+                          borderRadius: "6px",
                           color: "white",
-                          marginTop: "12px",
-                          fontSize: "15px",
+                          marginTop: window.innerWidth < 375 ? "4px" : "6px",
+                          fontSize: window.innerWidth < 375 ? "10px" : window.innerWidth < 480 ? "11px" : "13px",
                           cursor: "pointer",
                           boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
                           transition: "all 0.2s",
+                          fontWeight: "600",
+                          minHeight: "40px",
+                          width: "100%",
                         }}
                       >
                         Upload
@@ -280,14 +310,16 @@ export const Navbar = ({ active }) => {
                 ) : (
                   <>
                     <svg
-                      style={{ marginBottom: "10px" }}
+                      style={{ 
+                        marginBottom: window.innerWidth < 375 ? "4px" : window.innerWidth < 480 ? "6px" : "8px",
+                        width: window.innerWidth < 375 ? "50px" : window.innerWidth < 480 ? "60px" : "70px",
+                        height: window.innerWidth < 375 ? "50px" : window.innerWidth < 480 ? "60px" : "70px",
+                      }}
                       aria-label="Icon to represent media such as images or videos"
                       color="rgba(148, 163, 184, 0.9)"
                       fill="rgba(148, 163, 184, 0.9)"
-                      height="77"
                       role="img"
                       viewBox="0 0 97.6 77.3"
-                      width="96"
                     >
                       <path
                         d="M16.3 24h.3c2.8-.2 4.9-2.6 4.8-5.4-.2-2.8-2.6-4.9-5.4-4.8s-4.9 2.6-4.8 5.4c.1 2.7 2.4 4.8 5.1 4.8zm-2.4-7.2c.5-.6 1.3-1 2.1-1h.2c1.7 0 3.1 1.4 3.1 3.1 0 1.7-1.4 3.1-3.1 3.1-1.7 0-3.1-1.4-3.1-3.1 0-.8.3-1.5.8-2.1z"
@@ -302,7 +334,14 @@ export const Navbar = ({ active }) => {
                         fill="currentColor"
                       ></path>
                     </svg>
-                    <p style={{ fontSize: "15px" }}>
+                    <p style={{ 
+                      fontSize: window.innerWidth < 375 ? "11px" : window.innerWidth < 480 ? "12px" : "14px",
+                      textAlign: "center",
+                      color: "rgba(226, 232, 240, 0.9)",
+                      marginBottom: window.innerWidth < 375 ? "6px" : window.innerWidth < 480 ? "8px" : "10px",
+                      padding: "0 8px",
+                      margin: "0 0 6px 0",
+                    }}>
                       Drag photos and videos here
                     </p>
                     <label
@@ -312,14 +351,21 @@ export const Navbar = ({ active }) => {
                         outline: "none",
                         background:
                           "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
-                        padding: "3.5px 9px",
-                        borderRadius: "8px",
+                        padding: window.innerWidth < 375 ? "9px 12px" : window.innerWidth < 480 ? "10px 14px" : "12px 18px",
+                        borderRadius: "6px",
                         color: "white",
-                        marginTop: "12px",
-                        fontSize: "15px",
+                        marginTop: window.innerWidth < 375 ? "4px" : window.innerWidth < 480 ? "6px" : "8px",
+                        fontSize: window.innerWidth < 375 ? "10px" : window.innerWidth < 480 ? "11px" : "13px",
                         cursor: "pointer",
                         boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
                         transition: "all 0.2s",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minHeight: "40px",
+                        width: "100%",
+                        maxWidth: "250px",
                       }}
                     >
                       Select from computer

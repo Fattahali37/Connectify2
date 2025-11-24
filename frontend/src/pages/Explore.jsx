@@ -38,10 +38,10 @@ export default function Explore() {
     <div
       className="explore-page"
       style={{
-        width: "calc(100% - 280px)",
+        width: "calc(100% - var(--sidebar-width, 280px))",
         minHeight: "100vh",
-        padding: "32px 40px",
-        marginLeft: "280px",
+        padding: window.innerWidth < 768 ? "16px 20px" : "32px 40px",
+        marginLeft: "var(--sidebar-width, 280px)",
         background:
           "linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%)",
         backgroundAttachment: "fixed",
@@ -67,7 +67,7 @@ export default function Explore() {
       {/* Content Container */}
       <div
         style={{
-          maxWidth: "1400px",
+          maxWidth: window.innerWidth < 768 ? "100%" : "1400px",
           margin: "0 auto",
           position: "relative",
           zIndex: 1,
@@ -82,13 +82,13 @@ export default function Explore() {
             backdropFilter: "blur(20px)",
             border: "1px solid rgba(148, 163, 184, 0.1)",
             borderRadius: "24px",
-            padding: "32px 40px",
+            padding: window.innerWidth < 768 ? "20px 16px" : "32px 40px",
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
           }}
         >
           <h1
             style={{
-              fontSize: "36px",
+              fontSize: window.innerWidth < 768 ? "24px" : "36px",
               fontWeight: "700",
               background:
                 "linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(139, 92, 246) 100%)",
@@ -103,7 +103,7 @@ export default function Explore() {
           </h1>
           <p
             style={{
-              fontSize: "16px",
+              fontSize: window.innerWidth < 768 ? "14px" : "16px",
               color: "rgba(148, 163, 184, 0.9)",
               fontWeight: "400",
             }}
@@ -120,7 +120,7 @@ export default function Explore() {
             backdropFilter: "blur(20px)",
             border: "1px solid rgba(148, 163, 184, 0.1)",
             borderRadius: "24px",
-            padding: "32px",
+            padding: window.innerWidth < 768 ? "16px" : "32px",
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
             minHeight: "400px",
           }}

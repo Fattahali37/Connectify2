@@ -286,3 +286,62 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     padding: 8px;
 }
+
+/* Instagram-style Mobile Layout */
+@media (max-width: 1024px) {
+    .card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .card .user-details {
+        order: 1;
+        flex-shrink: 0;
+    }
+
+    .card .post {
+        order: 2;
+        width: 100%;
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .card .post img {
+        max-height: 500px;
+        width: 100%;
+        display: block;
+    }
+
+    .card .labels {
+        order: 3;
+        flex-shrink: 0;
+    }
+
+    .card .likes-count {
+        order: 4;
+        flex-shrink: 0;
+    }
+
+    .card .caption {
+        order: 5;
+        flex-shrink: 0;
+    }
+
+    .card .comments {
+        order: 6;
+        flex-shrink: 0;
+    }
+
+    .card .timestamp {
+        order: 7;
+        flex-shrink: 0;
+    }
+
+    .card .addComment {
+        order: 8;
+        flex-shrink: 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.12);
+        padding: 18px 20px;
+    }
+}

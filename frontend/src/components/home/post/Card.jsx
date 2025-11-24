@@ -551,12 +551,13 @@ export default function Card({
         </div>
 
         <Dialog
-          maxWidth="lg"
+          maxWidth={window.innerWidth <= 1024 ? "md" : "lg"}
+          fullWidth={window.innerWidth <= 1024 ? true : false}
           open={openDailog}
           PaperProps={{
             sx: {
-              minHeight: "95%",
-              maxHeight: "95%",
+              minHeight: window.innerWidth <= 1024 ? "auto" : "95%",
+              maxHeight: window.innerWidth <= 1024 ? "90vh" : "95%",
               padding: 0,
               background:
                 "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)",

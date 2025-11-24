@@ -56,13 +56,13 @@ export const Chat = () => {
     <div
       className="chatpage"
       style={{
-        width: "calc(100% - 280px)",
-        marginLeft: "280px",
+        width: "calc(100% - var(--sidebar-width, 280px))",
+        marginLeft: "var(--sidebar-width, 280px)",
         background:
           "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)",
         border: "none",
         display: "flex",
-        flexDirection: "row",
+        flexDirection: window.innerWidth < 768 ? "column" : "row",
         height: "100vh",
         borderRadius: "0",
         position: "relative",
@@ -71,14 +71,16 @@ export const Chat = () => {
       <div
         className="left_chat_bar"
         style={{
-          width: "420px",
+          width: window.innerWidth < 768 ? "100%" : "420px",
           flexShrink: 0,
-          height: "100%",
+          height: window.innerWidth < 768 ? "40vh" : "100%",
+          maxHeight: window.innerWidth < 768 ? "40vh" : "100%",
           overflowY: "auto",
           background:
             "linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%)",
           backdropFilter: "blur(20px)",
-          borderRight: "1px solid rgba(148, 163, 184, 0.1)",
+          borderRight: window.innerWidth < 768 ? "none" : "1px solid rgba(148, 163, 184, 0.1)",
+          borderBottom: window.innerWidth < 768 ? "1px solid rgba(148, 163, 184, 0.1)" : "none",
           boxShadow: "4px 0 24px rgba(0, 0, 0, 0.1)",
         }}
       >
@@ -170,10 +172,10 @@ export const Chat = () => {
           <Dialog
             PaperProps={{
               style: {
-                minHeight: "55%",
-                maxHeight: "65%",
-                minWidth: "400px",
-                maxWidth: "400px",
+                minHeight: window.innerWidth < 768 ? "70%" : "55%",
+                maxHeight: window.innerWidth < 768 ? "80%" : "65%",
+                minWidth: window.innerWidth < 768 ? "90vw" : "400px",
+                maxWidth: window.innerWidth < 768 ? "90vw" : "400px",
                 padding: 0,
                 overflowY: "auto",
                 borderRadius: "20px",
@@ -240,7 +242,7 @@ export const Chat = () => {
             <RoomName key={item.roomId} roomId={item.roomId} />
           ))}
       </div>
-      <div className="right_chatbar" style={{ width: "67%" }}>
+      <div className="right_chatbar" style={{ width: window.innerWidth < 768 ? "100%" : "67%", flex: 1 }}>
         {params.id === "all" ? (
           <Default />
         ) : (

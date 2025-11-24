@@ -129,8 +129,8 @@ export default function Home({ stories }) {
             >
               <div
                 style={{
-                  width: "80px",
-                  height: "80px",
+                  width: window.innerWidth < 768 ? "60px" : "80px",
+                  height: window.innerWidth < 768 ? "60px" : "80px",
                   borderRadius: "50%",
                   background:
                     "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)",
@@ -167,10 +167,10 @@ export default function Home({ stories }) {
               </p>
               <p
                 style={{
-                  fontSize: "14px",
+                  fontSize: window.innerWidth < 768 ? "12px" : "14px",
                   textAlign: "center",
                   color: "rgba(148, 163, 184, 0.9)",
-                  maxWidth: "320px",
+                  maxWidth: window.innerWidth < 768 ? "280px" : "320px",
                   lineHeight: "1.6",
                 }}
               >
