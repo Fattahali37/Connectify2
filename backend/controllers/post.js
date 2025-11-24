@@ -1,6 +1,6 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
-const { all } = require("../routes/post");
+const { computeFeaturesForUserId } = require('../utils/profileFeatureHelper');
 
 exports.getPost = async (req, res) => {
   try {
@@ -27,6 +27,8 @@ exports.createPost = async (req, res) => {
       { _id: req.user._id },
       { $push: { posts: saved._id } }
     );
+    // update posts_count in profile features
+    computeFeaturesForUserId(req.user._id);
     res.send(saved);
   } catch (err) {
     res.send({
@@ -49,6 +51,8 @@ exports.deletePost = async (req, res) => {
       { _id: req.user._id },
       { $pull: { posts: req.params.postId } }
     );
+    // update posts_count in profile features
+    computeFeaturesForUserId(req.user._id);
     res.status(200).send({
       success: true,
       message: "done",
@@ -249,7 +253,14 @@ exports.save = async (req, res) => {
 exports.userPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    const posts = await Post.find({ owner: userId }).sort({ createdAt: -1 });
+    
+    // Get user posts with only needed fields - limit to 100 most recent
+    const posts = await Post.find({ owner: userId })
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .select('owner files caption likes comments saved createdAt')
+      .lean();
+    
     res.send(posts);
   } catch (err) {
     res.send({
@@ -262,9 +273,36 @@ exports.userPosts = async (req, res) => {
 // explore post
 exports.explore = async (req, res) => {
   try {
-    const posts = await Post.find({ owner: { $ne: req.user._id } }).sort({
-      createdAt: -1,
-    });
+    // Optimized: Get user with only needed fields
+    const currentUser = await User.findOne({ _id: req.user._id })
+      .select('followings')
+      .lean();
+    
+    // Get all public user IDs
+    const publicUsers = await User.find({ 
+      private: { $ne: true },
+      _id: { $ne: req.user._id }
+    })
+    .select('_id')
+    .lean();
+    
+    // Get IDs of users whose posts should be shown:
+    // 1. Public users, OR
+    // 2. Private users that current user is following
+    const visibleUserIds = [
+      ...publicUsers.map(u => u._id),
+      ...(currentUser.followings || [])
+    ];
+    
+    // Single optimized query - limit to 150 most recent posts
+    const posts = await Post.find({ 
+      owner: { $in: visibleUserIds, $ne: req.user._id } 
+    })
+    .sort({ createdAt: -1 })
+    .limit(150)
+    .select('owner files caption likes comments saved createdAt')
+    .lean();
+    
     res.send(posts);
   } catch (err) {
     res.send({
@@ -277,15 +315,21 @@ exports.explore = async (req, res) => {
 // saved posts
 exports.savedPosts = async (req, res) => {
   try {
-    const findUser = await User.findOne({ _id: req.user._id });
-    let savedPost = [];
-    Promise.all(
-      findUser.saved.map(async (item) => {
-        savedPost.push(await Post.findOne({ _id: item }));
-      })
-    ).then(() => {
-      res.send(savedPost.reverse());
-    });
+    // Optimized: Get only saved field
+    const findUser = await User.findOne({ _id: req.user._id })
+      .select('saved')
+      .lean();
+    
+    // Single query with $in operator - limit to 100 most recent
+    const savedPosts = await Post.find({ 
+      _id: { $in: findUser.saved || [] } 
+    })
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .select('owner files caption likes comments saved createdAt')
+    .lean();
+    
+    res.send(savedPosts);
   } catch (err) {
     res.send({
       success: false,
@@ -298,18 +342,36 @@ exports.savedPosts = async (req, res) => {
 exports.homePosts = async (req, res) => {
   try {
     const userId = req.user._id;
-    const posts = await Post.find({ owner: userId });
-    const user = await User.findOne({ _id: userId });
-    Promise.all(
-      user.followings.map(async (item) => {
-        posts.push(...(await Post.find({ owner: item })));
-      })
-    ).then(() => {
-      const arr = posts.sort((a, b) => {
-        return b.createdAt - a.createdAt;
-      });
-      res.send(arr);
-    });
+    
+    // Optimized: Get user with only needed fields
+    const user = await User.findOne({ _id: userId })
+      .select('followings')
+      .lean();
+    
+    // Get IDs of users whose posts we want to show
+    const userIdsToShow = [userId, ...(user.followings || [])];
+    
+    // Get all public users NOT in our following list
+    const publicUserIds = await User.find({ 
+      private: { $ne: true },
+      _id: { $nin: userIdsToShow }
+    })
+    .select('_id')
+    .lean();
+    
+    // Add public user IDs to the list
+    const allUserIds = [...userIdsToShow, ...publicUserIds.map(u => u._id)];
+    
+    // Single optimized query - limit to recent 100 posts for better performance
+    const posts = await Post.find({ 
+      owner: { $in: allUserIds } 
+    })
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .select('owner files caption likes comments saved createdAt')
+    .lean();
+    
+    res.send(posts);
   } catch (err) {
     res.send({
       success: false,

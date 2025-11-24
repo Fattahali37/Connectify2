@@ -4,6 +4,7 @@ require("./config/db").connectToDB();
 const cors = require("cors");
 const app = express();
 const server = require("http").createServer(app);
+const { initVerificationScheduler } = require("./utils/verificationScheduler");
 app.use(express.json());
 app.use(cors());
 const io = require("socket.io")(server, {
@@ -55,4 +56,8 @@ io.on("connect", (socket) => {
 
 server.listen(process.env.PORT, () => {
   console.log(`Server running at port : ${process.env.PORT}`);
+  
+  // Initialize auto-verification scheduler
+  initVerificationScheduler();
+  console.log("✅ Auto-verification scheduler initialized");
 });

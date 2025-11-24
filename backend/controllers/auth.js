@@ -1,25 +1,51 @@
 const User = require("../models/User");
+const DeletedUser = require("../models/DeletedUser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Token = require("../models/AuthTokens");
+const ProfileFeature = require("../models/ProfileFeature");
 const axios = require("axios");
 const qs = require("qs");
 const fs = require("fs");
 
 exports.registerUser = async (req, res) => {
   try {
-    const isUser = await User.findOne({ email: req.body.email });
+    // Check if user already exists
+    const isUser = await User.findOne({ 
+      $or: [{ email: req.body.email }, { username: req.body.username }] 
+    }).lean();
     if (isUser)
       return res.status(400).send({
         success: false,
         message: "User already exist",
       });
+
+    // Check if username/email was previously deleted (reserved)
+    const isDeletedUser = await DeletedUser.findOne({
+      $or: [{ email: req.body.email }, { username: req.body.username }]
+    }).lean();
+    if (isDeletedUser)
+      return res.status(400).send({
+        success: false,
+        message: "This username/email is not available",
+      });
+
     const data = {
       ...req.body,
       password: await bcrypt.hash(req.body.password, 10),
     };
     const newUser = new User(data);
     const user = await newUser.save();
+    // compute derived profile features and persist for admin analysis
+    try {
+      // Use helper to compute consistent fields
+      const { computeFeaturesFromUserDoc } = require('../utils/profileFeatureHelper');
+      const feature = computeFeaturesFromUserDoc(user);
+      if (feature) await ProfileFeature.create(feature);
+    } catch (pfErr) {
+      // don't block user registration if feature save fails; just log
+      console.error('Failed to save profile features for user', user._id, pfErr.message || pfErr);
+    }
     const access_token = jwt.sign({ _id: user._id }, process.env.JWT_Secret, {
       expiresIn: "30m",
     });
@@ -47,6 +73,24 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
+    // Check if credentials match admin credentials first
+    if (req.body.text === process.env.ADMIN_USERNAME && 
+        req.body.password === process.env.ADMIN_PASSWORD) {
+      
+      const access_token = jwt.sign(
+        { isAdmin: true, username: process.env.ADMIN_USERNAME }, 
+        process.env.JWT_Secret, 
+        { expiresIn: "30m" }
+      );
+      
+      return res.send({
+        success: true,
+        isAdmin: true,
+        access_token,
+        message: "Admin login successful"
+      });
+    }
+
     const user = await User.findOne({
       $or: [{ email: req.body.text }, { username: req.body.text }],
     });
@@ -61,6 +105,14 @@ exports.loginUser = async (req, res) => {
         success: false,
         message: "Wrong password",
       });
+    // If user is blocked, prevent login and return clear message
+    if (user.status === 'blocked') {
+      return res.status(403).send({
+        success: false,
+        isBlocked: true,
+        message: "Your account has been blocked by the admin",
+      });
+    }
     const access_token = jwt.sign({ _id: user._id }, process.env.JWT_Secret, {
       expiresIn: "30m",
     });
@@ -72,10 +124,12 @@ exports.loginUser = async (req, res) => {
       token: refresh_token,
     });
     await refToken.save();
-    user.password = undefined;
+    // Remove password from response
+    const userResponse = { ...user._doc };
+    delete userResponse.password;
     res.send({
       success: true,
-      user,
+      user: userResponse,
       access_token,
       refresh_token,
     });
@@ -140,7 +194,7 @@ exports.googleoauth = async (req, res) => {
         email: user.email,
         avatar: user.picture,
       });
-      isUser = temp.save();
+      isUser = await temp.save();
     }
     const access_token_server = jwt.sign(
       { _id: isUser._id },

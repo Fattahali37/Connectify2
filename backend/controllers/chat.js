@@ -5,6 +5,9 @@ const Room = require('../models/Room')
 exports.getRooms = async (req, res) => {
     try {
         const rooms = await Chat.find({ people: req.user._id })
+            .select('roomId people lastMessage lastSeen createdAt')
+            .lean()
+            .sort({ 'lastMessage.timestamp': -1 });
         res.send(rooms)
     } catch (err) {
         res.send({
@@ -16,7 +19,7 @@ exports.getRooms = async (req, res) => {
 
 exports.createOrGetRoom = async (req, res) => {
     try {
-        const have = await Chat.findOne({ people: { $all: [...req.body.people, req.user._id] } })
+        const have = await Chat.findOne({ people: { $all: [...req.body.people, req.user._id] } }).lean();
         if (have) {
             return res.send(have)
         }
@@ -41,6 +44,8 @@ exports.createOrGetRoom = async (req, res) => {
 exports.findRoom = async (req, res) => {
     try {
         const result = await Chat.findOne({ roomId: req.params.roomId })
+            .select('roomId people lastMessage lastSeen createdAt')
+            .lean();
         res.send(result)
     } catch (err) {
         res.send({
@@ -66,6 +71,101 @@ exports.leaveChat = async (req, res) => {
     } catch (err) {
         console.log(err);
         res.send({
+            success: false,
+            message: err.message,
+        });
+    }
+}
+
+// Update last seen timestamp when user views a room
+exports.updateLastSeen = async (req, res) => {
+    try {
+        const { roomId } = req.body;
+        const userId = req.user._id;
+        
+        const room = await Room.findOne({ roomId });
+        if (!room) return res.status(404).send({ success: false, message: "Room not found" });
+        
+        // Update or add lastSeen for this user
+        const lastSeenIndex = room.lastSeen.findIndex(ls => ls.userId.toString() === userId.toString());
+        
+        if (lastSeenIndex >= 0) {
+            room.lastSeen[lastSeenIndex].timestamp = new Date();
+        } else {
+            room.lastSeen.push({ userId, timestamp: new Date() });
+        }
+        
+        await room.save();
+        res.send({ success: true });
+    } catch (err) {
+        res.status(400).send({
+            success: false,
+            message: err.message,
+        });
+    }
+}
+
+// Update last message timestamp when a message is sent
+exports.updateLastMessage = async (req, res) => {
+    try {
+        const { roomId, timestamp } = req.body;
+        const userId = req.user._id;
+        
+        await Room.updateOne(
+            { roomId },
+            { 
+                $set: { 
+                    lastMessage: {
+                        timestamp: new Date(timestamp),
+                        from: userId
+                    }
+                }
+            }
+        );
+        
+        res.send({ success: true });
+    } catch (err) {
+        res.status(400).send({
+            success: false,
+            message: err.message,
+        });
+    }
+}
+
+// Get count of rooms with unread messages
+exports.getUnreadMessageCount = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        
+        // Get all rooms the user is part of
+        const rooms = await Room.find({ people: userId })
+            .select('lastMessage lastSeen')
+            .lean();
+        
+        let unreadCount = 0;
+        
+        for (const room of rooms) {
+            // Find when this user last saw this room
+            const userLastSeen = room.lastSeen?.find(ls => ls.userId.toString() === userId.toString());
+            
+            // If there's a last message and either:
+            // 1. User has never seen the room, or
+            // 2. Last message is newer than when user last saw
+            // 3. Last message was not from the user themselves
+            if (room.lastMessage && 
+                room.lastMessage.from && 
+                room.lastMessage.from.toString() !== userId.toString()) {
+                
+                if (!userLastSeen || 
+                    (room.lastMessage.timestamp > userLastSeen.timestamp)) {
+                    unreadCount++;
+                }
+            }
+        }
+        
+        res.json({ success: true, count: unreadCount });
+    } catch (err) {
+        res.status(400).json({
             success: false,
             message: err.message,
         });

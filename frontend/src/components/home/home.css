@@ -1,32 +1,244 @@
 .home {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    padding: 18px 0;
+    @apply w-full flex flex-row py-6 px-8;
+    min-height: 100vh;
+    background: linear-gradient(180deg, rgb(2, 6, 23) 0%, rgb(15, 23, 42) 50%, rgb(2, 6, 23) 100%);
+    position: relative;
+    gap: 40px;
+    margin-left: 280px;
+    width: calc(100% - 280px);
+    padding-left: 24px;
+    padding-right: 24px;
+    justify-content: center;
+}
+
+.home::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .left-home {
-    width: 55%;
-    display: flex;
-    flex-direction: column;
-    border-radius: 3px;
+    @apply w-full flex flex-col rounded;
+    max-width: 680px;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    margin: 0 auto;
 }
 
 .right-home {
-    width: 28%;
-    height: 50px;
+    @apply w-[380px] hidden lg:block;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .stories {
-    width: 100%;
-    background-color: white;
-    margin-bottom: 15px;
-    height: 109px;
-    border-radius: 7px;
-    border: 1.7px solid var(--border);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    overflow: scroll;
+    @apply w-full mb-8 rounded-3xl flex flex-row items-center overflow-x-auto;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.7) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    gap: 16px;
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+}
+
+.stories::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.5), transparent);
+}
+
+.stories::-webkit-scrollbar {
+    height: 6px;
+}
+
+.stories::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.stories::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 3px;
+}
+
+.stories::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.3);
+}
+
+.posts {
+    @apply space-y-5;
+}
+
+@media screen and (max-width: 1400px) {
+    .home {
+        @apply px-6;
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    .left-home {
+        max-width: 640px;
+    }
+    
+    .right-home {
+        @apply w-[320px];
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .home {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .right-home {
+        @apply hidden;
+    }
+    
+    .left-home {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .home {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        justify-content: center;
+    }
+}
+
+@media screen and (max-width: 850px) {
+    .home {
+        @apply flex-col px-4;
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+    
+    .left-home {
+        @apply w-full;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .home {
+        margin-left: 0;
+        width: 100%;
+        margin-bottom: 72px;
+        padding-bottom: 20px;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 12px;
+        gap: 12px;
+    }
+    
+    .left-home {
+        max-width: 100%;
+        padding: 0;
+        margin: 0 auto;
+    }
+
+    .stories {
+        padding: 12px;
+        height: auto;
+        min-height: 120px;
+        margin-bottom: 16px;
+    }
+
+    .stories .story-item {
+        min-width: 80px;
+        width: 80px;
+        height: 100px;
+    }
+
+    .posts {
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .posts .card {
+        margin-bottom: 8px;
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .right-home {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .home {
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-top: 8px;
+        margin-bottom: 72px;
+    }
+
+    .left-home {
+        max-width: 100%;
+    }
+
+    .stories {
+        padding: 8px;
+        height: auto;
+        min-height: 110px;
+        gap: 8px;
+    }
+
+    .stories .story-item {
+        min-width: 70px;
+        width: 70px;
+        height: 90px;
+    }
+
+    .posts {
+        gap: 8px;
+    }
+
+    .posts .card {
+        padding: 8px;
+        border-radius: 10px;
+    }
+}
+
+@media screen and (max-width: 375px) {
+    .home {
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+    .stories {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .stories .story-item {
+        min-width: 60px;
+        width: 60px;
+        height: 80px;
+    }
 }

@@ -84,22 +84,49 @@ exports.addSeen = async (req, res) => {
 
 exports.homeStory = async (req, res) => {
   try {
+    // Check if user is authenticated
+    if (!req.user || !req.user._id) {
+      return res.status(401).send({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
     const user = await User.findOne({ _id: req.user._id });
-    const allStories = [];
-    Promise.all(
-      user.followings.map(async (item) => {
-        const t = await Story.find({
-          $and: [
-            { owner: item },
-            { createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
-          ],
-        });
-        if (t.length != 0) allStories.push(t);
-      })
-    ).then(() => {
-      res.send(allStories);
-    });
+    
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+    // Fetch stories for all followings in a single query instead of one query per following
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    // If there are no followings, short-circuit
+    if (!user.followings || user.followings.length === 0) {
+      return res.send([]);
+    }
+
+    const stories = await Story.find({
+      owner: { $in: user.followings },
+      createdAt: { $gt: since },
+    })
+      .sort({ createdAt: -1 })
+      .select("id owner data createdAt seen")
+      .lean();
+
+    // Group stories by owner to keep previous response shape (array of arrays)
+    const grouped = {};
+    for (const s of stories) {
+      const key = s.owner.toString();
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(s);
+    }
+
+    const allStories = Object.values(grouped);
+    res.send(allStories);
   } catch (err) {
+    console.error("Error in homeStory:", err);
     res.status(400).send({
       success: false,
       message: err.message,
