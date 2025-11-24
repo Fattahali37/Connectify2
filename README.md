@@ -169,10 +169,10 @@ python app.py
 ```
 
 ### 5️⃣ Access Application
-- **Frontend:** http://localhost:3000
+- **Frontend:** connectifydev.vercel.app
 - **Backend API:** http://localhost:8000
 - **ML API:** http://localhost:5000
-- **Admin Dashboard:** http://localhost:3000/admin
+- **Admin Dashboard:** connectifydev.vercel.app/admin
 
 ---
 
@@ -298,7 +298,7 @@ npm run dev        # Start with nodemon
 
 #### Frontend
 ```bash
-npm start          # Start dev server (http://localhost:3000)
+npm start          # Start dev server (connectifydev.vercel.app)
 npm test           # Run tests
 npm run build      # Production build
 npm run eject      # Eject from Create React App

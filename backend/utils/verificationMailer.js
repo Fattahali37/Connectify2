@@ -68,7 +68,7 @@ const sendVerificationStartEmail = async (adminEmail, settings) => {
               
               <p>You will receive another email with the results once the verification process is complete.</p>
               
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/dashboard" class="button">
+              <a href="${process.env.FRONTEND_URL || 'connectifydev.vercel.app'}/admin/dashboard" class="button">
                 View Admin Dashboard
               </a>
             </div>
@@ -181,7 +181,7 @@ const sendVerificationCompleteEmail = async (adminEmail, results, settings) => {
                 <p>Based on your current schedule (${settings.verificationSchedule}), the next auto-verification will run automatically.</p>
               </div>
               
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/dashboard" class="button">
+              <a href="${process.env.FRONTEND_URL || 'connectifydev.vercel.app'}/admin/dashboard" class="button">
                 View Admin Dashboard
               </a>
             </div>
