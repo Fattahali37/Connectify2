@@ -1,13 +1,51 @@
 const nodemailer = require('nodemailer');
 
-// Create email transporter
+// Create email transporter - prefer SendGrid on Render, fall back to Gmail locally
 const createTransporter = () => {
+  const sendgridKey = process.env.SENDGRID_API_KEY;
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASSWORD;
+  
+  // Priority 1: SendGrid API (works reliably on Render - no port blocking)
+  if (sendgridKey) {
+    console.log('[Email] Using SendGrid API transporter');
+    return nodemailer.createTransport({
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'apikey',
+        pass: sendgridKey
+      }
+    });
+  }
+  
+  // Priority 2: Explicit SMTP config (for custom providers)
+  if (process.env.SMTP_HOST) {
+    console.log('[Email] Using explicit SMTP config');
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: emailUser,
+        pass: emailPass
+      },
+      connectionTimeout: 10000,
+      socketTimeout: 30000
+    });
+  }
+  
+  // Fallback: Gmail (works locally, may timeout on Render without SendGrid)
+  console.log('[Email] Using Gmail SMTP (may timeout on Render - consider setting SENDGRID_API_KEY)');
   return nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
+    service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD
-    }
+      user: emailUser,
+      pass: emailPass
+    },
+    connectionTimeout: 10000,
+    socketTimeout: 30000
   });
 };
 
