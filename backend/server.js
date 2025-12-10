@@ -32,8 +32,6 @@ app.use("/chat", chatRoute);
 app.use("/story", storyRoute);
 app.use("/api/admin", adminRoute);
 
-// Temporary debug endpoint (bypasses admin router/auth) to trigger profile verification
-// Use only in development. Calls controller directly and returns its result.
 if (process.env.NODE_ENV !== 'production') {
   app.post('/__debug_verify/:userId', async (req, res, next) => {
     try {
@@ -76,5 +74,5 @@ server.listen(process.env.PORT, () => {
   
   // Initialize auto-verification scheduler
   initVerificationScheduler();
-  console.log("✅ Auto-verification scheduler initialized");
+  console.log("Auto-verification scheduler initialized");
 });

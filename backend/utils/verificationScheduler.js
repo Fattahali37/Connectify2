@@ -4,11 +4,9 @@ const { performAutoVerification } = require('../controllers/admin');
 
 let scheduledTask = null;
 
-// Initialize the verification scheduler
 function initVerificationScheduler() {
   console.log('[Verification Scheduler] Initializing...');
   
-  // Check settings and start scheduler every minute
   cron.schedule('* * * * *', async () => {
     try {
       const settings = await VerificationSettings.getSettings();

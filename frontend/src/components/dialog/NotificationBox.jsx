@@ -9,10 +9,10 @@ export const NotificationBox = () => {
     const [loading, setLoading] = useState(true)
     useEffect(() => {
         // Fetch notifications
-        console.log("📧 Fetching notifications for current user...");
+        console.log("Fetching notifications for current user...");
         api.get(`${url}/user/view/notifications`).then((res) => {
-            console.log("📧 Notifications response:", res.data);
-            console.log("📧 Number of notifications:", res.data?.length || 0);
+            console.log("Notifications response:", res.data);
+            console.log("Number of notifications:", res.data?.length || 0);
             // Ensure the response is an array
             setNoti(Array.isArray(res.data) ? res.data : [])
         }).catch((err) => {

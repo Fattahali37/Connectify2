@@ -84,7 +84,7 @@ const sendVerificationStartEmail = async (adminEmail, settings) => {
         html: htmlContent
       };
       await sgMail.send(msg);
-      console.log('✅ Verification start email sent via SendGrid to:', adminEmail);
+      console.log('Verification start email sent via SendGrid to:', adminEmail);
     } else {
       console.log('[Email] Sending via Nodemailer (Gmail)...');
       const transporter = nodemailer.createTransport({
@@ -105,7 +105,7 @@ const sendVerificationStartEmail = async (adminEmail, settings) => {
       };
       
       await transporter.sendMail(mailOptions);
-      console.log('✅ Verification start email sent via Gmail to:', adminEmail);
+      console.log('Verification start email sent via Gmail to:', adminEmail);
     }
     
     return true;
@@ -233,7 +233,7 @@ const sendVerificationCompleteEmail = async (adminEmail, results, settings) => {
         html: htmlContent
       };
       await sgMail.send(msg);
-      console.log('✅ Verification complete email sent via SendGrid to:', adminEmail);
+      console.log('Verification complete email sent via SendGrid to:', adminEmail);
     } else {
       console.log('[Email] Sending via Nodemailer (Gmail)...');
       const transporter = nodemailer.createTransport({
@@ -254,12 +254,12 @@ const sendVerificationCompleteEmail = async (adminEmail, results, settings) => {
       };
       
       await transporter.sendMail(mailOptions);
-      console.log('✅ Verification complete email sent via Gmail to:', adminEmail);
+      console.log('Verification complete email sent via Gmail to:', adminEmail);
     }
     
     return true;
   } catch (error) {
-    console.error('❌ Failed to send verification complete email:', error.message);
+    console.error('Failed to send verification complete email:', error.message);
     if (error.response) {
       console.error('SendGrid Error Response:', error.response.body);
     }

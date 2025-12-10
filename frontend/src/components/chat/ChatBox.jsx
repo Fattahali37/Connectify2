@@ -42,7 +42,6 @@ export default function ChatBox({ roomId, deleteRoom }) {
     useEffect(() => {
         setDetails(false)
         
-        // Mark room as seen in localStorage
         const lastSeenKey = `lastSeen_${roomId}_${context.auth._id}`;
         localStorage.setItem(lastSeenKey, new Date().toISOString());
         
@@ -104,7 +103,6 @@ export default function ChatBox({ roomId, deleteRoom }) {
                 file: file ? true : false
             });
             
-            // Update last message timestamp in MongoDB for unread tracking
             api.put(`${url}/chat/update-last-message`, { 
                 roomId, 
                 timestamp: timestamp.toISOString() 

@@ -34,7 +34,6 @@ export const SignupCard = () => {
 
   return (
     <div className="w-full max-w-md px-4 md:px-0">
-      {/* Modern Glass Card */}
       <div className="relative bg-slate-900/40 backdrop-blur-2xl border border-slate-700/50 rounded-3xl p-10 shadow-2xl shadow-purple-500/10">
         {/* Gradient Orb Background */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"></div>

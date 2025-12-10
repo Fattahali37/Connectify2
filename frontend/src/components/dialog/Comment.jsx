@@ -35,7 +35,6 @@ export default function Comment({
 
   useEffect(() => {
     api.get(`${url}/user/get/${userId}`).then((res) => {
-      // console.log(res.data);
       setUser(res.data);
     });
   }, [userId]);
