@@ -23,7 +23,7 @@ function computeFeaturesFromUserDoc(user) {
 
 async function computeFeaturesForUserId(userId) {
   if (!userId) return null;
-  // require User dynamically to avoid circular dependency when this helper is required by User model
+
   const User = require('../models/User');
   const user = await User.findOne({ _id: userId }).lean();
   if (!user) return null;

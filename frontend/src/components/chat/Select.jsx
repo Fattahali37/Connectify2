@@ -32,7 +32,6 @@ export default function Select({ handleClose, addRoom }) {
         api.post(`${url}/chat/handshake`, {
             people: selectedIds
         }).then((res) => {
-            // console.log(res);
             handleClose()
             navigate(`/chats/${res.data.roomId}`)
             addRoom(res.data)

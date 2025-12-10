@@ -11,15 +11,12 @@ const { sendVerificationStartEmail, sendVerificationCompleteEmail } = require(".
 
 exports.getAllUsers = async (req, res) => {
   try {
-    // Optimized: Use lean() to get plain JavaScript objects (faster)
-    // Use select() to only get needed fields
-    // Use countDocuments instead of populating arrays
     const users = await User.find({})
       .select("-password -requestSent -requestReceived -notifications -highlights -saved")
       .lean()
       .sort({ createdAt: -1 });
 
-    // Get counts in parallel using aggregation (much faster)
+    // Get counts in parallel using aggregation
     const usersWithStats = await Promise.all(
       users.map(async (user) => {
         const [postsCount, followersCount, followingCount] = await Promise.all([
@@ -67,13 +64,11 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getBlockedUsers = async (req, res) => {
   try {
-    // Optimized: Use lean() and select only needed fields
     const blockedUsers = await User.find({ status: "blocked" })
       .select("-password -requestSent -requestReceived -notifications -highlights -saved")
       .lean()
       .sort({ createdAt: -1 });
 
-    // Transform users with stats (array lengths already available from lean())
     const usersWithStats = blockedUsers.map((user) => ({
       _id: user._id,
       username: user.username,
@@ -838,7 +833,7 @@ exports.updateVerificationSettings = async (req, res) => {
     settings.updatedBy = req.admin?.username || 'admin';
     await settings.save();
 
-    console.log(`[Auto-Verification] ✅ Settings updated:`, {
+    console.log(`[Auto-Verification] Settings updated:`, {
       enabled: settings.autoVerificationEnabled,
       waitingPeriod: settings.waitingPeriod,
       waitingPeriodDays: settings.waitingPeriodDays,
@@ -910,7 +905,7 @@ async function performAutoVerification(forceAll = false) {
   console.log("[Auto-Verification] ========================================");
 
   // Reset all verification data before starting new verification
-  console.log("[Auto-Verification] 🔄 Clearing all existing verification data...");
+  console.log("[Auto-Verification] Clearing all existing verification data...");
   try {
     const clearResult = await User.updateMany(
       {},
@@ -922,9 +917,9 @@ async function performAutoVerification(forceAll = false) {
         }
       }
     );
-    console.log(`[Auto-Verification] ✅ Cleared verification data for ${clearResult.modifiedCount} users`);
+    console.log(`[Auto-Verification] Cleared verification data for ${clearResult.modifiedCount} users`);
   } catch (clearError) {
-    console.error("[Auto-Verification] ⚠️ Error clearing verification data:", clearError.message);
+    console.error("[Auto-Verification] Error clearing verification data:", clearError.message);
   }
 
   // Send start email notification
@@ -933,12 +928,12 @@ async function performAutoVerification(forceAll = false) {
     try {
       const emailSent = await sendVerificationStartEmail(settings.adminEmail, settings);
       if (emailSent) {
-        console.log("[Auto-Verification] ✅ Start email sent successfully");
+        console.log("[Auto-Verification] Start email sent successfully");
       } else {
-        console.log("[Auto-Verification] ⚠️ Start email failed to send");
+        console.log("[Auto-Verification] Start email failed to send");
       }
     } catch (emailError) {
-      console.error("[Auto-Verification] ❌ Email error:", emailError.message);
+      console.error("[Auto-Verification] Email error:", emailError.message);
     }
   } else {
     console.log("[Auto-Verification] Email notifications disabled or no admin email configured");
@@ -1032,7 +1027,7 @@ async function performAutoVerification(forceAll = false) {
   };
 
   if (eligibleUsers.length === 0) {
-    console.log(`[Auto-Verification] ⚠️ No users eligible for verification.`);
+    console.log(`[Auto-Verification] No users eligible for verification.`);
     console.log(`[Auto-Verification] This could mean:`);
     console.log(`[Auto-Verification]   - All users are too new (under waiting period)`);
     console.log(`[Auto-Verification]   - Users don't meet minimum posts requirement`);
@@ -1047,9 +1042,9 @@ async function performAutoVerification(forceAll = false) {
       const isReVerification = !!existingVerification;
       
       if (isReVerification) {
-        console.log(`[Auto-Verification] 🔄 RE-VERIFYING user: ${user.username} (previously: ${existingVerification.verificationStatus})`);
+        console.log(`[Auto-Verification] RE-VERIFYING user: ${user.username} (previously: ${existingVerification.verificationStatus})`);
       } else {
-        console.log(`[Auto-Verification] ✨ NEW VERIFICATION for user: ${user.username}`);
+        console.log(`[Auto-Verification] NEW VERIFICATION for user: ${user.username}`);
       }
       
       // Get or generate profile features
@@ -1104,7 +1099,7 @@ async function performAutoVerification(forceAll = false) {
 
       // Call Flask API
       const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
-      console.log(`[Auto-Verification] 🤖 Calling Flask ML API for ${user.username} at ${FLASK_API_URL}/predict`);
+      console.log(`[Auto-Verification] Calling Flask ML API for ${user.username} at ${FLASK_API_URL}/predict`);
       let predictionResponse;
       
       try {
@@ -1115,9 +1110,9 @@ async function performAutoVerification(forceAll = false) {
           },
           timeout: 15000
         });
-        console.log(`[Auto-Verification] ✅ Flask API responded for ${user.username}`);
+        console.log(`[Auto-Verification] Flask API responded for ${user.username}`);
       } catch (apiError) {
-        console.error(`[Auto-Verification] ❌ Flask API error for ${user.username}:`, apiError.message);
+        console.error(`[Auto-Verification] Flask API error for ${user.username}:`, apiError.message);
         results.failed++;
         results.errors.push({ username: user.username, error: "ML API failed" });
         continue;
@@ -1220,7 +1215,7 @@ async function performAutoVerification(forceAll = false) {
         results.fake++;
       }
 
-      console.log(`[Auto-Verification] ✅ ${user.username} verified as ${verificationStatus.toUpperCase()}`);
+      console.log(`[Auto-Verification] ${user.username} verified as ${verificationStatus.toUpperCase()}`);
 
     } catch (error) {
       console.error(`[Auto-Verification] Error verifying ${user.username}:`, error.message);
@@ -1245,12 +1240,12 @@ async function performAutoVerification(forceAll = false) {
     try {
       const emailSent = await sendVerificationCompleteEmail(settings.adminEmail, results, settings);
       if (emailSent) {
-        console.log("[Auto-Verification] ✅ Completion email sent successfully");
+        console.log("[Auto-Verification] Completion email sent successfully");
       } else {
-        console.log("[Auto-Verification] ⚠️ Completion email failed to send");
+        console.log("[Auto-Verification] Completion email failed to send");
       }
     } catch (emailError) {
-      console.error("[Auto-Verification] ❌ Email error:", emailError.message);
+      console.error("[Auto-Verification] Email error:", emailError.message);
     }
   } else {
     console.log("[Auto-Verification] Email notifications disabled or no admin email configured");

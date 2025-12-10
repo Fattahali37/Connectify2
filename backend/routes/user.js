@@ -44,7 +44,6 @@ router.route("/follow-requests/accept/:userId").post(isAuthenticated, acceptFoll
 
 router.route("/follow-requests/reject/:userId").post(isAuthenticated, rejectFollowRequest)
 
-// IMPORTANT: Keep /:username route at the bottom to avoid catching other routes
 router.route('/:username').get(getUser)
 
 module.exports = router
